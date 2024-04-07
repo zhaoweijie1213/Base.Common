@@ -53,6 +53,7 @@ namespace QYQ.Base.Common.Tool
 
         /// <summary>
         /// 生成token
+        /// HmacSha256
         /// </summary>
         /// <param name="info"></param>
         /// <param name="secretKey"></param>
