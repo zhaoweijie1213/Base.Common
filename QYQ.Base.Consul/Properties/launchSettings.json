@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "QYQ.Base.Consul": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:53069;http://localhost:53070"
+    }
+  }
+}

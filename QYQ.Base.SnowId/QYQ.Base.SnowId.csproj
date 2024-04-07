@@ -1,0 +1,33 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <Version>8.0.9</Version>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <Description>AddDefaultSnowIdGenerator/AddSnowIdRedisGenerator
+1.雪花id生成；
+2.时间与雪花id之间转换；
+3.数据中心需要添加DataCenterId环境变量;
+3.使用DefaultSnowIdGenerator需要添加SnowServerId环境变量,否则将默认生成一个随机的ServerId;
+使用ISnowIdGenerator接口</Description>
+    <Company>QYQ</Company>
+    <PackageIcon>雀友圈512.png</PackageIcon>
+    <PackageProjectUrl>https://192.168.0.218:3000/zhaoweijie0817/QYQ.Base.Common</PackageProjectUrl>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Include="..\雀友圈512.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="EasyCaching.Core" Version="1.9.2" />
+    <PackageReference Include="EasyCaching.Redis" Version="1.9.2" />
+    <PackageReference Include="EasyCaching.Serialization.Json" Version="1.9.2" />
+    <PackageReference Include="Yitter.IdGenerator" Version="1.0.14" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="8.0.0" />
+  </ItemGroup>
+</Project>

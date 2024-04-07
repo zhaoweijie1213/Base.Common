@@ -1,0 +1,47 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+    <Authors>zhaoweijie</Authors>
+    <Company>QYQ</Company>
+    <Version>8.0.0</Version>
+    <Description>读取配置文件注册consul
+首先需要 AddQYQCOnsul(),再按需注册的代理类型,支持两种同时注册,但是
+注册服务名不能重复。
+    1.webapi注册consul 调用AddQYQConsulHttp()注册http代理实
+    2.GRPC服务注册发现 调用AddQYQConsulgRPC()注册grpc代理实例
+    3.将代理实例注册到consul服务  AddQYQRegistrationHostedService()
+要将agent注册到consul必须调用3.方法
+
+
+	</Description>
+    <RepositoryUrl>http://192.168.0.218:3000/zhaoweijie0817/QYQ.Base.Common</RepositoryUrl>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+    <PackageIcon>雀友圈512.png</PackageIcon>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DocumentationFile>QYQ.Base.Consul.xml</DocumentationFile>
+  </PropertyGroup>
+  <ItemGroup>
+    <None Remove="Grpc\Proto\HealthCheckService.proto" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\雀友圈512.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Consul.AspNetCore" Version="1.6.10.9" />
+    <PackageReference Include="Grpc.AspNetCore" Version="2.53.0" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <Protobuf Include="Grpc\Proto\HealthCheckService.proto" GrpcServices="Server" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Update="QYQ.Base.Consul.xml">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+</Project>

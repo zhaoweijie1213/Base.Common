@@ -1,0 +1,539 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>QYQ.Base.Consul</name>
+    </assembly>
+    <members>
+        <member name="T:QYQ.Base.Consul.Consul.AgentServiceRegistrationQYQHostedService">
+            <summary>
+            conusl所有代理注册
+            </summary>
+        </member>
+        <member name="M:QYQ.Base.Consul.Consul.AgentServiceRegistrationQYQHostedService.#ctor(Consul.IConsulClient,System.Collections.Generic.IEnumerable{Consul.AgentServiceRegistration})">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:QYQ.Base.Consul.Consul.AgentServiceRegistrationQYQHostedService.StartAsync(System.Threading.CancellationToken)">
+            <summary>
+            开始注册
+            </summary>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
+        <member name="M:QYQ.Base.Consul.Consul.AgentServiceRegistrationQYQHostedService.StopAsync(System.Threading.CancellationToken)">
+            <summary>
+            注销注册
+            </summary>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
+        <member name="T:QYQ.Base.Consul.ConsulServiceOptions">
+            <summary>
+             Consul配置模型类
+            </summary>
+        </member>
+        <member name="P:QYQ.Base.Consul.ConsulServiceOptions.ConsulAddress">
+            <summary>
+            服务注册地址（Consul的地址）
+            </summary>
+        </member>
+        <member name="P:QYQ.Base.Consul.ConsulServiceOptions.Token">
+            <summary>
+            token
+            </summary>
+        </member>
+        <member name="P:QYQ.Base.Consul.ConsulServiceOptions.ConsulAgents">
+            <summary>
+            代理配置
+            </summary>
+        </member>
+        <member name="T:QYQ.Base.Consul.ConsulAgentOptions">
+            <summary>
+            代理配置项
+            </summary>
+        </member>
+        <member name="P:QYQ.Base.Consul.ConsulAgentOptions.AgentCategory">
+            <summary>
+            代理类型
+            </summary>
+        </member>
+        <member name="P:QYQ.Base.Consul.ConsulAgentOptions.ServiceId">
+            <summary>
+             服务ID
+            </summary>
+        </member>
+        <member name="P:QYQ.Base.Consul.ConsulAgentOptions.ServiceName">
+            <summary>
+             服务名称
+            </summary>
+        </member>
+        <member name="P:QYQ.Base.Consul.ConsulAgentOptions.Port">
+            <summary>
+            监听的端口
+            </summary>
+        </member>
+        <member name="P:QYQ.Base.Consul.ConsulAgentOptions.Tags">
+            <summary>
+            标签
+            </summary>
+        </member>
+        <member name="P:QYQ.Base.Consul.ConsulAgentOptions.Meta">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:QYQ.Base.Consul.AgentCategory">
+            <summary>
+            代理类型
+            </summary>
+        </member>
+        <member name="F:QYQ.Base.Consul.AgentCategory.HTTP">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:QYQ.Base.Consul.AgentCategory.GRPC">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="T:QYQ.Base.Consul.ServiceCollectionExtensions">
+            <summary>
+            consul扩展
+            </summary>
+        </member>
+        <member name="M:QYQ.Base.Consul.ServiceCollectionExtensions.AddQYQConsul(Microsoft.AspNetCore.Builder.WebApplicationBuilder,System.String)">
+            <summary>
+            注册ConsulClient
+            </summary>
+            <param name="builder"></param>
+            <param name="consul">consul配置文件的key</param>
+            <returns></returns>
+        </member>
+        <member name="M:QYQ.Base.Consul.ServiceCollectionExtensions.AddQYQConsul(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration,System.String)">
+            <summary>
+            注册ConsulClient
+            </summary>
+            <param name="services"></param>
+            <param name="configuration"></param>
+            <param name="consul">consul配置文件的key</param>
+            <returns></returns>
+        </member>
+        <member name="M:QYQ.Base.Consul.ServiceCollectionExtensions.AddQYQConsulHttp(Microsoft.AspNetCore.Builder.WebApplicationBuilder,System.String)">
+            <summary>
+            注册Consul http Agent
+            </summary>
+            <param name="builder"></param>
+            <param name="consul">consul配置文件的key</param>
+            <returns></returns>
+        </member>
+        <member name="M:QYQ.Base.Consul.ServiceCollectionExtensions.AddQYQConsulHttp(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration,System.String)">
+            <summary>
+            注册Consul http Agent
+            </summary>
+            <param name="services"></param>
+            <param name="configuration"></param>
+            <param name="consul">consul配置文件的key</param>
+            <returns></returns>
+        </member>
+        <member name="M:QYQ.Base.Consul.ServiceCollectionExtensions.AddQYQConsulgRPC(Microsoft.AspNetCore.Builder.WebApplicationBuilder,System.String)">
+            <summary>
+            gRPC注册consul
+            </summary>
+            <param name="builder"></param>
+            <param name="consul">consul配置文件的key</param>
+            <returns></returns>
+        </member>
+        <member name="M:QYQ.Base.Consul.ServiceCollectionExtensions.AddQYQConsulgRPC(Microsoft.Extensions.DependencyInjection.IServiceCollection,Microsoft.Extensions.Configuration.IConfiguration,System.String)">
+            <summary>
+            gRPC注册consul
+            </summary>
+            <param name="services"></param>
+            <param name="configuration"></param>
+            <param name="consul">consul配置文件的key</param>
+            <returns></returns>
+        </member>
+        <member name="M:QYQ.Base.Consul.ServiceCollectionExtensions.AddQYQConsulAgentService(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{Consul.AgentServiceRegistration})">
+            <summary>
+            注册consul agent
+            Register consul service with default <see cref="T:Consul.IConsulClient"/>.
+            First client can be accessed from DI, to create multiple named clients use <see cref="T:Consul.AspNetCore.IConsulClientFactory"/>
+            </summary>
+        </member>
+        <member name="M:QYQ.Base.Consul.ServiceCollectionExtensions.AddQYQRegistrationHostedService(Microsoft.AspNetCore.Builder.WebApplicationBuilder)">
+            <summary>
+            添加注册任务
+            </summary>
+            <param name="builder"></param>
+            <returns></returns>
+        </member>
+        <member name="M:QYQ.Base.Consul.ServiceCollectionExtensions.AddQYQRegistrationHostedService(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            添加注册任务
+            </summary>
+            <param name="services"></param>
+            <returns></returns>
+        </member>
+        <member name="M:QYQ.Base.Consul.ServiceCollectionExtensions.AddConsulDispatcher(Microsoft.Extensions.DependencyInjection.IServiceCollection,QYQ.Base.Consul.ConsulDispatcherType)">
+            <summary>
+            注册Consul调度策略
+            默认为轮询
+            </summary>
+            <param name="services"></param>
+            <param name="consulDispatcherType"></param>
+        </member>
+        <member name="M:QYQ.Base.Consul.ServiceCollectionExtensions.AddConsulHttpClient(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.String)">
+            <summary>
+            添加consul 发送HTTP请求处理
+            </summary>
+            <param name="services"></param>
+            <param name="name"></param>
+        </member>
+        <member name="M:QYQ.Base.Consul.ServiceCollectionExtensions.AddConsulGrpcClient``1(Microsoft.AspNetCore.Builder.WebApplicationBuilder,System.String,System.String)">
+            <summary>
+            添加consul Grpc客户端
+            </summary>
+            <typeparam name="TClient"></typeparam>
+            <param name="builder"></param>
+            <param name="name"></param>
+            <param name="consulServiceName"></param>
+            <returns></returns>
+        </member>
+        <member name="M:QYQ.Base.Consul.ServiceCollectionExtensions.AddConsulGrpcClient``1(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.String,System.String,Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            添加consul 发送Grpc请求处理
+            </summary>
+            <param name="services"></param>
+            <param name="name">客户端实例名</param>
+            <param name="consulServiceName">consul注册的服务名</param>
+            <param name="configuration">配置信息</param>
+        </member>
+        <member name="M:QYQ.Base.Consul.ServiceCollectionExtensions.UseHealthcheck(Microsoft.AspNetCore.Builder.WebApplication)">
+            <summary>
+            添加健康检查地址
+            </summary>
+            <param name="app"></param>
+        </member>
+        <member name="M:QYQ.Base.Consul.ServiceCollectionExtensions.UseHealthcheck(Microsoft.AspNetCore.Builder.IApplicationBuilder)">
+            <summary>
+            添加健康检查地址
+            </summary>
+            <param name="app"></param>
+        </member>
+        <member name="M:QYQ.Base.Consul.ServiceCollectionExtensions.UseGrpcHealthcheck(Microsoft.AspNetCore.Builder.WebApplication)">
+            <summary>
+            添加Grpc健康检查地址
+            </summary>
+            <param name="app"></param>
+        </member>
+        <member name="M:QYQ.Base.Consul.ServiceCollectionExtensions.UseGrpcHealthcheck(Microsoft.AspNetCore.Builder.IApplicationBuilder)">
+            <summary>
+            添加Grpc健康检查地址
+            </summary>
+            <param name="app"></param>
+        </member>
+        <member name="M:QYQ.Base.Consul.ServiceCollectionExtensions.GetIPAddress">
+            <summary>
+            获取ip地址
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:QYQ.Base.Consul.ConsulDispatcherType">
+            <summary>
+            调度类型
+            </summary>
+        </member>
+        <member name="F:QYQ.Base.Consul.ConsulDispatcherType.Average">
+            <summary>
+            平均
+            </summary>
+        </member>
+        <member name="F:QYQ.Base.Consul.ConsulDispatcherType.Polling">
+            <summary>
+            轮询
+            </summary>
+        </member>
+        <member name="F:QYQ.Base.Consul.ConsulDispatcherType.Weight">
+            <summary>
+            权重
+            </summary>
+        </member>
+        <member name="T:QYQ.Base.Consul.DispatcherExtend.AbstractConsulDispatcher">
+            <summary>
+            抽象的Dispatcher基类
+            
+            模板方法设计模式
+            </summary>
+        </member>
+        <member name="F:QYQ.Base.Consul.DispatcherExtend.AbstractConsulDispatcher._ConsulClientOption">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:QYQ.Base.Consul.DispatcherExtend.AbstractConsulDispatcher._agentServices">
+            <summary>
+            客户端
+            </summary>
+        </member>
+        <member name="M:QYQ.Base.Consul.DispatcherExtend.AbstractConsulDispatcher.#ctor(Microsoft.Extensions.Options.IOptionsMonitor{QYQ.Base.Consul.ConsulServiceOptions})">
+            <summary>
+            
+            </summary>
+            <param name="options"></param>
+        </member>
+        <member name="M:QYQ.Base.Consul.DispatcherExtend.AbstractConsulDispatcher.MapAddress(System.String)">
+            <summary>
+            负载均衡获取地址
+            </summary>
+            <param name="mappingUrl">Consul映射后的地址</param>
+            <returns></returns>
+        </member>
+        <member name="M:QYQ.Base.Consul.DispatcherExtend.AbstractConsulDispatcher.ChooseAddress(System.String)">
+            <summary>
+            根据服务名字来获取地址
+            </summary>
+            <param name="serviceName"></param>
+            <returns></returns>
+        </member>
+        <member name="M:QYQ.Base.Consul.DispatcherExtend.AbstractConsulDispatcher.InitAgentServiceDictionary(System.String)">
+            <summary>
+            跟Consul交互，获取清单
+            </summary>
+            <param name="serviceName"></param>
+        </member>
+        <member name="M:QYQ.Base.Consul.DispatcherExtend.AbstractConsulDispatcher.GetIndex(System.Int32)">
+            <summary>
+            根据不同策略  获得不同的索引
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="M:QYQ.Base.Consul.DispatcherExtend.AbstractConsulDispatcher.CheckHealthService">
+            <summary>
+            维护服务列表的健康地址
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:QYQ.Base.Consul.DispatcherExtend.AgentServiceHealthCheck">
+            <summary>
+            服务健康维护
+            </summary>
+        </member>
+        <member name="M:QYQ.Base.Consul.DispatcherExtend.AgentServiceHealthCheck.#ctor(QYQ.Base.Consul.DispatcherExtend.AbstractConsulDispatcher)">
+            <summary>
+            
+            </summary>
+            <param name="abstractConsulDispatcher"></param>
+        </member>
+        <member name="M:QYQ.Base.Consul.DispatcherExtend.AgentServiceHealthCheck.ExecuteAsync(System.Threading.CancellationToken)">
+            <summary>
+            
+            </summary>
+            <param name="stoppingToken"></param>
+            <returns></returns>
+        </member>
+        <member name="T:QYQ.Base.Consul.DispatcherExtend.AverageDispatcher">
+            <summary>
+            平均
+            </summary>
+        </member>
+        <member name="F:QYQ.Base.Consul.DispatcherExtend.AverageDispatcher.random">
+            <summary>
+            随机数
+            </summary>
+        </member>
+        <member name="F:QYQ.Base.Consul.DispatcherExtend.AverageDispatcher.syncLock">
+            <summary>
+            用于线程安全的锁对象
+            </summary>
+        </member>
+        <member name="M:QYQ.Base.Consul.DispatcherExtend.AverageDispatcher.#ctor(Microsoft.Extensions.Options.IOptionsMonitor{QYQ.Base.Consul.ConsulServiceOptions})">
+            <summary>
+            
+            </summary>
+            <param name="consulClientOption"></param>
+        </member>
+        <member name="M:QYQ.Base.Consul.DispatcherExtend.AverageDispatcher.GetIndex(System.Int32)">
+            <summary>
+            平均
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:QYQ.Base.Consul.DispatcherExtend.PollingDispatcher">
+            <summary>
+            轮询
+            </summary>
+        </member>
+        <member name="M:QYQ.Base.Consul.DispatcherExtend.PollingDispatcher.#ctor(Microsoft.Extensions.Options.IOptionsMonitor{QYQ.Base.Consul.ConsulServiceOptions})">
+            <summary>
+            
+            </summary>
+            <param name="consulClientOption"></param>
+        </member>
+        <member name="M:QYQ.Base.Consul.DispatcherExtend.PollingDispatcher.GetIndex(System.Int32)">
+            <summary>
+            轮询
+            </summary>
+            <param name="length"></param>
+            <returns></returns>
+        </member>
+        <member name="T:QYQ.Base.Consul.DispatcherExtend.WeightDispatcher">
+            <summary>
+            权重
+            </summary>
+        </member>
+        <member name="M:QYQ.Base.Consul.DispatcherExtend.WeightDispatcher.#ctor(Microsoft.Extensions.Options.IOptionsMonitor{QYQ.Base.Consul.ConsulServiceOptions})">
+            <summary>
+            
+            </summary>
+            <param name="consulClientOption"></param>
+        </member>
+        <member name="M:QYQ.Base.Consul.DispatcherExtend.WeightDispatcher.ChooseAddress(System.String)">
+            <summary>
+            按权重选择地址
+            </summary>
+            <param name="serviceName"></param>
+            <returns></returns>
+        </member>
+        <member name="M:QYQ.Base.Consul.DispatcherExtend.WeightDispatcher.GetIndex(System.Int32)">
+            <summary>
+            
+            </summary>
+            <returns></returns>
+        </member>
+        <member name="T:QYQ.Base.Consul.Grpc.Resolve.GrpcConsulResolver">
+            <summary>
+            Grpc自定义解析程序
+            </summary>
+        </member>
+        <member name="P:QYQ.Base.Consul.Grpc.Resolve.GrpcConsulResolver.ConsulClientOption">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:QYQ.Base.Consul.Grpc.Resolve.GrpcConsulResolver.ServiceName">
+            <summary>
+            服务名称
+            </summary>
+        </member>
+        <member name="M:QYQ.Base.Consul.Grpc.Resolve.GrpcConsulResolver.#ctor(Microsoft.Extensions.Logging.ILoggerFactory)">
+            <summary>
+            _consulClientOption
+            </summary>
+        </member>
+        <member name="M:QYQ.Base.Consul.Grpc.Resolve.GrpcConsulResolver.OnStarted">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:QYQ.Base.Consul.Grpc.Resolve.GrpcConsulResolver.ResolveAsync(System.Threading.CancellationToken)">
+            <summary>
+            获取Consul地址列表
+            </summary>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
+        <member name="T:QYQ.Base.Consul.Grpc.Resolve.GrpcConsulResolverFactory">
+            <summary>
+            负载均衡工厂
+            </summary>
+        </member>
+        <member name="P:QYQ.Base.Consul.Grpc.Resolve.GrpcConsulResolverFactory.Name">
+            <summary>
+            解析scheme为'consul'的Url地址
+            </summary>
+        </member>
+        <member name="M:QYQ.Base.Consul.Grpc.Resolve.GrpcConsulResolverFactory.#ctor(Microsoft.Extensions.Options.IOptionsMonitor{QYQ.Base.Consul.ConsulServiceOptions})">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:QYQ.Base.Consul.Grpc.Resolve.GrpcConsulResolverFactory.Create(Grpc.Net.Client.Balancer.ResolverOptions)">
+            <summary>
+            创建负载均衡器
+            </summary>
+            <param name="options"></param>
+            <returns></returns>
+        </member>
+        <member name="T:QYQ.Base.Consul.Grpc.Serivce.HealthCheckService">
+            <summary>
+            Grpc健康检查
+            </summary>
+        </member>
+        <member name="M:QYQ.Base.Consul.Grpc.Serivce.HealthCheckService.Check(Grpc.Health.V1.HealthCheckRequest,Grpc.Core.ServerCallContext)">
+            <summary>
+            
+            </summary>
+            <param name="request"></param>
+            <param name="context"></param>
+            <returns></returns>
+        </member>
+        <member name="M:QYQ.Base.Consul.Grpc.Serivce.HealthCheckService.Watch(Grpc.Health.V1.HealthCheckRequest,Grpc.Core.IServerStreamWriter{Grpc.Health.V1.HealthCheckResponse},Grpc.Core.ServerCallContext)">
+            <summary>
+            
+            </summary>
+            <param name="request"></param>
+            <param name="responseStream"></param>
+            <param name="context"></param>
+            <returns></returns>
+        </member>
+        <member name="T:QYQ.Base.Consul.Http.ConsulHttpMessageHandler">
+            <summary>
+            consul发送http请求中间件
+            </summary>
+        </member>
+        <member name="M:QYQ.Base.Consul.Http.ConsulHttpMessageHandler.#ctor(QYQ.Base.Consul.DispatcherExtend.AbstractConsulDispatcher)">
+            <summary>
+            
+            </summary>
+            <param name="abstractConsulDispatcher"></param>
+        </member>
+        <member name="M:QYQ.Base.Consul.Http.ConsulHttpMessageHandler.Send(System.Net.Http.HttpRequestMessage,System.Threading.CancellationToken)">
+            <summary>
+            发送HTTP请求
+            </summary>
+            <param name="request"></param>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
+        <member name="M:QYQ.Base.Consul.Http.ConsulHttpMessageHandler.SendAsync(System.Net.Http.HttpRequestMessage,System.Threading.CancellationToken)">
+            <summary>
+            发送HTTP请求
+            </summary>
+            <param name="request"></param>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
+        <member name="T:Grpc.Health.V1.HealthCheckServiceReflection">
+            <summary>Holder for reflection information generated from Grpc/Proto/HealthCheckService.proto</summary>
+        </member>
+        <member name="P:Grpc.Health.V1.HealthCheckServiceReflection.Descriptor">
+            <summary>File descriptor for Grpc/Proto/HealthCheckService.proto</summary>
+        </member>
+        <member name="F:Grpc.Health.V1.HealthCheckRequest.ServiceFieldNumber">
+            <summary>Field number for the "service" field.</summary>
+        </member>
+        <member name="F:Grpc.Health.V1.HealthCheckResponse.StatusFieldNumber">
+            <summary>Field number for the "status" field.</summary>
+        </member>
+        <member name="T:Grpc.Health.V1.HealthCheckResponse.Types">
+            <summary>Container for nested types declared in the HealthCheckResponse message type.</summary>
+        </member>
+        <member name="P:Grpc.Health.V1.Health.Descriptor">
+            <summary>Service descriptor</summary>
+        </member>
+        <member name="T:Grpc.Health.V1.Health.HealthBase">
+            <summary>Base class for server-side implementations of Health</summary>
+        </member>
+        <member name="M:Grpc.Health.V1.Health.BindService(Grpc.Health.V1.Health.HealthBase)">
+            <summary>Creates service definition that can be registered with a server</summary>
+            <param name="serviceImpl">An object implementing the server-side handling logic.</param>
+        </member>
+        <member name="M:Grpc.Health.V1.Health.BindService(Grpc.Core.ServiceBinderBase,Grpc.Health.V1.Health.HealthBase)">
+            <summary>Register service method with a service binder with or without implementation. Useful when customizing the service binding logic.
+            Note: this method is part of an experimental API that can change or be removed without any prior notice.</summary>
+            <param name="serviceBinder">Service methods will be bound by calling <c>AddMethod</c> on this object.</param>
+            <param name="serviceImpl">An object implementing the server-side handling logic.</param>
+        </member>
+    </members>
+</doc>

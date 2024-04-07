@@ -1,0 +1,19 @@
+﻿syntax = "proto3";
+
+option csharp_namespace = "GamePlay.Grpc";
+
+service GamePlay {
+  //获取票证
+  rpc Ticket (TicketRequest) returns (TicketResponse);
+}
+
+message TicketRequest {
+  int64 userId = 1;
+  string gameId = 2;
+  string language = 3;
+  string platform = 4;
+}
+
+message TicketResponse {
+  string ticket = 1;
+}
