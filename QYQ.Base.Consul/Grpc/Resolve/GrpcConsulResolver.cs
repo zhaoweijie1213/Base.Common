@@ -79,6 +79,10 @@ namespace QYQ.Base.Consul.Grpc.Resolve
             var entrys = await client.Health.Service(ServiceName);
             var services = entrys.Response.Select(i => i.Service).ToArray();
             var addresses = services.Select(x => new BalancerAddress(x.Address, x.Port)).ToArray();
+            if(addresses.Length == 0)
+            {
+                _logger.LogWarning("ResolveAsync:Resolver returned no {ServiceName} addresses.", ServiceName);
+            }
             // Pass the results back to the channel.
             Listener(ResolverResult.ForResult(addresses));
         }

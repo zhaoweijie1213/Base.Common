@@ -5,17 +5,24 @@
     <Nullable>enable</Nullable>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <Title>SwaggerUI、Api版本控制</Title>
-    <Version>8.0.2</Version>
+    <Version>8.0.3</Version>
     <Company>QYQ</Company>
     <PackageProjectUrl>http://192.168.0.218:3000/zhaoweijie0817/QYQ.Base.Common</PackageProjectUrl>
-    <RepositoryUrl>http://192.168.0.218:3000/zhaoweijie0817/QYQ.Base.Common</RepositoryUrl>
+    <RepositoryUrl>https://192.168.0.218:3000/zhaoweijie0817/QYQ.Base.Common</RepositoryUrl>
     <Description>1.生成Api的Swagger文档;
 2.Api的版本;</Description>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageIcon>雀友圈512.png</PackageIcon>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\雀友圈512.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="README.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>

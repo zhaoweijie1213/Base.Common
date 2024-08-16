@@ -15,9 +15,15 @@
     <Company>QYQ</Company>
     <PackageIcon>雀友圈512.png</PackageIcon>
     <PackageProjectUrl>https://192.168.0.218:3000/zhaoweijie0817/QYQ.Base.Common</PackageProjectUrl>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
   <ItemGroup>
     <None Include="..\雀友圈512.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Include="README.md">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>

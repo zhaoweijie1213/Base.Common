@@ -49,14 +49,14 @@ namespace QYQ.Base.Common.Middleware
         {
             ApiResult<string> data = new()
             {
-                Code = StatusCodes.Status500InternalServerError,
+                Code = context.Response.StatusCode,
                 Data = null,
                 Message = msg
             };
-            var result = JsonConvert.SerializeObject(data);
-            context.Response.ContentType = "application/json;charset=utf-8";
-            context.Response.StatusCode = StatusCodes.Status500InternalServerError;
-            await context.Response.WriteAsync(result);
+            //var result = JsonConvert.SerializeObject(data);
+            //context.Response.ContentType = "application/json;charset=utf-8";
+            //context.Response.StatusCode = StatusCodes.Status500InternalServerError;
+            await context.Response.WriteAsJsonAsync(data);
         }
 
 

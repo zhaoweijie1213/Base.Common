@@ -39,6 +39,6 @@ app.UseQYQHttpLogging();
 app.MapControllers();
 app.UseGrpcHealthcheck();
 app.UseHealthcheck();
-app.UseQYQSwaggerUI("CommonTest");
+app.UseQYQSwaggerUI("CommonTest", true);
 
 app.Run();

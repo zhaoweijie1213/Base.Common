@@ -80,10 +80,16 @@ namespace QYQ.Base.Common.Models
         [JsonProperty("symbol", NullValueHandling = NullValueHandling.Ignore)]
         public string Symbol { get; set; } = string.Empty;
 
-        /// <summary>
-        /// 扩展属性
-        /// </summary>
-        [JsonProperty("extraProperties", NullValueHandling = NullValueHandling.Ignore)]
+		/// <summary>
+		/// 包ID
+		/// </summary>
+		[JsonProperty("appId", NullValueHandling = NullValueHandling.Ignore)]
+		public long AppId { get; set; }
+
+		/// <summary>
+		/// 扩展属性
+		/// </summary>
+		[JsonProperty("extraProperties", NullValueHandling = NullValueHandling.Ignore)]
         public ExtraProperties? ExtraProperties { get; set; }
 
     }

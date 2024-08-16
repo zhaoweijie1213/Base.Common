@@ -213,8 +213,9 @@ namespace QYQ.Base.Swagger.Extension
         /// </summary>
         /// <param name="app"></param>
         /// <param name="name">name与请求路径名相关</param>
+        /// <param name="apiGateway"></param>
         /// <returns></returns>
-        public static WebApplication UseQYQSwaggerUI(this WebApplication app, string name)
+        public static WebApplication UseQYQSwaggerUI(this WebApplication app, string name, bool apiGateway)
         {
             if (app.Configuration.GetSection("apollo:Env").Get<string>() != "Pro")
             {
@@ -240,7 +241,7 @@ namespace QYQ.Base.Swagger.Extension
                         //options.HeadContent += $"<script type='text/javascript'>alert('欢迎来到SwaggerUI页面')</script>";
 
                         //设置请求路径
-                        if (app.Environment.IsProduction())
+                        if (app.Environment.IsProduction() &&  apiGateway)
                         {
                             settings.SwaggerRoutes.Add(new SwaggerUiRoute(description.ApiVersion.ToString(), $"/{name}/swagger/v{description.ApiVersion}/swagger.json"));
                         }

@@ -15,6 +15,15 @@ namespace QYQ.Base.Common.ApiResult
     public class ApiResult<T>
     {
         /// <summary>
+        /// 初始化
+        /// </summary>
+        public ApiResult()
+        {
+            Code = (int)ApiResultCode.Fail;
+            Message = ApiResultCode.Fail.GetDescription();
+        }
+
+        /// <summary>
         /// 执行结果
         /// </summary>
         public int Code { get; set; }

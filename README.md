@@ -83,6 +83,8 @@ dotnet nuget push -s http://192.168.0.252/v3/index.json QYQ.Base.Common.1.0.0.nu
 |           Success           |     0      |                   操作成功                   |
 |     InternalServerError     |    500     |                 内部服务错误                 |
 |         ErrorParams         |     2      |                   参数错误                   |
+|         DuplicateId         |     3      |                    重复Id                    |
+|       RepeatedRequest       |     4      |                  重复的请求                  |
 |            Fail             |     -1     |                   操作失败                   |
 |         TokenError          |    1004    |                  token错误                   |
 |      TokenTimeOutError      |    1005    |                  token失效                   |
@@ -158,6 +160,7 @@ dotnet nuget push -s http://192.168.0.252/v3/index.json QYQ.Base.Common.1.0.0.nu
 |    NotSatisfyConditions    |  5012  |       不满足条件       |
 |    InsufficientVipLevel    |  5013  |      Vip等级不足       |
 |      WithdrawNumLimit      |  5014  |    提现次数达到上限    |
+|       OrderNotFound        |  5015  |       找不到订单       |
 
 |       Key        | 返回码 |    描述    |
 | :--------------: | :----: | :--------: |

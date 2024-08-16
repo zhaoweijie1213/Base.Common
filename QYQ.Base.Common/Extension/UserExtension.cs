@@ -34,7 +34,8 @@ namespace QYQ.Base.Common.Extension
                 TimeZone = Convert.ToDouble(claimsPrincipal.FindFirstValue("TimeZone")),
                 Country = claimsPrincipal.FindFirstValue("Country") ?? "",
                 Currency = claimsPrincipal.FindFirstValue("Currency") ?? "",
-                Symbol = claimsPrincipal.FindFirstValue("Symbol") ?? ""
+                Symbol = claimsPrincipal.FindFirstValue("Symbol") ?? "",
+                AppId = Convert.ToInt64(claimsPrincipal.FindFirstValue("AppId"))
             };
             var extra = claimsPrincipal.FindFirstValue("ExtraProperties");
             if(!string.IsNullOrEmpty(extra))

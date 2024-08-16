@@ -53,7 +53,6 @@ namespace QYQ.Base.Common.Tool
 
         /// <summary>
         /// 生成token
-        /// HmacSha256
         /// </summary>
         /// <param name="info"></param>
         /// <param name="secretKey"></param>
@@ -76,6 +75,7 @@ namespace QYQ.Base.Common.Tool
                 new Claim("Country", info.Country.ToString()),
                 new Claim("Currency", info.Currency.ToString()),
                 new Claim("Symbol", info.Symbol.ToString()),
+                new Claim("AppId", info.AppId.ToString()),
                 new Claim("ExtraProperties", JsonConvert.SerializeObject(info.ExtraProperties))
             };
 
@@ -119,6 +119,49 @@ namespace QYQ.Base.Common.Tool
         }
 
 
+        /// <summary>
+        /// 读取 JWT的信息(不进行任何验证)
+        /// </summary>
+        /// <param name="jwtToken"></param>
+        public static JwtSecurityToken? ReadJwt(string jwtToken)
+        {
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var jwtTokenRead = tokenHandler.ReadJwtToken(jwtToken);
+            return jwtTokenRead;
+        }
+
+        /// <summary>
+        /// 验证Token
+        /// </summary>
+        /// <param name="jwtToken"></param>
+        /// <param name="jsonWebKey"></param>
+        /// <returns></returns>
+        public static async Task<bool> ValidateJwtToken(string jwtToken, JsonWebKey jsonWebKey)
+        {
+            var tokenValidationParameters = new TokenValidationParameters
+            {
+                ValidateIssuerSigningKey = true,
+                IssuerSigningKey = jsonWebKey,
+                ValidateIssuer = false,
+                ValidateAudience = false,
+                //ClockSkew = TimeSpan.Zero, // 默认情况下有5分钟的时差容忍
+                ValidateLifetime = true
+            };
+
+            //var tokenHandler = new JwtSecurityTokenHandler();
+
+            var tokenHandler = new JsonWebTokenHandler();
+
+            var result = await tokenHandler.ValidateTokenAsync(jwtToken, tokenValidationParameters);
+
+            //验证失败抛出错误
+            if (!result.IsValid)
+            {
+                throw result.Exception;
+            }
+
+            return result.IsValid;
+        }
 
     }
 }

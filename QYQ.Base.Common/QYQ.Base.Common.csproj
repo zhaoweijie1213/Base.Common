@@ -11,11 +11,12 @@
 3.分页返回结果</Description>
     <PackageProjectUrl>https://192.168.0.218:3000/zhaoweijie0817/QYQ.Base.Common</PackageProjectUrl>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <Version>8.1.0</Version>
+    <Version>8.1.7</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
-    <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <PackageIcon>雀友圈512.png</PackageIcon>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
     <DocumentationFile>QYQ.Base.Common.xml</DocumentationFile>

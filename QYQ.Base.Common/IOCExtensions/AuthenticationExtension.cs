@@ -52,9 +52,9 @@ namespace QYQ.Base.Common.IOCExtensions
                        ValidAudience = jwtseting.Audience,//Audience
                        ValidIssuer = jwtseting.Issuer,//Issuer，这两项和登陆时颁发的一致
                        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtseting.SecretKey)),     //拿到SecurityKey
-                       //注意这是缓冲过期时间，总的有效时间等于这个时间加上jwt的过期时间，如果不配置，默认是5分钟
-                       LifetimeValidator = (DateTime? notBefore, DateTime? expires, SecurityToken securityToken, TokenValidationParameters validationParameters) => expires > DateTime.UtcNow,
-                       ClockSkew = TimeSpan.FromSeconds(0)   //设置toekn过期之后立马失效
+                       //// 验证过期时间的委托，自定义验证规则
+                       //LifetimeValidator = (DateTime? notBefore, DateTime? expires, SecurityToken securityToken, TokenValidationParameters validationParameters) => expires > DateTime.UtcNow,
+                       ClockSkew = TimeSpan.FromSeconds(0)   //设置toekn过期之后立马失效 默认是5分钟
                    };
                    options.SaveToken = true;
                });

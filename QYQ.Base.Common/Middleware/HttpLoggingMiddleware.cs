@@ -64,21 +64,21 @@ namespace QYQ.Base.Common.Middleware
                 if (context.Request.ContentType != null && context.Request.ContentLength > 0 && context.Request.ContentLength < _httpLoggingOptions.Value.MaxRequestBodySize)
                 {
                     context.Request.EnableBuffering(); // 使请求体可读
-                    var body = await new StreamReader(context.Request.Body).ReadToEndAsync();
+                    requestBodyContent = await new StreamReader(context.Request.Body).ReadToEndAsync();
                     context.Request.Body.Position = 0; // 重置流位置
 
-                    // 检查内容类型
-                    if (context.Request.HasJsonContentType())
-                    {
-                        var bodyObj = JsonConvert.DeserializeObject<Dictionary<string, object>>(body);
-                        requestBodyContent = JsonConvert.SerializeObject(bodyObj); // JSON数据
-                    }
-                    else if (context.Request.HasFormContentType && !context.Request.ContentType.Contains("multipart/form-data"))
-                    {
-                        //var form = context.Request.Form; // 获取已解析的表单数据
-                        //requestBodyContent = JsonConvert.SerializeObject(form); // JSON数据
-                        requestBodyContent = body;
-                    }
+                    //// 检查内容类型
+                    //if (context.Request.HasJsonContentType())
+                    //{
+                    //    var bodyObj = JsonConvert.DeserializeObject<Dictionary<string, object>>(body);
+                    //    requestBodyContent = JsonConvert.SerializeObject(bodyObj); // JSON数据
+                    //}
+                    //else if (context.Request.HasFormContentType && !context.Request.ContentType.Contains("multipart/form-data"))
+                    //{
+                    //    //var form = context.Request.Form; // 获取已解析的表单数据
+                    //    //requestBodyContent = JsonConvert.SerializeObject(form); // JSON数据
+                    //    requestBodyContent = body;
+                    //}
                 }
 
                 // 准备捕获响应

@@ -31,6 +31,30 @@ namespace QYQ.Base.Common.ApiResult
         ErrorParams = 2,
 
         /// <summary>
+        /// 重复Id
+        /// </summary>
+        [Description("Duplicate id")]
+        DuplicateId = 3,
+
+        /// <summary>
+        /// 重复的请求
+        /// </summary>
+        [Description("Repeated request")]
+        RepeatedRequest = 4,
+
+        /// <summary>
+        /// 不支持该国家
+        /// </summary>
+        [Description("Not support the country")]
+        UnSupportTheCountry = 5,
+
+        /// <summary>
+        /// 找不到数据
+        /// </summary>
+        [Description("Data is not found")]
+        DataNotFound = 6,
+
+        /// <summary>
         /// 操作失败
         /// </summary>
         [Description("Fail")]
@@ -306,7 +330,7 @@ namespace QYQ.Base.Common.ApiResult
         /// 提现达到上限
         /// </summary>
         [Description("Withdrawal limit has been reached.")]
-        WithdrawLimit  = 5009,
+        WithdrawLimit = 5009,
 
         /// <summary>
         /// 提现之前需要玩局游戏
@@ -339,6 +363,12 @@ namespace QYQ.Base.Common.ApiResult
         /// </summary>
         [Description("The number of withdrawals has reached the limit.")]
         WithdrawNumLimit = 5014,
+
+        /// <summary>
+        /// 找不到订单
+        /// </summary>
+        [Description("order not found.")]
+        OrderNotFound = 5015,
 
         #endregion
 
