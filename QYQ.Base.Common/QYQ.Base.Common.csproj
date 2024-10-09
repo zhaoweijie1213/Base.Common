@@ -11,7 +11,7 @@
 3.分页返回结果</Description>
     <PackageProjectUrl>https://192.168.0.218:3000/zhaoweijie0817/QYQ.Base.Common</PackageProjectUrl>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <Version>8.1.7</Version>
+    <Version>8.1.8</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <PackageIcon>雀友圈512.png</PackageIcon>
@@ -30,8 +30,8 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Com.Ctrip.Framework.Apollo.Configuration" Version="2.10.2" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.2.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.1" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.8" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
   <ItemGroup>

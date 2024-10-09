@@ -135,7 +135,7 @@ namespace QYQ.Base.SnowId
             {
                 var redis = GetRedis();
                 //显示当前worker Id
-                _logger.LogInformation("Current Worker ID:{workerId}", _workerId);
+                _logger.LogDebug("Current Worker ID:{workerId}", _workerId);
                 redis.KeyExpire(GetUsageIdKey(), 15);
             }
 

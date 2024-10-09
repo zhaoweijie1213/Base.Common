@@ -24,20 +24,20 @@ namespace QYQ.Base.Common.Extension
         {
             var user = new UserInfo
             {
-                UserId = Convert.ToInt64(claimsPrincipal.FindFirstValue("UserId")),
-                Name = claimsPrincipal.FindFirstValue("UserName") ?? "",
-                Email = claimsPrincipal.FindFirstValue("Email") ?? "",
-                HeadImg = claimsPrincipal.FindFirstValue("HeadImg") ?? "",
-                Phone = claimsPrincipal.FindFirstValue("Phone") ?? "",
-                Sex = claimsPrincipal.FindFirstValue("Sex") ?? "",
-                Lobby = Convert.ToInt32(claimsPrincipal.FindFirstValue("Lobby")),
-                TimeZone = Convert.ToDouble(claimsPrincipal.FindFirstValue("TimeZone")),
-                Country = claimsPrincipal.FindFirstValue("Country") ?? "",
-                Currency = claimsPrincipal.FindFirstValue("Currency") ?? "",
-                Symbol = claimsPrincipal.FindFirstValue("Symbol") ?? "",
-                AppId = Convert.ToInt64(claimsPrincipal.FindFirstValue("AppId"))
+                UserId = Convert.ToInt64(claimsPrincipal.FindFirstValue(CustomClaimTypes.UserId)),
+                Name = claimsPrincipal.FindFirstValue(CustomClaimTypes.UserName) ?? "",
+                Email = claimsPrincipal.FindFirstValue(CustomClaimTypes.Email) ?? "",
+                HeadImg = claimsPrincipal.FindFirstValue(CustomClaimTypes.HeadImg) ?? "",
+                Phone = claimsPrincipal.FindFirstValue(CustomClaimTypes.Phone) ?? "",
+                Sex = claimsPrincipal.FindFirstValue(CustomClaimTypes.Sex) ?? "",
+                Lobby = Convert.ToInt32(claimsPrincipal.FindFirstValue(CustomClaimTypes.Lobby)),
+                TimeZone = Convert.ToDouble(claimsPrincipal.FindFirstValue(CustomClaimTypes.TimeZone)),
+                Country = claimsPrincipal.FindFirstValue(CustomClaimTypes.Country) ?? "",
+                Currency = claimsPrincipal.FindFirstValue(CustomClaimTypes.Currency) ?? "",
+                Symbol = claimsPrincipal.FindFirstValue(CustomClaimTypes.Symbol) ?? "",
+                AppId = Convert.ToInt64(claimsPrincipal.FindFirstValue(CustomClaimTypes.AppId))
             };
-            var extra = claimsPrincipal.FindFirstValue("ExtraProperties");
+            var extra = claimsPrincipal.FindFirstValue(CustomClaimTypes.ExtraProperties);
             if(!string.IsNullOrEmpty(extra))
             {
                 user.ExtraProperties = JsonConvert.DeserializeObject<ExtraProperties>(extra);

@@ -36,7 +36,7 @@ namespace Test
                services.AddConsulGrpcClient<Team.TeamClient>("team", "pokervegas-invite-job-grpc", context.Configuration).AddConsulDispatcher();
                services.AddConsulGrpcClient<GamePlay.Grpc.GamePlay.GamePlayClient>("Gameplay", "game-play-grpc", context.Configuration);
                services.AddConsulHttpClient("game-integration").AddConsulDispatcher();
-               services.AddSnowIdGenerator().AddWorderIdRegister(context.Configuration.GetSection("Redis").Get<RedisDBOptions>()!);
+               services.AddSnowIdRedisGenerator(context.Configuration.GetSection("Redis").Get<RedisDBOptions>()!);
                services.AddScoped<GameIntegrationApi>();
            });
 

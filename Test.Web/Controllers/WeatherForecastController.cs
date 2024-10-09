@@ -33,16 +33,19 @@ namespace Test.Web.Controllers
 
         private readonly GrpcClientFactory _consulGrpcClientFactory;
 
+        private readonly IHttpClientFactory _httpClientFactory;
+
         /// <summary>
         /// 
         /// </summary>
         /// <param name="logger"></param>
         /// <param name="consulGrpcClientFactory"></param>
-        public WeatherForecastController(ILogger<WeatherForecastController> logger, GrpcClientFactory consulGrpcClientFactory, ISnowIdGenerator snowIdGenerator)
+        public WeatherForecastController(ILogger<WeatherForecastController> logger, GrpcClientFactory consulGrpcClientFactory, ISnowIdGenerator snowIdGenerator, IHttpClientFactory httpClientFactory)
         {
             _logger = logger;
             _consulGrpcClientFactory = consulGrpcClientFactory;
             _snowIdGenerator = snowIdGenerator;
+            _httpClientFactory = httpClientFactory;
         }
 
         /// <summary>
@@ -62,6 +65,12 @@ namespace Test.Web.Controllers
                 Language = "en",
                 Platform = "web"
             });
+
+
+           var httpClient = _httpClientFactory.CreateClient("game-play");
+
+            var healthRes = await httpClient.GetAsync("api/Health");
+
             return Enumerable.Range(1, 5).Select(index => new WeatherForecast
             {
                 Date = DateOnly.FromDateTime(DateTime.Now.AddDays(index)),

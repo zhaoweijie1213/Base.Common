@@ -53,11 +53,11 @@ namespace QYQ.Base.Consul.DispatcherExtend
         /// 平均
         /// </summary>
         /// <returns></returns>
-        protected override int GetIndex(int length)
+        protected override int GetIndex(string serviceName)
         {
             lock (syncLock) // 确保线程安全
             {
-                return random.Next(0, length); // 生成 0 到 length 之间的随机数
+                return random.Next(0, _agentServices[serviceName].Length); // 生成 0 到 length 之间的随机数
             }
             //return new Random(iTotalCount++).Next(0, length);
         }

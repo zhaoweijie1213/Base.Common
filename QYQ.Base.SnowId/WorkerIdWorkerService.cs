@@ -42,7 +42,6 @@ namespace QYQ.Base.SnowId
                 //五秒刷新
                 await Task.Delay(5000, stoppingToken);
                 _workerIdManager.Refresh();
-                _logger.LogDebug(" Refresh WorkId");
             }
         }
 

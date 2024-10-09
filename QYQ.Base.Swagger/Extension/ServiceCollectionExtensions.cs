@@ -215,7 +215,7 @@ namespace QYQ.Base.Swagger.Extension
         /// <param name="name">name与请求路径名相关</param>
         /// <param name="apiGateway"></param>
         /// <returns></returns>
-        public static WebApplication UseQYQSwaggerUI(this WebApplication app, string name, bool apiGateway)
+        public static WebApplication UseQYQSwaggerUI(this WebApplication app, string name, bool apiGateway = true)
         {
             if (app.Configuration.GetSection("apollo:Env").Get<string>() != "Pro")
             {

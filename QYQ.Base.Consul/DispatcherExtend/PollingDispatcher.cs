@@ -1,5 +1,6 @@
 ﻿using Microsoft.Extensions.Options;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -11,44 +12,35 @@ namespace QYQ.Base.Consul.DispatcherExtend
     /// <summary>
     /// 轮询
     /// </summary>
-    public class PollingDispatcher : AbstractConsulDispatcher
+    /// <param name="consulClientOption"></param>
+    public class PollingDispatcher(IOptionsMonitor<ConsulServiceOptions> consulClientOption) : AbstractConsulDispatcher(consulClientOption)
     {
-        #region Identity
-        private static int _iTotalCount = 0;
-        private static int iTotalCount
-        {
-            get
-            {
-                return _iTotalCount;
-            }
-            set
-            {
-                _iTotalCount = value >= int.MaxValue ? 0 : value;
-            }
-        }
-
         /// <summary>
-        /// 
+        /// 索引
         /// </summary>
-        /// <param name="consulClientOption"></param>
-        public PollingDispatcher(IOptionsMonitor<ConsulServiceOptions> consulClientOption) : base(consulClientOption)
-        {
-        }
-        #endregion
+        private readonly ConcurrentDictionary<string, int> _serviveIndex = new();
 
         /// <summary>
         /// 轮询
         /// </summary>
-        /// <param name="length"></param>
+        /// <param name="serviceName"></param>
         /// <returns></returns>
-        protected override int GetIndex(int length)
+        protected override int GetIndex(string serviceName)
         {
-            int index = Interlocked.Increment(ref _iTotalCount);
-            if (index == int.MaxValue)
+            //int index = _serviveIndex.GetOrAdd(serviceName, 0);
+            //index = Interlocked.Increment(ref index) % _agentServices[serviceName].Length;
+            //_serviveIndex[serviceName] = index;
+            ////if (index == int.MaxValue)
+            ////{
+            ////    Interlocked.Exchange(ref _iTotalCount, 0);
+            ////}
+            //return index;
+
+            return _serviveIndex.AddOrUpdate(serviceName, 0, (key, value) =>
             {
-                Interlocked.Exchange(ref _iTotalCount, 0);
-            }
-            return index % length;
+                int newValue = (value + 1) % _agentServices[serviceName].Length;
+                return newValue;
+            });
         }
     }
 }

@@ -11,6 +11,11 @@
             </summary>
             <typeparam name="T"></typeparam>
         </member>
+        <member name="M:QYQ.Base.Common.ApiResult.ApiResult`1.#ctor">
+            <summary>
+            初始化
+            </summary>
+        </member>
         <member name="P:QYQ.Base.Common.ApiResult.ApiResult`1.Code">
             <summary>
             执行结果
@@ -68,6 +73,26 @@
         <member name="F:QYQ.Base.Common.ApiResult.ApiResultCode.ErrorParams">
             <summary>
             参数错误
+            </summary>
+        </member>
+        <member name="F:QYQ.Base.Common.ApiResult.ApiResultCode.DuplicateId">
+            <summary>
+            重复Id
+            </summary>
+        </member>
+        <member name="F:QYQ.Base.Common.ApiResult.ApiResultCode.RepeatedRequest">
+            <summary>
+            重复的请求
+            </summary>
+        </member>
+        <member name="F:QYQ.Base.Common.ApiResult.ApiResultCode.UnSupportTheCountry">
+            <summary>
+            不支持该国家
+            </summary>
+        </member>
+        <member name="F:QYQ.Base.Common.ApiResult.ApiResultCode.DataNotFound">
+            <summary>
+            找不到数据
             </summary>
         </member>
         <member name="F:QYQ.Base.Common.ApiResult.ApiResultCode.Fail">
@@ -315,6 +340,11 @@
             提现次数达到上限
             </summary>
         </member>
+        <member name="F:QYQ.Base.Common.ApiResult.ApiResultCode.OrderNotFound">
+            <summary>
+            找不到订单
+            </summary>
+        </member>
         <member name="F:QYQ.Base.Common.ApiResult.ApiResultCode.ConfigNotFound">
             <summary>
             配置未找到
@@ -362,7 +392,7 @@
             数据列表
             </summary>
         </member>
-        <member name="M:QYQ.Base.Common.ApiResult.PageResult`1.SetPageRsult(System.Collections.Generic.List{`0},System.Int32,System.Int32,System.Int64)">
+        <member name="M:QYQ.Base.Common.ApiResult.PageResult`1.SetPageRsult(System.Collections.Generic.List{`0},System.Int32,System.Int32,System.Int32)">
             <summary>
             设置分页
             返回结果
@@ -397,6 +427,17 @@
             <param name="data">返回数据</param>
             <param name="msg">说明信息</param>
             <returns></returns>
+        </member>
+        <member name="T:QYQ.Base.Common.ApplicationExtensions">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="M:QYQ.Base.Common.ApplicationExtensions.UseQYQHttpLogging(Microsoft.AspNetCore.Builder.WebApplication)">
+            <summary>
+            添加http请求日志中间件
+            </summary>
+            <param name="app"></param>
         </member>
         <member name="T:QYQ.Base.Common.Tool.DateTimeExtension">
             <summary>
@@ -459,6 +500,20 @@
             </summary>
             <param name="token"></param>
             <param name="secretKey"></param>
+            <returns></returns>
+        </member>
+        <member name="M:QYQ.Base.Common.Tool.JwtHepler.ReadJwt(System.String)">
+            <summary>
+            读取 JWT的信息(不进行任何验证)
+            </summary>
+            <param name="jwtToken"></param>
+        </member>
+        <member name="M:QYQ.Base.Common.Tool.JwtHepler.ValidateJwtToken(System.String,Microsoft.IdentityModel.Tokens.JsonWebKey)">
+            <summary>
+            验证Token
+            </summary>
+            <param name="jwtToken"></param>
+            <param name="jsonWebKey"></param>
             <returns></returns>
         </member>
         <member name="T:QYQ.Base.Common.Tool.SecurityHelper">
@@ -685,12 +740,12 @@
             Http日志中间件
             </summary>
         </member>
-        <member name="F:QYQ.Base.Common.Middleware.HttpLoggingMiddleware.ignorePath">
+        <member name="F:QYQ.Base.Common.Middleware.HttpLoggingMiddleware._httpLoggingOptions">
             <summary>
-            忽略的路径
+            配置
             </summary>
         </member>
-        <member name="M:QYQ.Base.Common.Middleware.HttpLoggingMiddleware.#ctor(Microsoft.AspNetCore.Http.RequestDelegate)">
+        <member name="M:QYQ.Base.Common.Middleware.HttpLoggingMiddleware.#ctor(Microsoft.AspNetCore.Http.RequestDelegate,Microsoft.Extensions.Options.IOptions{QYQ.Base.Common.Models.QYQHttpLoggingOptions})">
             <summary>
             
             </summary>
@@ -733,6 +788,31 @@
             访问令牌过期时间
             </summary>
         </member>
+        <member name="T:QYQ.Base.Common.Models.QYQHttpLoggingOptions">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:QYQ.Base.Common.Models.QYQHttpLoggingOptions.IgnorePath">
+            <summary>
+            忽略的路径
+            </summary>
+        </member>
+        <member name="P:QYQ.Base.Common.Models.QYQHttpLoggingOptions.MaxRequestBodySize">
+            <summary>
+            最大请求体,默认限制为1MB
+            </summary>
+        </member>
+        <member name="P:QYQ.Base.Common.Models.QYQHttpLoggingOptions.MaxResponseLenght">
+            <summary>
+            最大响应,默认限制为1MB
+            </summary>
+        </member>
+        <member name="P:QYQ.Base.Common.Models.QYQHttpLoggingOptions.LongQueryThreshold">
+            <summary>
+            长查询阈值(毫秒)
+            </summary>
+        </member>
         <member name="T:QYQ.Base.Common.Models.UserInfo">
             <summary>
             用户信息
@@ -768,11 +848,6 @@
             头像
             </summary>
         </member>
-        <member name="P:QYQ.Base.Common.Models.UserInfo.FacebookId">
-            <summary>
-            facebookId
-            </summary>
-        </member>
         <member name="P:QYQ.Base.Common.Models.UserInfo.Lobby">
             <summary>
             大厅
@@ -798,6 +873,31 @@
             货币符号
             </summary>
         </member>
+        <member name="P:QYQ.Base.Common.Models.UserInfo.AppId">
+            <summary>
+            包ID
+            </summary>
+        </member>
+        <member name="P:QYQ.Base.Common.Models.UserInfo.ExtraProperties">
+            <summary>
+            扩展属性
+            </summary>
+        </member>
+        <member name="T:QYQ.Base.Common.Models.ExtraProperties">
+            <summary>
+            扩展属性
+            </summary>
+        </member>
+        <member name="P:QYQ.Base.Common.Models.ExtraProperties.Account">
+            <summary>
+            账号
+            </summary>
+        </member>
+        <member name="P:QYQ.Base.Common.Models.ExtraProperties.FacebookId">
+            <summary>
+            facebookId
+            </summary>
+        </member>
         <member name="T:QYQ.Base.Common.RegisterExtensions">
             <summary>
             注册
@@ -808,6 +908,19 @@
             api返回结果处理
             </summary>
             <param name="services"></param>
+        </member>
+        <member name="M:QYQ.Base.Common.RegisterExtensions.AddQYQHttpLogging(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.Action{QYQ.Base.Common.Models.QYQHttpLoggingOptions})">
+            <summary>
+            添加Http日志的配置
+            </summary>
+            <param name="services"></param>
+            <param name="action"></param>
+            <returns></returns>
+        </member>
+        <member name="F:DefaultOptionsHelpers.DefaultIgnorePath">
+            <summary>
+            默认忽略路径
+            </summary>
         </member>
     </members>
 </doc>

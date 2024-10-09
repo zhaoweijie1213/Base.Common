@@ -40,7 +40,7 @@ namespace QYQ.Base.Consul.Http
 
             //获取consul注册的名字
             string servieName = request.Headers.GetValues("ConsulServiceName").First();
-            string requestPath = _abstractConsulDispatcher.ChooseAddress(servieName);
+            string requestPath = _abstractConsulDispatcher.ChooseAddress(servieName).GetAwaiter().GetResult();
             string pathQuery = request.RequestUri.PathAndQuery;
             request.RequestUri = new Uri("http://" + requestPath + pathQuery);
             return base.Send(request, cancellationToken);
@@ -57,7 +57,7 @@ namespace QYQ.Base.Consul.Http
 
             //获取consul注册的名字
             string servieName = request.Headers.GetValues("ConsulServiceName").First();
-            string requestPath = _abstractConsulDispatcher.ChooseAddress(servieName);
+            string requestPath = await _abstractConsulDispatcher.ChooseAddress(servieName);
             string pathQuery = request.RequestUri.PathAndQuery;
             request.RequestUri = new Uri("http://" + requestPath + pathQuery);
             return await base.SendAsync(request, cancellationToken);

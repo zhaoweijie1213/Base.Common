@@ -56,8 +56,6 @@ namespace QYQ.Base.Consul
         {
             var serviceOptions = configuration.GetSection(consul).Get<ConsulServiceOptions>();
             services.Configure<ConsulServiceOptions>(configuration.GetSection(consul));
-
-
             //添加consul客户端配置
             services.AddConsul(client =>
             {
@@ -94,39 +92,40 @@ namespace QYQ.Base.Consul
         /// <returns></returns>
         public static IServiceCollection AddQYQConsulHttp(this IServiceCollection services, IConfiguration configuration, string consul = "ConsulOptions")
         {
-            var serviceOptions = configuration.GetSection(consul).Get<ConsulServiceOptions>();
-            //代理配置
-            var agent = serviceOptions.ConsulAgents.FirstOrDefault(i => i.AgentCategory == AgentCategory.HTTP);
-            //添加环境
-            agent.Meta.Add("Env", configuration["apollo:Env"]);
-            if (agent.Port != 0)
-            {
-                // 服务ID必须保证唯一
-                agent.ServiceId = Guid.NewGuid().ToString();
-                string ip = GetIPAddress();
-                services.AddQYQConsulAgentService(options =>  //注册服务
-                {
-                    options.ID = agent.ServiceId;
-                    options.Name = agent.ServiceName;
-                    options.Tags = agent.Tags;
-                    options.Meta = agent.Meta;
-                    options.Address = ip;
-                    options.Port = agent.Port;
-                    options.Check = new AgentServiceCheck()
-                    {
-                        // 注册超时
-                        Timeout = TimeSpan.FromSeconds(5),
-                        // 服务停止多久后注销服务
-                        DeregisterCriticalServiceAfter = TimeSpan.FromMinutes(1),
-                        // 健康检查地址
-                        HTTP = $"http://{ip}:{agent.Port}/api/Health",
-                        // 健康检查时间间隔
-                        Interval = TimeSpan.FromSeconds(10),
-                    };
+            //var serviceOptions = configuration.GetSection(consul).Get<ConsulServiceOptions>();
+            ////代理配置
+            //var agent = serviceOptions.ConsulAgents.FirstOrDefault(i => i.AgentCategory == AgentCategory.HTTP);
+            ////添加环境
+            //agent.Meta.Add("Env", configuration["apollo:Env"]);
+            //if (agent.Port != 0)
+            //{
+            //    // 服务ID必须保证唯一
+            //    agent.ServiceId = Guid.NewGuid().ToString();
+            //    string ip = GetIPAddress();
+            //    services.AddQYQConsulAgentService(options =>  //注册服务
+            //    {
+            //        options.ID = agent.ServiceId;
+            //        options.Name = agent.ServiceName;
+            //        options.Tags = agent.Tags;
+            //        options.Meta = agent.Meta;
+            //        options.Address = ip;
+            //        options.Port = agent.Port;
+            //        options.Check = new AgentServiceCheck()
+            //        {
+            //            // 注册超时
+            //            Timeout = TimeSpan.FromSeconds(5),
+            //            // 服务停止多久后注销服务
+            //            DeregisterCriticalServiceAfter = TimeSpan.FromMinutes(1),
+            //            // 健康检查地址
+            //            HTTP = $"http://{ip}:{agent.Port}/api/Health",
+            //            // 健康检查时间间隔
+            //            Interval = TimeSpan.FromSeconds(10),
+            //        };
 
-                });
-            }
+            //    });
+            //}
             services.AddHealthChecks();
+            services.AddHostedService<ConsulHttpHostedService>();
             return services;
         }
 
@@ -155,40 +154,41 @@ namespace QYQ.Base.Consul
         /// <returns></returns>
         public static IServiceCollection AddQYQConsulgRPC(this IServiceCollection services,IConfiguration configuration, string consul = "ConsulOptions")
         {
-            var serviceOptions = configuration.GetSection(consul).Get<ConsulServiceOptions>();
+            //var serviceOptions = configuration.GetSection(consul).Get<ConsulServiceOptions>();
 
-            var agent = serviceOptions.ConsulAgents.FirstOrDefault(i => i.AgentCategory == AgentCategory.GRPC);
-            //添加环境
-            agent.Meta.Add("Env", configuration["apollo:Env"]);
-            if (agent.Port != 0)
-            {
-                // 服务ID必须保证唯一
-                agent.ServiceId = Guid.NewGuid().ToString();
-                string ip = GetIPAddress();
-                services.AddQYQConsulAgentService(options =>  //注册服务
-                {
-                    options.ID = agent.ServiceId;
-                    options.Name = agent.ServiceName;
-                    options.Tags = agent.Tags;
-                    options.Meta = agent.Meta;
-                    options.Address = ip;
-                    options.Port = agent.Port;
-                    options.Check = new AgentServiceCheck()
-                    {
-                        //gRPC特有
-                        GRPC = $"{ip}:{agent.Port}",
-                        //支持http
-                        GRPCUseTLS = false,
-                        // 注册超时
-                        Timeout = TimeSpan.FromSeconds(5),
-                        // 服务停止多久后注销服务
-                        DeregisterCriticalServiceAfter = TimeSpan.FromMinutes(1),
-                        // 健康检查时间间隔
-                        Interval = TimeSpan.FromSeconds(10),
-                    };
+            //var agent = serviceOptions.ConsulAgents.FirstOrDefault(i => i.AgentCategory == AgentCategory.GRPC);
+            ////添加环境
+            //agent.Meta.Add("Env", configuration["apollo:Env"]);
+            //if (agent.Port != 0)
+            //{
+            //    // 服务ID必须保证唯一
+            //    agent.ServiceId = Guid.NewGuid().ToString();
+            //    string ip = GetIPAddress();
+            //    services.AddQYQConsulAgentService(options =>  //注册服务
+            //    {
+            //        options.ID = agent.ServiceId;
+            //        options.Name = agent.ServiceName;
+            //        options.Tags = agent.Tags;
+            //        options.Meta = agent.Meta;
+            //        options.Address = ip;
+            //        options.Port = agent.Port;
+            //        options.Check = new AgentServiceCheck()
+            //        {
+            //            //gRPC特有
+            //            GRPC = $"{ip}:{agent.Port}",
+            //            //支持http
+            //            GRPCUseTLS = false,
+            //            // 注册超时
+            //            Timeout = TimeSpan.FromSeconds(5),
+            //            // 服务停止多久后注销服务
+            //            DeregisterCriticalServiceAfter = TimeSpan.FromMinutes(1),
+            //            // 健康检查时间间隔
+            //            Interval = TimeSpan.FromSeconds(10),
+            //        };
 
-                });
-            }
+            //    });
+            //}
+            services.AddHostedService<ConsulGRPCHostedService>();
             return services;
         }
 
@@ -220,6 +220,7 @@ namespace QYQ.Base.Consul
         /// </summary>
         /// <param name="builder"></param>
         /// <returns></returns>
+        [Obsolete("使用各自的注册类型的HostedService完成注册和注销")]
         public static WebApplicationBuilder AddQYQRegistrationHostedService(this WebApplicationBuilder builder)
         {
              builder.Services.AddQYQRegistrationHostedService();
@@ -232,6 +233,7 @@ namespace QYQ.Base.Consul
         /// </summary>
         /// <param name="services"></param>
         /// <returns></returns>
+        [Obsolete("使用各自的注册类型的HostedService完成注册和注销")]
         public static IServiceCollection AddQYQRegistrationHostedService(this IServiceCollection services)
         {
             return services.AddHostedService<AgentServiceRegistrationQYQHostedService>();
@@ -249,6 +251,10 @@ namespace QYQ.Base.Consul
             this IServiceCollection services,
             ConsulDispatcherType consulDispatcherType = ConsulDispatcherType.Polling)
         {
+            services.Configure<ConsulDispatcherOptions>(options =>
+            {
+                options.ConsulDispatcherType = consulDispatcherType;
+            });
             switch (consulDispatcherType)
             {
                 case ConsulDispatcherType.Average:
@@ -269,7 +275,7 @@ namespace QYQ.Base.Consul
         }
 
         /// <summary>
-        /// 添加consul 发送HTTP请求处理
+        /// 添加consul 发送HTTP请求处理客户端
         /// </summary>
         /// <param name="services"></param>
         /// <param name="name"></param>
@@ -356,16 +362,40 @@ namespace QYQ.Base.Consul
         /// 添加健康检查地址
         /// </summary>
         /// <param name="app"></param>
-        public static void UseHealthcheck(this WebApplication app)
+        public static void UseHttpHealthcheck(this WebApplication app)
         {
             app.MapHealthChecks("api/Health");
-        }       
-        
-        
+        }
+
         /// <summary>
         /// 添加健康检查地址
         /// </summary>
         /// <param name="app"></param>
+        [Obsolete("使用UseHttpHealthcheck")]
+        public static void UseHealthcheck(this WebApplication app)
+        {
+            app.MapHealthChecks("api/Health");
+        }
+
+
+        /// <summary>
+        /// 添加健康检查地址
+        /// </summary>
+        /// <param name="app"></param>
+        public static void UseHttpHealthcheck(this IApplicationBuilder app)
+        {
+            app.UseEndpoints(endpoints =>
+            {
+                endpoints.MapHealthChecks("api/Health");
+            });
+        }
+
+
+        /// <summary>
+        /// 添加健康检查地址
+        /// </summary>
+        /// <param name="app"></param>
+        [Obsolete("使用UseHttpHealthcheck")] 
         public static void UseHealthcheck(this IApplicationBuilder app)
         {
             app.UseEndpoints(endpoints =>
@@ -413,8 +443,16 @@ namespace QYQ.Base.Consul
 
     }
 
-
-
+    /// <summary>
+    /// consul调度选项
+    /// </summary>
+    public class ConsulDispatcherOptions
+    {
+        /// <summary>
+        /// 调度类型
+        /// </summary>
+        public ConsulDispatcherType ConsulDispatcherType { get; set; }
+    }
 
     /// <summary>
     /// 调度类型

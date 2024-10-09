@@ -185,7 +185,7 @@
         </member>
         <member name="M:QYQ.Base.Consul.ServiceCollectionExtensions.AddConsulHttpClient(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.String)">
             <summary>
-            添加consul 发送HTTP请求处理
+            添加consul 发送HTTP请求处理客户端
             </summary>
             <param name="services"></param>
             <param name="name"></param>
@@ -209,7 +209,19 @@
             <param name="consulServiceName">consul注册的服务名</param>
             <param name="configuration">配置信息</param>
         </member>
+        <member name="M:QYQ.Base.Consul.ServiceCollectionExtensions.UseHttpHealthcheck(Microsoft.AspNetCore.Builder.WebApplication)">
+            <summary>
+            添加健康检查地址
+            </summary>
+            <param name="app"></param>
+        </member>
         <member name="M:QYQ.Base.Consul.ServiceCollectionExtensions.UseHealthcheck(Microsoft.AspNetCore.Builder.WebApplication)">
+            <summary>
+            添加健康检查地址
+            </summary>
+            <param name="app"></param>
+        </member>
+        <member name="M:QYQ.Base.Consul.ServiceCollectionExtensions.UseHttpHealthcheck(Microsoft.AspNetCore.Builder.IApplicationBuilder)">
             <summary>
             添加健康检查地址
             </summary>
@@ -238,6 +250,16 @@
             获取ip地址
             </summary>
             <returns></returns>
+        </member>
+        <member name="T:QYQ.Base.Consul.ConsulDispatcherOptions">
+            <summary>
+            consul调度选项
+            </summary>
+        </member>
+        <member name="P:QYQ.Base.Consul.ConsulDispatcherOptions.ConsulDispatcherType">
+            <summary>
+            调度类型
+            </summary>
         </member>
         <member name="T:QYQ.Base.Consul.ConsulDispatcherType">
             <summary>
@@ -302,7 +324,7 @@
             </summary>
             <param name="serviceName"></param>
         </member>
-        <member name="M:QYQ.Base.Consul.DispatcherExtend.AbstractConsulDispatcher.GetIndex(System.Int32)">
+        <member name="M:QYQ.Base.Consul.DispatcherExtend.AbstractConsulDispatcher.GetIndex(System.String)">
             <summary>
             根据不同策略  获得不同的索引
             </summary>
@@ -319,15 +341,14 @@
             服务健康维护
             </summary>
         </member>
-        <member name="M:QYQ.Base.Consul.DispatcherExtend.AgentServiceHealthCheck.#ctor(QYQ.Base.Consul.DispatcherExtend.AbstractConsulDispatcher)">
+        <member name="M:QYQ.Base.Consul.DispatcherExtend.AgentServiceHealthCheck.#ctor(Microsoft.Extensions.Logging.ILogger{QYQ.Base.Consul.DispatcherExtend.AgentServiceHealthCheck},Microsoft.Extensions.Options.IOptions{QYQ.Base.Consul.ConsulDispatcherOptions},QYQ.Base.Consul.DispatcherExtend.AbstractConsulDispatcher)">
             <summary>
-            
+            服务健康维护
             </summary>
-            <param name="abstractConsulDispatcher"></param>
         </member>
         <member name="M:QYQ.Base.Consul.DispatcherExtend.AgentServiceHealthCheck.ExecuteAsync(System.Threading.CancellationToken)">
             <summary>
-            
+            定时更新健康服务地址
             </summary>
             <param name="stoppingToken"></param>
             <returns></returns>
@@ -353,7 +374,7 @@
             </summary>
             <param name="consulClientOption"></param>
         </member>
-        <member name="M:QYQ.Base.Consul.DispatcherExtend.AverageDispatcher.GetIndex(System.Int32)">
+        <member name="M:QYQ.Base.Consul.DispatcherExtend.AverageDispatcher.GetIndex(System.String)">
             <summary>
             平均
             </summary>
@@ -363,41 +384,47 @@
             <summary>
             轮询
             </summary>
+            <param name="consulClientOption"></param>
         </member>
         <member name="M:QYQ.Base.Consul.DispatcherExtend.PollingDispatcher.#ctor(Microsoft.Extensions.Options.IOptionsMonitor{QYQ.Base.Consul.ConsulServiceOptions})">
             <summary>
-            
+            轮询
             </summary>
             <param name="consulClientOption"></param>
         </member>
-        <member name="M:QYQ.Base.Consul.DispatcherExtend.PollingDispatcher.GetIndex(System.Int32)">
+        <member name="F:QYQ.Base.Consul.DispatcherExtend.PollingDispatcher._serviveIndex">
+            <summary>
+            索引
+            </summary>
+        </member>
+        <member name="M:QYQ.Base.Consul.DispatcherExtend.PollingDispatcher.GetIndex(System.String)">
             <summary>
             轮询
             </summary>
-            <param name="length"></param>
+            <param name="serviceName"></param>
             <returns></returns>
         </member>
         <member name="T:QYQ.Base.Consul.DispatcherExtend.WeightDispatcher">
             <summary>
             权重
             </summary>
+            <remarks>
+            
+            </remarks>
+            <param name="consulClientOption"></param>
         </member>
         <member name="M:QYQ.Base.Consul.DispatcherExtend.WeightDispatcher.#ctor(Microsoft.Extensions.Options.IOptionsMonitor{QYQ.Base.Consul.ConsulServiceOptions})">
             <summary>
-            
+            权重
             </summary>
+            <remarks>
+            
+            </remarks>
             <param name="consulClientOption"></param>
         </member>
-        <member name="M:QYQ.Base.Consul.DispatcherExtend.WeightDispatcher.ChooseAddress(System.String)">
+        <member name="M:QYQ.Base.Consul.DispatcherExtend.WeightDispatcher.GetIndex(System.String)">
             <summary>
-            按权重选择地址
-            </summary>
-            <param name="serviceName"></param>
-            <returns></returns>
-        </member>
-        <member name="M:QYQ.Base.Consul.DispatcherExtend.WeightDispatcher.GetIndex(System.Int32)">
-            <summary>
-            
+            按权重获取索引
             </summary>
             <returns></returns>
         </member>
@@ -455,6 +482,37 @@
             <param name="options"></param>
             <returns></returns>
         </member>
+        <member name="T:QYQ.Base.Consul.Grpc.Serivce.ConsulGRPCHostedService">
+            <summary>
+            consul 注册 和 注销
+            </summary>
+        </member>
+        <member name="M:QYQ.Base.Consul.Grpc.Serivce.ConsulGRPCHostedService.#ctor(Consul.IConsulClient,Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            consul 注册 和 注销
+            </summary>
+        </member>
+        <member name="M:QYQ.Base.Consul.Grpc.Serivce.ConsulGRPCHostedService.StartAsync(System.Threading.CancellationToken)">
+            <summary>
+            
+            </summary>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+            <exception cref="T:System.NotImplementedException"></exception>
+        </member>
+        <member name="M:QYQ.Base.Consul.Grpc.Serivce.ConsulGRPCHostedService.StopAsync(System.Threading.CancellationToken)">
+            <summary>
+            
+            </summary>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
+        <member name="M:QYQ.Base.Consul.Grpc.Serivce.ConsulGRPCHostedService.GetIPAddress">
+            <summary>
+            获取ip地址
+            </summary>
+            <returns></returns>
+        </member>
         <member name="T:QYQ.Base.Consul.Grpc.Serivce.HealthCheckService">
             <summary>
             Grpc健康检查
@@ -475,6 +533,37 @@
             <param name="request"></param>
             <param name="responseStream"></param>
             <param name="context"></param>
+            <returns></returns>
+        </member>
+        <member name="T:QYQ.Base.Consul.Http.ConsulHttpHostedService">
+            <summary>
+            consul 注册 和 注销
+            </summary>
+        </member>
+        <member name="M:QYQ.Base.Consul.Http.ConsulHttpHostedService.#ctor(Consul.IConsulClient,Microsoft.Extensions.Configuration.IConfiguration)">
+            <summary>
+            consul 注册 和 注销
+            </summary>
+        </member>
+        <member name="M:QYQ.Base.Consul.Http.ConsulHttpHostedService.StartAsync(System.Threading.CancellationToken)">
+            <summary>
+            
+            </summary>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+            <exception cref="T:System.NotImplementedException"></exception>
+        </member>
+        <member name="M:QYQ.Base.Consul.Http.ConsulHttpHostedService.StopAsync(System.Threading.CancellationToken)">
+            <summary>
+            
+            </summary>
+            <param name="cancellationToken"></param>
+            <returns></returns>
+        </member>
+        <member name="M:QYQ.Base.Consul.Http.ConsulHttpHostedService.GetIPAddress">
+            <summary>
+            获取ip地址
+            </summary>
             <returns></returns>
         </member>
         <member name="T:QYQ.Base.Consul.Http.ConsulHttpMessageHandler">

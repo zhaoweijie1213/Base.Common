@@ -14,12 +14,10 @@ builder.Logging.AddLog4Net();
 builder.Services.AddControllers();
 builder.Services.AddGrpc();
 
-builder.Services.AddConsulDispatcher();
-builder.AddQYQConsul()
-    .AddQYQConsulHttp()
-    .AddQYQConsulgRPC()
-    .AddQYQRegistrationHostedService();
+builder.Services.AddConsulDispatcher(ConsulDispatcherType.Weight);
+builder.AddQYQConsul().AddQYQConsulHttp().AddQYQConsulgRPC();
 
+builder.Services.AddConsulHttpClient("game-play");
 builder.AddConsulGrpcClient<GamePlay.Grpc.GamePlay.GamePlayClient>("Gameplay", "game-play-grpc");
 builder.AddQYQSwaggerAndApiVersioning(new OpenApiInfo { Title = "CommonTest" }, new Asp.Versioning.ApiVersion(1));
 
@@ -38,7 +36,7 @@ app.UseQYQHttpLogging();
 
 app.MapControllers();
 app.UseGrpcHealthcheck();
-app.UseHealthcheck();
+app.UseHttpHealthcheck();
 app.UseQYQSwaggerUI("CommonTest", true);
 
 app.Run();

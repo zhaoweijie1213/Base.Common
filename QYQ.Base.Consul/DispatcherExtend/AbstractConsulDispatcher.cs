@@ -40,11 +40,11 @@ namespace QYQ.Base.Consul.DispatcherExtend
         /// </summary>
         /// <param name="mappingUrl">Consul映射后的地址</param>
         /// <returns></returns>
-        public string MapAddress(string mappingUrl)
+        public async Task<string> MapAddress(string mappingUrl)
         {
             Uri uri = new(mappingUrl);
             string serviceName = uri.Host;
-            string addressPort = this.ChooseAddress(serviceName);
+            string addressPort = await this.ChooseAddress(serviceName);
             return $"{uri.Scheme}://{addressPort}{uri.PathAndQuery}";
         }
 
@@ -53,19 +53,19 @@ namespace QYQ.Base.Consul.DispatcherExtend
         /// </summary>
         /// <param name="serviceName"></param>
         /// <returns></returns>
-        public virtual string ChooseAddress(string serviceName)
+        public virtual async Task<string> ChooseAddress(string serviceName)
         {
-            InitAgentServiceDictionary(serviceName);
+            await InitAgentServiceDictionary(serviceName);
 
             if (_agentServices.TryGetValue(serviceName,out AgentService[] agentServices))
             {
-                int index = GetIndex(agentServices.Length);
+                int index = GetIndex(serviceName);
                 AgentService agentService = agentServices[index];
                 return $"{agentService.Address}:{agentService.Port}";
             }
             else
             {
-                return "";
+                throw new Exception($"Not find {serviceName} address,Please check it health!");
             }
         }
 
@@ -73,7 +73,7 @@ namespace QYQ.Base.Consul.DispatcherExtend
         /// 跟Consul交互，获取清单
         /// </summary>
         /// <param name="serviceName"></param>
-        protected void InitAgentServiceDictionary(string serviceName)
+        protected async Task InitAgentServiceDictionary(string serviceName)
         {
             
             if (!_agentServices.TryGetValue(serviceName, out AgentService[] services))
@@ -84,7 +84,7 @@ namespace QYQ.Base.Consul.DispatcherExtend
                     c.Token = _ConsulClientOption.Token;
                 });
                 //consul实例获取
-                var entrys = client.Health.Service(serviceName).GetAwaiter().GetResult();
+                var entrys = await client.Health.Service(serviceName);
                 services = entrys.Response.Select(i => i.Service).ToArray();
 
                 if (services.Length > 0)
@@ -100,13 +100,13 @@ namespace QYQ.Base.Consul.DispatcherExtend
         /// 根据不同策略  获得不同的索引
         /// </summary>
         /// <returns></returns>
-        protected abstract int GetIndex(int length);
+        protected abstract int GetIndex(string serviceName);
 
         /// <summary>
         /// 维护服务列表的健康地址
         /// </summary>
         /// <returns></returns>
-        public async Task CheckHealthService()
+        public virtual async Task CheckHealthService()
         {
             var serviceNames = _agentServices.Select(i => i.Key);
 

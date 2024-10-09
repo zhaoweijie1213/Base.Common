@@ -64,19 +64,19 @@ namespace QYQ.Base.Common.Tool
         {
             var claims = new[]
             {
-                new Claim("UserId", info.UserId.ToString()),
-                new Claim("UserName", info.Name),
-                new Claim("HeadImg", info.HeadImg),
-                new Claim("Phone", info.Phone),
-                new Claim("Email", info.Email),
-                new Claim("Sex", info.Sex),
-                new Claim("Lobby", info.Lobby.ToString()),
-                new Claim("TimeZone", info.TimeZone.ToString()),
-                new Claim("Country", info.Country.ToString()),
-                new Claim("Currency", info.Currency.ToString()),
-                new Claim("Symbol", info.Symbol.ToString()),
-                new Claim("AppId", info.AppId.ToString()),
-                new Claim("ExtraProperties", JsonConvert.SerializeObject(info.ExtraProperties))
+                new Claim(CustomClaimTypes.UserId, info.UserId.ToString()),
+                new Claim(CustomClaimTypes.UserName, info.Name),
+                new Claim(CustomClaimTypes.HeadImg, info.HeadImg),
+                new Claim(CustomClaimTypes.Phone, info.Phone),
+                new Claim(CustomClaimTypes.Email, info.Email),
+                new Claim(CustomClaimTypes.Sex, info.Sex),
+                new Claim(CustomClaimTypes.Lobby, info.Lobby.ToString()),
+                new Claim(CustomClaimTypes.TimeZone, info.TimeZone.ToString()),
+                new Claim(CustomClaimTypes.Country, info.Country.ToString()),
+                new Claim(CustomClaimTypes.Currency, info.Currency.ToString()),
+                new Claim(CustomClaimTypes.Symbol, info.Symbol.ToString()),
+                new Claim(CustomClaimTypes.AppId, info.AppId.ToString()),
+                new Claim(CustomClaimTypes.ExtraProperties, JsonConvert.SerializeObject(info.ExtraProperties))
             };
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));

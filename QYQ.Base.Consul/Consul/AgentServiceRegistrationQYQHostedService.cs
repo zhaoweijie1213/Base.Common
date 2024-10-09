@@ -12,6 +12,7 @@ namespace QYQ.Base.Consul.Consul
     /// <summary>
     /// conusl所有代理注册
     /// </summary>
+    [Obsolete("使用各自的注册类型的HostedService完成注册和注销")]
     public class AgentServiceRegistrationQYQHostedService : IHostedService
     {
         private readonly IConsulClient _consulClient;

@@ -4,14 +4,12 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>zhaoweijie</Authors>
     <Company>QYQ</Company>
-    <Version>8.0.1</Version>
+    <Version>8.0.4</Version>
     <Description>读取配置文件注册consul
 首先需要 AddQYQCOnsul(),再按需注册的代理类型,支持两种同时注册,但是
 注册服务名不能重复。
     1.webapi注册consul 调用AddQYQConsulHttp()注册http代理实
     2.GRPC服务注册发现 调用AddQYQConsulgRPC()注册grpc代理实例
-    3.将代理实例注册到consul服务  AddQYQRegistrationHostedService()
-要将agent注册到consul必须调用3.方法
 
 
 	</Description>
@@ -34,8 +32,8 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Consul.AspNetCore" Version="1.6.10.9" />
-    <PackageReference Include="Grpc.AspNetCore" Version="2.62.0" />
+    <PackageReference Include="Consul.AspNetCore" Version="1.7.14.4" />
+    <PackageReference Include="Grpc.AspNetCore" Version="2.65.0" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="8.0.0" />
   </ItemGroup>
   <ItemGroup>
