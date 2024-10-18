@@ -5,6 +5,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace QYQ.Base.Consul.DispatcherExtend
@@ -106,7 +107,7 @@ namespace QYQ.Base.Consul.DispatcherExtend
         /// 维护服务列表的健康地址
         /// </summary>
         /// <returns></returns>
-        public virtual async Task CheckHealthService()
+        public virtual async Task CheckHealthService(CancellationToken stoppingToken)
         {
             var serviceNames = _agentServices.Select(i => i.Key);
 
@@ -118,7 +119,7 @@ namespace QYQ.Base.Consul.DispatcherExtend
                     c.Token = _ConsulClientOption.Token;
                 });
                 //consul实例获取
-                var entrys = await client.Health.Service(name, null, true, new QueryOptions() { WaitTime = TimeSpan.FromMinutes(5) });
+                var entrys = await client.Health.Service(name, null, true, new QueryOptions() { WaitTime = TimeSpan.FromMinutes(5) }, stoppingToken);
                 var services = entrys.Response.Select(i => i.Service).ToArray();
                 if (services.Length > 0)
                 {
