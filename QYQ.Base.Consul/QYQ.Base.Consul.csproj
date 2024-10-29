@@ -13,7 +13,7 @@
 
 
 	</Description>
-    <RepositoryUrl>http://192.168.0.218:3000/zhaoweijie0817/QYQ.Base.Common</RepositoryUrl>
+    <RepositoryUrl>https://192.168.0.218:3000/zhaoweijie0817/QYQ.Base.Common</RepositoryUrl>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <PackageIcon>雀友圈512.png</PackageIcon>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
