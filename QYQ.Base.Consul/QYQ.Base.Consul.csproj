@@ -4,7 +4,7 @@
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <Authors>zhaoweijie</Authors>
     <Company>QYQ</Company>
-    <Version>8.0.4</Version>
+    <Version>8.0.5</Version>
     <Description>读取配置文件注册consul
 首先需要 AddQYQCOnsul(),再按需注册的代理类型,支持两种同时注册,但是
 注册服务名不能重复。
@@ -13,7 +13,7 @@
 
 
 	</Description>
-    <RepositoryUrl>https://192.168.0.218:3000/zhaoweijie0817/QYQ.Base.Common</RepositoryUrl>
+    <RepositoryUrl>https://github.com/zhaoweijie1213/Base.Common.git</RepositoryUrl>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <PackageIcon>雀友圈512.png</PackageIcon>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

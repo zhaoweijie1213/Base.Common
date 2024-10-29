@@ -4,11 +4,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>8.0.4</Version>
+    <Version>8.0.5</Version>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <Title>SqlSugar组件</Title>
     <Description>SqlSugar数据仓储基类</Description>
-    <PackageProjectUrl>https://192.168.0.218:3000/zhaoweijie0817/QYQ.Base.Common.git</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/zhaoweijie1213/Base.Common.git</PackageProjectUrl>
     <PackageIcon>雀友圈512.png</PackageIcon>
     <RepositoryUrl>https://192.168.0.218:3000/zhaoweijie0817/QYQ.Base.Common.git</RepositoryUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>

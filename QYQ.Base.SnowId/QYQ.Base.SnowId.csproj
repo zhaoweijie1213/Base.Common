@@ -3,7 +3,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Version>8.1.0</Version>
+    <Version>8.1.1</Version>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Description>AddDefaultSnowIdGenerator/AddSnowIdRedisGenerator
@@ -14,7 +14,7 @@
 使用ISnowIdGenerator接口</Description>
     <Company>QYQ</Company>
     <PackageIcon>雀友圈512.png</PackageIcon>
-    <PackageProjectUrl>https://192.168.0.218:3000/zhaoweijie0817/QYQ.Base.Common</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/zhaoweijie1213/Base.Common.git</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>

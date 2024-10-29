@@ -9,9 +9,9 @@
   添加公共返回结果编码枚举
 2.添加枚举扩展方法
 3.分页返回结果</Description>
-    <PackageProjectUrl>https://192.168.0.218:3000/zhaoweijie0817/QYQ.Base.Common</PackageProjectUrl>
+    <PackageProjectUrl>https://github.com/zhaoweijie1213/Base.Common.git</PackageProjectUrl>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <Version>8.1.8</Version>
+    <Version>8.1.9</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <PackageIcon>雀友圈512.png</PackageIcon>
