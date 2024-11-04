@@ -2,6 +2,8 @@
 using Google.Protobuf.Reflection;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,7 +17,7 @@ namespace QYQ.Base.Consul.Http
     /// <summary>
     /// consul 注册 和 注销
     /// </summary>
-    public class ConsulHttpHostedService(IConsulClient consulClient, IConfiguration configuration) : IHostedService
+    public class ConsulHttpHostedService(ILogger<ConsulHttpHostedService> logger,IConsulClient consulClient, IConfiguration configuration) : IHostedService
     {
 
         private readonly IConsulClient _consulClient = consulClient;
@@ -23,7 +25,7 @@ namespace QYQ.Base.Consul.Http
         private readonly string _serviceId = Guid.NewGuid().ToString();
 
         /// <summary>
-        /// 
+        /// 开始
         /// </summary>
         /// <param name="cancellationToken"></param>
         /// <returns></returns>
@@ -37,12 +39,12 @@ namespace QYQ.Base.Consul.Http
             agent.Meta.Add("Env", configuration["apollo:Env"]);
             // 在启动时移除相同地址和端口的旧服务
             var servicesList = await _consulClient.Agent.Services(cancellationToken);
-            foreach (var service in servicesList.Response.Values)
+            var list = servicesList.Response.Where(i => i.Value.Service == agent.ServiceName && i.Value.Address == ipAddress && i.Value.Port == port).Select(i => i.Value).ToList();
+            logger.LogInformation("StartAsync.查询相同Consul服务列表:{list}", JsonConvert.SerializeObject(list));
+            foreach (var service in list)
             {
-                if (service.Address == ipAddress && service.Port == port)
-                {
-                    await _consulClient.Agent.ServiceDeregister(service.ID, cancellationToken);
-                }
+                await _consulClient.Agent.ServiceDeregister(service.ID, cancellationToken);
+                logger.LogInformation("Deregistered existing service: {ServiceId}", service.ID);
             }
 
             var registration = new AgentServiceRegistration
