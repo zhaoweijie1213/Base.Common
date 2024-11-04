@@ -40,7 +40,7 @@ namespace QYQ.Base.Consul.Http
             // 在启动时移除相同地址和端口的旧服务
             var servicesList = await _consulClient.Agent.Services(cancellationToken);
             var list = servicesList.Response.Where(i => i.Value.Service == agent.ServiceName && i.Value.Address == ipAddress && i.Value.Port == port).Select(i => i.Value).ToList();
-            logger.LogInformation("StartAsync.查询相同Consul服务列表:{list}", JsonConvert.SerializeObject(list));
+            //logger.LogInformation("StartAsync.查询相同Consul服务列表:{list}", JsonConvert.SerializeObject(list));
             foreach (var service in list)
             {
                 await _consulClient.Agent.ServiceDeregister(service.ID, cancellationToken);
