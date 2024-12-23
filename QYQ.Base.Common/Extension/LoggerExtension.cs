@@ -20,7 +20,7 @@ namespace QYQ.Base.Common.Extension
         /// <param name="e"></param>
         public static void BaseErrorLog(this ILogger logger,string method,Exception e)
         {
-            logger.LogError($"{method}:{e.Message}\n{e.StackTrace}");
+            logger.LogError(e, "{method}:", method);
         }
     }
 }
