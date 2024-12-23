@@ -1,1 +1,1 @@
-# ORM
+# 提供使用SqlSugar的基类
