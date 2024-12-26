@@ -34,6 +34,14 @@ namespace QYQ.Base.SqlSugar
         public Task<TEntity> InsertAsync(TEntity entity);
 
         /// <summary>
+        /// 批量分页入库
+        /// </summary>
+        /// <param name="list"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
+        public Task<int> InsertByPageAsync(List<TEntity> list, int pageSize = 100);
+
+        /// <summary>
         /// 查询列表
         /// </summary>
         /// <returns></returns>

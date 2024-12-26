@@ -190,6 +190,18 @@ namespace QYQ.Base.SqlSugar
         }
 
         /// <summary>
+        /// 批量分页入库
+        /// </summary>
+        /// <param name="list"></param>
+        /// <param name="pageSize"></param>
+        /// <returns></returns>
+        public virtual Task<int> InsertByPageAsync(List<TEntity> list, int pageSize = 100)
+        {
+            return Db.Insertable(list).PageSize(pageSize).ExecuteCommandAsync();
+        }
+
+
+        /// <summary>
         /// 查询列表
         /// </summary>
         /// <returns></returns>
