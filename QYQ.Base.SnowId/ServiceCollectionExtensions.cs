@@ -24,7 +24,7 @@ namespace QYQ.Base.SnowId
         /// <param name="services"></param>
         /// <param name="action"></param>
         /// <returns></returns>
-        public static IServiceCollection AddDefaultSnowIdGenerator(this IServiceCollection services,Action<SnowIdOptions>? action = null)
+        public static IServiceCollection AddDefaultSnowIdGenerator(this IServiceCollection services, Action<SnowIdOptions>? action = null)
         {
             if (action != null)
             {
