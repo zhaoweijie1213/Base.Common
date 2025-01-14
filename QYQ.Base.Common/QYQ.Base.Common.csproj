@@ -11,7 +11,7 @@
 3.分页返回结果</Description>
     <PackageProjectUrl>https://github.com/zhaoweijie1213/Base.Common.git</PackageProjectUrl>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
-    <Version>8.3.0</Version>
+    <Version>8.4.0</Version>
     <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <PackageIcon>雀友圈512.png</PackageIcon>
@@ -30,6 +30,7 @@
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Com.Ctrip.Framework.Apollo.Configuration" Version="2.11.0" />
+    <PackageReference Include="QRCoder-ImageSharp" Version="0.10.0" />
     <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.11" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />

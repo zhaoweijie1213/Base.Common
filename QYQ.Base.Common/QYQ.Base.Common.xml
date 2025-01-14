@@ -439,6 +439,76 @@
             </summary>
             <param name="app"></param>
         </member>
+        <member name="T:QYQ.Base.Common.CustomClaimTypes">
+            <summary>
+            自定义声明类型
+            </summary>
+        </member>
+        <member name="F:QYQ.Base.Common.CustomClaimTypes.UserId">
+            <summary>
+            用户Id
+            </summary>
+        </member>
+        <member name="F:QYQ.Base.Common.CustomClaimTypes.UserName">
+            <summary>
+            用户名
+            </summary>
+        </member>
+        <member name="F:QYQ.Base.Common.CustomClaimTypes.HeadImg">
+            <summary>
+            头像
+            </summary>
+        </member>
+        <member name="F:QYQ.Base.Common.CustomClaimTypes.Phone">
+            <summary>
+            电话
+            </summary>
+        </member>
+        <member name="F:QYQ.Base.Common.CustomClaimTypes.Email">
+            <summary>
+            邮箱
+            </summary>
+        </member>
+        <member name="F:QYQ.Base.Common.CustomClaimTypes.Sex">
+            <summary>
+            性别
+            </summary>
+        </member>
+        <member name="F:QYQ.Base.Common.CustomClaimTypes.Lobby">
+            <summary>
+            大厅
+            </summary>
+        </member>
+        <member name="F:QYQ.Base.Common.CustomClaimTypes.TimeZone">
+            <summary>
+            时区
+            </summary>
+        </member>
+        <member name="F:QYQ.Base.Common.CustomClaimTypes.Country">
+            <summary>
+            国家
+            </summary>
+        </member>
+        <member name="F:QYQ.Base.Common.CustomClaimTypes.Currency">
+            <summary>
+            货币
+            </summary>
+        </member>
+        <member name="F:QYQ.Base.Common.CustomClaimTypes.Symbol">
+            <summary>
+            货币符号
+            </summary>
+        </member>
+        <member name="F:QYQ.Base.Common.CustomClaimTypes.AppId">
+            <summary>
+            应用Id
+            </summary>
+        </member>
+        <member name="F:QYQ.Base.Common.CustomClaimTypes.ExtraProperties">
+            <summary>
+            扩展属性
+            </summary>
+        </member>
         <member name="T:QYQ.Base.Common.Tool.DateTimeExtension">
             <summary>
             时间扩展
@@ -514,6 +584,49 @@
             </summary>
             <param name="jwtToken"></param>
             <param name="jsonWebKey"></param>
+            <returns></returns>
+        </member>
+        <member name="T:QYQ.Base.Common.Tool.QRCoderHepler">
+            <summary>
+            二维码服务类
+            </summary>
+        </member>
+        <member name="M:QYQ.Base.Common.Tool.QRCoderHepler.GenerateQRCodeAsync(System.String)">
+            <summary>
+            生成二维码
+            </summary>
+            <param name="url"></param>
+            <returns></returns>
+        </member>
+        <member name="M:QYQ.Base.Common.Tool.QRCoderHepler.GenerateBase64QRCodeAsync(System.String)">
+            <summary>
+            生成base64二维码
+            </summary>
+            <param name="url"></param>
+            <returns></returns>
+        </member>
+        <member name="M:QYQ.Base.Common.Tool.QRCoderHepler.GenerateImage(System.String,System.Func{QRCoder.QRCode,SixLabors.ImageSharp.Image{SixLabors.ImageSharp.PixelFormats.Rgba32}})">
+            <summary>
+            生成Image
+            </summary>
+            <param name="content"></param>
+            <param name="getGraphic"></param>
+            <returns></returns>
+        </member>
+        <member name="M:QYQ.Base.Common.Tool.QRCoderHepler.GeneratePng(System.String,System.Func{QRCoder.PngByteQRCode,System.Byte[]})">
+            <summary>
+            生成PNG
+            </summary>
+            <param name="content"></param>
+            <param name="getGraphic"></param>
+            <returns></returns>
+        </member>
+        <member name="M:QYQ.Base.Common.Tool.QRCoderHepler.GenerateBase64QRCode(System.String,System.Func{QRCoder.Base64QRCode,System.String})">
+            <summary>
+            生成PNG
+            </summary>
+            <param name="content"></param>
+            <param name="getGraphic"></param>
             <returns></returns>
         </member>
         <member name="T:QYQ.Base.Common.Tool.SecurityHelper">

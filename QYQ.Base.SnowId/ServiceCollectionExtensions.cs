@@ -3,6 +3,7 @@ using EasyCaching.Serialization.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using QYQ.Base.SnowId.Interface;
+using QYQ.Base.SnowId.Options;
 using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
@@ -21,9 +22,14 @@ namespace QYQ.Base.SnowId
         /// 默认雪花id生成
         /// </summary>
         /// <param name="services"></param>
+        /// <param name="action"></param>
         /// <returns></returns>
-        public static IServiceCollection AddDefaultSnowIdGenerator(this IServiceCollection services)
+        public static IServiceCollection AddDefaultSnowIdGenerator(this IServiceCollection services,Action<SnowIdOptions>? action = null)
         {
+            if (action != null)
+            {
+                services.Configure(action);
+            }
             services.AddSingleton<ISnowIdGenerator, SnowIdDefaultGenerator>();
             return services;
         }

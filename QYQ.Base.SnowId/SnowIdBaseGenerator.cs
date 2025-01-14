@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Microsoft.Extensions.Options;
+using QYQ.Base.SnowId.Options;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,14 +11,31 @@ using Yitter.IdGenerator;
 namespace QYQ.Base.SnowId
 {
     /// <summary>
-    /// 
+    /// 雪花Id生成基类
     /// </summary>
     public class SnowIdBaseGenerator
     {
         /// <summary>
+        /// 雪花Id生成基类
+        /// </summary>
+        /// <param name="options"></param>
+        public SnowIdBaseGenerator(IOptions<SnowIdOptions> options)
+        {
+            if (options.Value.BaseTime == null) 
+            {
+                BaseTime = new DateTime(2020, 2, 20, 2, 20, 2, 20, DateTimeKind.Utc);
+
+            }
+            else
+            {
+                BaseTime = options.Value.BaseTime.Value;
+            }
+        }
+
+        /// <summary>
         /// 基础时间(utc时间)
         /// </summary>
-        public DateTime BaseTime { get; set; } = new DateTime(2020, 2, 20, 2, 20, 2, 20, DateTimeKind.Utc);
+        public DateTime BaseTime { get; set; }
 
         /// <summary>
         /// 

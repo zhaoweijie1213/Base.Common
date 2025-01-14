@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QYQ.Base.SnowId.Interface;
+using QYQ.Base.SnowId.Options;
 using System.Collections.Concurrent;
 using Yitter.IdGenerator;
 
@@ -21,7 +22,8 @@ namespace QYQ.Base.SnowId
         /// <summary>
         /// 
         /// </summary>
-        public SnowIdRedisGenerator(ILogger<SnowIdRedisGenerator> logger, WorkerIdManager workerIdManager, IConfiguration configuration)
+        public SnowIdRedisGenerator(ILogger<SnowIdRedisGenerator> logger, WorkerIdManager workerIdManager, IConfiguration configuration, IOptions<SnowIdOptions> options)
+            : base(options)
         {
             _workerIdManager = workerIdManager;
             DataCenterId = configuration.GetSection("DataCenterId").Get<uint?>() ?? Convert.ToUInt32(new Random().Next(1, 20));

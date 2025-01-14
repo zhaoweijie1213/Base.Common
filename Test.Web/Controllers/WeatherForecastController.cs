@@ -4,6 +4,7 @@ using Grpc.Net.ClientFactory;
 using Microsoft.AspNetCore.Mvc;
 using NSwag.Annotations;
 using QYQ.Base.Common.ApiResult;
+using QYQ.Base.Common.Tool;
 using QYQ.Base.Consul.Grpc;
 using QYQ.Base.SnowId.Interface;
 using Test.Models.Input;
@@ -83,10 +84,9 @@ namespace Test.Web.Controllers
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="name"></param>
         /// <returns></returns>
         [HttpGet]
-        public ApiResult<string> Get(string name)
+        public ApiResult<string> Get()
         {
             ApiResult<string> result = new();
 
@@ -94,7 +94,7 @@ namespace Test.Web.Controllers
 
             DateTime dateTime = _snowIdGenerator.GetDateTime(id);
 
-            result.SetRsult(ApiResultCode.Success, $"{name} {dateTime:g}");
+            result.SetRsult(ApiResultCode.Success, $"{dateTime:g} ID:{id}");
             return result;
 
         }
@@ -112,5 +112,37 @@ namespace Test.Web.Controllers
             return result;
 
         }
+
+        /// <summary>
+        /// 生成二维码
+        /// </summary>
+        /// <param name="content"></param>
+        /// <returns></returns>
+        [HttpGet("GetQRCodeAsync")]
+        public async Task<ApiResult<byte[]>> GetQRCodeAsync(string content)
+        {
+            ApiResult<byte[]> result = new();
+            var qr = await QRCoderHepler.GenerateQRCodeAsync(content);
+            result.SetRsult(ApiResultCode.Success, qr);
+            return result;
+
+        }
+
+        /// <summary>
+        /// 生成Base64二维码
+        /// </summary>
+        /// <param name="content"></param>
+        /// <returns></returns>
+        [HttpGet("GetBase64QRCodeAsync")]
+        public async Task<ApiResult<string>> GetBase64QRCodeAsync(string content)
+        {
+            ApiResult<string> result = new();
+            var qr = await QRCoderHepler.GenerateBase64QRCodeAsync(content);
+            result.SetRsult(ApiResultCode.Success, qr);
+            return result;
+
+        }
+
+
     }
 }

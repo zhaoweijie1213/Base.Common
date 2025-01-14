@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using QYQ.Base.SnowId.Interface;
+using QYQ.Base.SnowId.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,7 +23,8 @@ namespace QYQ.Base.SnowId
         /// <summary>
         /// 
         /// </summary>
-        public SnowIdDefaultGenerator(ILogger<SnowIdDefaultGenerator> logger,IConfiguration configuration)
+        public SnowIdDefaultGenerator(ILogger<SnowIdDefaultGenerator> logger, IConfiguration configuration, IOptions<SnowIdOptions> options)
+            : base(options)
         {
             workerId = configuration.GetSection("SnowServerId").Get<int?>() ?? new Random().Next(1, 20);
             DataCenterId = configuration.GetSection("DataCenterId").Get<uint?>() ?? Convert.ToUInt32(new Random().Next(1, 20));
