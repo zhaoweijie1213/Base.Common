@@ -1,4 +1,24 @@
-# .NET基础公共方法(SqlSugar、Consul、雪花Id、Swagger、Apollo配置中心)
+# .NET基础公共方法
+
+- [x] 公告方法
+
+- class批量注入容器实现
+- jwt封装
+- 统一Api返回格式
+- Http日志中间件
+
+- [x] SqlSugar基础类封装
+- [x] Consul注册、发现基础操作封装
+
+- http注册、通过注册名调用http服务
+- grpc注册、通过注册名调用grpc服务
+
+- [x] Swagger配置封装
+- [x] Apollo配置中心集成封装
+- [x] 雪花Id集成，redis 自动注册workerId
+
+- 默认雪花Id生成器通过配置文件或者随机生成一个workerId
+- redis默认雪花Id生成器从redis里取出workerId保证workerId唯一性
 
 > 
 >
