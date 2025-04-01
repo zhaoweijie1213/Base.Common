@@ -176,6 +176,61 @@ namespace QYQ.Base.Common.Tool
             return Encoding.UTF8.GetString(decryptedData);
         }
 
+
+        #endregion
+
+        #region AES-CBC 模式（每次加密结果一样）
+
+        /// <summary>
+        /// AES-CBC 模式（每次加密结果一样）
+        /// </summary>
+        /// <param name="plainText"></param>
+        /// <param name="base64Key"></param>
+        /// <param name="ivStr">固定 16 字节 IV，注意不能变</param>
+        /// <returns></returns>
+        public static string EncryptDeterministicAESCBC(string plainText, string base64Key, string ivStr)
+        {
+            byte[] key = Convert.FromBase64String(base64Key);
+            byte[] iv = Encoding.UTF8.GetBytes(ivStr);
+
+            using var aes = Aes.Create();
+            aes.Key = key;
+            aes.IV = iv;
+            aes.Mode = CipherMode.CBC;
+            aes.Padding = PaddingMode.PKCS7;
+
+            using var encryptor = aes.CreateEncryptor();
+            byte[] inputBytes = Encoding.UTF8.GetBytes(plainText);
+            byte[] cipherBytes = encryptor.TransformFinalBlock(inputBytes, 0, inputBytes.Length);
+
+            return Convert.ToBase64String(cipherBytes);
+        }
+
+        /// <summary>
+        /// AES-CBC 模式解密
+        /// </summary>
+        /// <param name="base64Cipher"></param>
+        /// <param name="base64Key"></param>
+        /// <param name="ivStr"></param>
+        /// <returns></returns>
+        public static string DecryptDeterministicAESCBC(string base64Cipher, string base64Key, string ivStr)
+        {
+            byte[] key = Convert.FromBase64String(base64Key);
+            byte[] iv = Encoding.UTF8.GetBytes(ivStr); // 和加密时一样
+
+            using var aes = Aes.Create();
+            aes.Key = key;
+            aes.IV = iv;
+            aes.Mode = CipherMode.CBC;
+            aes.Padding = PaddingMode.PKCS7;
+
+            using var decryptor = aes.CreateDecryptor();
+            byte[] cipherBytes = Convert.FromBase64String(base64Cipher);
+            byte[] plainBytes = decryptor.TransformFinalBlock(cipherBytes, 0, cipherBytes.Length);
+
+            return Encoding.UTF8.GetString(plainBytes);
+        }
+
         #endregion
 
         #region RSA
