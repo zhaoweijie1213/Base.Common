@@ -18,12 +18,12 @@ namespace QYQ.Base.SqlSugar
         /// <summary>
         /// 
         /// </summary>
-        private readonly string? _connectionString;
+        protected string? _connectionString { get; set; } = null;
 
         /// <summary>
         /// 
         /// </summary>
-        private readonly ConnectionStringConfig? _connectionStringConfig;
+        protected ConnectionStringConfig? _connectionStringConfig { get; set; }
 
 
         /// <summary>
@@ -59,7 +59,7 @@ namespace QYQ.Base.SqlSugar
         /// 获取SqlSugarClient客户端
         /// </summary>
         /// <returns></returns>
-        protected SqlSugarClient GetSqlSugarClient()
+        protected virtual SqlSugarClient GetSqlSugarClient()
         {
             var config = new ConnectionConfig() 
             {
@@ -85,7 +85,7 @@ namespace QYQ.Base.SqlSugar
         /// 获取自定义连接字符串的SqlSugarClient客户端
         /// </summary>
         /// <returns></returns>
-        protected SqlSugarClient GetSqlSugarClient(string connectionString)
+        protected virtual SqlSugarClient GetSqlSugarClient(string connectionString)
         {
             var config = new ConnectionConfig()
             {

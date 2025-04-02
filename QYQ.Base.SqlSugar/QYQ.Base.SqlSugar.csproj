@@ -4,7 +4,7 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <Version>8.1.0</Version>
+    <Version>8.1.1</Version>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <Title>SqlSugar组件</Title>
     <Description>SqlSugar数据仓储基类</Description>
