@@ -15,10 +15,10 @@ namespace QYQ.Base.Common.Tool
         /// <summary>
         /// 从 txt 文件中读取私钥（如 rsa_private_key_base64.txt）
         /// </summary>
-        public static string GetBase64PrivateKey(string base64FilePath)
+        public static string GetBase64KeyFromTextFile(string base64FilePath)
         {
             if (!File.Exists(base64FilePath))
-                throw new FileNotFoundException("私钥文件未找到", base64FilePath);
+                throw new FileNotFoundException("文件未找到", base64FilePath);
 
             return File.ReadAllText(base64FilePath).Trim();
         }
@@ -26,10 +26,10 @@ namespace QYQ.Base.Common.Tool
         /// <summary>
         /// .pem 文件获取私钥
         /// </summary>
-        public static string GetBase64PrivateKeyWithPemFile(string pemFilePath)
+        public static string GetBase64KeyWithPemFile(string pemFilePath)
         {
             if (!File.Exists(pemFilePath))
-                throw new FileNotFoundException("PEM 私钥文件未找到", pemFilePath);
+                throw new FileNotFoundException("PEM 文件未找到", pemFilePath);
 
             var pemContent = File.ReadAllText(pemFilePath);
             var base64 = ExtractPemBody(pemContent);
