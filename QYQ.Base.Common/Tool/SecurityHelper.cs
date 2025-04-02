@@ -186,12 +186,12 @@ namespace QYQ.Base.Common.Tool
         /// </summary>
         /// <param name="plainText"></param>
         /// <param name="base64Key"></param>
-        /// <param name="ivStr">固定 16 字节 IV，注意不能变</param>
+        /// <param name="base64IV"></param>
         /// <returns></returns>
-        public static string EncryptDeterministicAESCBC(string plainText, string base64Key, string ivStr)
+        public static string EncryptDeterministicAESCBC(string plainText, string base64Key, string base64IV)
         {
             byte[] key = Convert.FromBase64String(base64Key);
-            byte[] iv = Encoding.UTF8.GetBytes(ivStr);
+            byte[] iv = Convert.FromBase64String(base64IV);
 
             using var aes = Aes.Create();
             aes.Key = key;
@@ -211,12 +211,12 @@ namespace QYQ.Base.Common.Tool
         /// </summary>
         /// <param name="base64Cipher"></param>
         /// <param name="base64Key"></param>
-        /// <param name="ivStr"></param>
+        /// <param name="base64IV"></param>
         /// <returns></returns>
-        public static string DecryptDeterministicAESCBC(string base64Cipher, string base64Key, string ivStr)
+        public static string DecryptDeterministicAESCBC(string base64Cipher, string base64Key, string base64IV)
         {
             byte[] key = Convert.FromBase64String(base64Key);
-            byte[] iv = Encoding.UTF8.GetBytes(ivStr); // 和加密时一样
+            byte[] iv = Convert.FromBase64String(base64IV); // 和加密时一样
 
             using var aes = Aes.Create();
             aes.Key = key;
