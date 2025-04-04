@@ -40,7 +40,7 @@ namespace QYQ.Base.Common.Tool
         /// <summary>
         /// 从 PEM 字符串中提取 Base64 主体部分
         /// </summary>
-        private static string ExtractPemBody(string pem)
+        public static string ExtractPemBody(string pem)
         {
             var lines = pem.Split('\n');
             var sb = new StringBuilder();
