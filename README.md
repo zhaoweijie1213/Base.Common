@@ -76,14 +76,6 @@
 
 ​	统一api返回结果格式
 
-​	推送nuget包
-
-```shell
-dotnet nuget push -s http://192.168.0.252/v3/index.json QYQ.Base.Common.1.0.0.nupkg -k 1234567890
-```
-
-
-
 ### PageResult
 
 返回分页数据
