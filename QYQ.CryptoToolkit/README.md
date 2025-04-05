@@ -2,8 +2,7 @@
 
 > 通用加密解密算法库，支持 .NET Framework、.NET Core 2.1~9.0
 
-[![NuGet](https://zhaoweijie-oss.oss-cn-chengdu.aliyuncs.com/img/CryptoToolkit.svg)](https://www.nuget.org/packages/CryptoToolkit/)
-[![License](https://zhaoweijie-oss.oss-cn-chengdu.aliyuncs.com/img/CryptoToolkit.svg)](LICENSE)
+[![NuGet](https://zhaoweijie-oss.oss-cn-chengdu.aliyuncs.com/img/CryptoToolkit.svg)](https://www.nuget.org/packages/QYQ.CryptoToolkit/)
 
 ## 功能特性
 

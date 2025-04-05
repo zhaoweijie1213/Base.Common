@@ -76,7 +76,7 @@ namespace QYQ.CryptoToolkit.Symmetric
                 byte[] decryptedDataBytes = rsa.Decrypt(encryptedDataBytes, RSAEncryptionPadding.Pkcs1);
                 return Encoding.UTF8.GetString(decryptedDataBytes);
             }
-#endif
+#endif 
         }
 
         /// <summary>
