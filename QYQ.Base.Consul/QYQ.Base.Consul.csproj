@@ -15,7 +15,7 @@
 	</Description>
     <RepositoryUrl>https://github.com/zhaoweijie1213/Base.Common.git</RepositoryUrl>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
-    <PackageIcon>雀友圈512.png</PackageIcon>
+    <PackageIcon>logo.png</PackageIcon>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
@@ -26,7 +26,7 @@
     <None Remove="Grpc\Proto\HealthCheckService.proto" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\雀友圈512.png">
+    <None Include="..\logo.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>

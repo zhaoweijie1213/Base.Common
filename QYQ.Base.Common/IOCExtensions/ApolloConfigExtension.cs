@@ -24,12 +24,16 @@ namespace QYQ.Base.Common.IOCExtensions
         {
             LogManager.UseConsoleLogging(Com.Ctrip.Framework.Apollo.Logging.LogLevel.Information);
             var configuration = builder.Build();
+            if (configuration == null)
+            {
+                throw new ArgumentNullException(nameof(configuration), "配置不能为空");
+            }
             //获取apollo配置
-            ApolloOptions apollo = configuration.GetSection("apollo").Get<ApolloOptions>();
+            ApolloOptions apollo = configuration.GetSection("apollo").Get<ApolloOptions>()!;
             //读取集群
             if (!string.IsNullOrEmpty(configuration["Cluster"]))
             {
-                apollo.Cluster = configuration["Cluster"];
+                apollo.Cluster = configuration["Cluster"]!;
             }
 
             //设置apollo的服务地址

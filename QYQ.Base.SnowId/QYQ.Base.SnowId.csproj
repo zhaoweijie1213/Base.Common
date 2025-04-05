@@ -13,13 +13,13 @@
 3.使用DefaultSnowIdGenerator需要添加SnowServerId环境变量,否则将默认生成一个随机的ServerId;
 使用ISnowIdGenerator接口</Description>
     <Company>QYQ</Company>
-    <PackageIcon>雀友圈512.png</PackageIcon>
+    <PackageIcon>logo.png</PackageIcon>
     <PackageProjectUrl>https://github.com/zhaoweijie1213/Base.Common.git</PackageProjectUrl>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="..\雀友圈512.png">
+    <None Include="..\logo.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>

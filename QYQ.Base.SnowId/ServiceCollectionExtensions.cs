@@ -74,59 +74,5 @@ namespace QYQ.Base.SnowId
 
             return services;
         }
-
-        ///**
-        // * 
-        // * ***********添加redis配置**********
-        // * "Redis":{
-        // *      "Password":"YRBoWMgaziuALOU",
-        // *      "AllowAdmin":true,
-        // *      "Endpoints":[
-        // *          {
-        // *              "Host":"192.168.0.224",
-        // *              "Port":6379
-        // *          }
-        // *      ],
-        // *      "Database":0
-        // *  }
-        // *  *********************************
-        // * **/
-        ///// <summary>
-        ///// WorderId注册(需要添加redis配置)
-        ///// "Redis":{"Password":"YRBoWMgaziuALOU","AllowAdmin":true,"Endpoints":[{"Host":"192.168.0.224","Port":6379}],"Database":0}
-        ///// </summary>
-        ///// <param name="services"></param>
-        ///// <param name="redis"></param>
-        ///// <returns></returns>
-        ///// <exception cref="Exception"></exception>
-        //public static IServiceCollection AddWorderIdRegister(this IServiceCollection services, RedisDBOptions? redis)
-        //{
-        //    if (redis == null)
-        //    {
-        //        throw new Exception("请添加Redis配置!");
-        //    }
-
-        //    #region EasyCaching注册
-
-        //    services.AddEasyCaching(options =>
-        //    {
-        //        Action<EasyCachingJsonSerializerOptions> easycaching = x =>
-        //        {
-        //            x.NullValueHandling = NullValueHandling.Ignore;
-        //            x.TypeNameHandling = TypeNameHandling.None;
-        //        };
-        //        options.UseRedis(config =>
-        //        {
-        //            config.DBConfig = redis;
-        //        }, "SnowIdRedis").WithJson(easycaching, "SnowIdRedis");
-        //    });
-
-        //    #endregion
-
-
-        //    services.AddHostedService<WorkerIdWorkerService>();
-        //    return services;
-        //}
-
     }
 }

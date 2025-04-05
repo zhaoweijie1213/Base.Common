@@ -39,8 +39,6 @@ namespace Test.Web.Controllers
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="logger"></param>
-        /// <param name="consulGrpcClientFactory"></param>
         public WeatherForecastController(ILogger<WeatherForecastController> logger, GrpcClientFactory consulGrpcClientFactory, ISnowIdGenerator snowIdGenerator, IHttpClientFactory httpClientFactory)
         {
             _logger = logger;

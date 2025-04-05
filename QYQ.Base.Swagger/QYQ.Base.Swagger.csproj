@@ -12,13 +12,13 @@
     <Description>1.生成Api的Swagger文档;
 2.Api的版本;</Description>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-    <PackageIcon>雀友圈512.png</PackageIcon>
+    <PackageIcon>logo.png</PackageIcon>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
   <ItemGroup>
-    <None Include="..\雀友圈512.png">
+    <None Include="..\logo.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
     </None>
