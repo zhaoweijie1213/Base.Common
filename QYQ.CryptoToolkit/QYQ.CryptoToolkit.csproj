@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFrameworks>netstandard2.0;netstandard2.1;net6.0;net8.0;net9.0</TargetFrameworks>
+	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	<Version>1.0.0</Version>
+	<Authors>zhaoweijie</Authors>
+	<Company>zhaoweijie</Company>
+	<Description>多框架兼容的加密工具包，支持 AES-CBC / AES-GCM / RSA 等加密算法。</Description>
+	<PackageTags>Encryption;Crypto;AES;RSA;Toolkit;Security;QYQ</PackageTags>
+	<PackageLicenseExpression>MIT</PackageLicenseExpression>
+	<RepositoryUrl>https://github.com/zhaoweijie1213/Base.Common.git</RepositoryUrl>
+	<RepositoryType>git</RepositoryType>
+	<!-- XML 注释，便于 NuGet 用户获得智能提示 -->
+	<GenerateDocumentationFile>true</GenerateDocumentationFile>
+	<PackageLicenseExpression>MIT</PackageLicenseExpression>
+	<PackageReadmeFile>README.md</PackageReadmeFile>
+	<PackageProjectUrl>https://github.com/zhaoweijie1213/Base.Common.git</PackageProjectUrl>
+	<PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Update="README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
+</Project>

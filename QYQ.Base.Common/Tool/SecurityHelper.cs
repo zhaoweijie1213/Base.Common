@@ -126,7 +126,7 @@ namespace QYQ.Base.Common.Tool
         {
             byte[] key = Convert.FromBase64String(base64Key);
 
-            using AesGcm aesGcm = new(key);
+            using AesGcm aesGcm = new(key, 128);
 
             byte[] nonce = new byte[12];
             RandomNumberGenerator.Fill(nonce); // 生成随机的 12 字节 nonce
@@ -157,7 +157,7 @@ namespace QYQ.Base.Common.Tool
             byte[] encryptedData = Convert.FromBase64String(base64CipherText);
             byte[] key = Convert.FromBase64String(base64Key);
 
-            using AesGcm aesGcm = new(key);
+            using AesGcm aesGcm = new(key, 128);
 
             //生成随机的 12 字节 nonce
             byte[] nonce = new byte[12];
