@@ -18,32 +18,38 @@ namespace QYQ.Base.SqlSugar
         /// <summary>
         /// 
         /// </summary>
-        protected string? _connectionString { get; set; } = null;
+        protected string? ConnectionString { get; set; } = null;
+
+        /// <summary>
+        /// 数据库类型
+        /// </summary>
+        protected DbType DatabaseType { get; set; }
 
         /// <summary>
         /// 
         /// </summary>
-        protected ConnectionStringConfig? _connectionStringConfig { get; set; }
+        protected ConnectionStringConfig? ConnectionStringConfig { get; set; }
 
 
         /// <summary>
         /// 
         /// </summary>
-        public BaseRepository(ILogger logger, string connectionString)
+        public BaseRepository(ILogger logger, string connectionString, DbType dbType = DbType.MySql)
         {
             _logger = logger;
-            _connectionString = connectionString;
+            ConnectionString = connectionString;
+            DatabaseType = dbType;
 
         }
 
         /// <summary>
         /// 
         /// </summary>
-        public BaseRepository(ILogger logger, ConnectionStringConfig connectionStringConfig)
+        public BaseRepository(ILogger logger, ConnectionStringConfig connectionStringConfig, DbType dbType = DbType.MySql)
         {
             _logger = logger;
-            _connectionStringConfig = connectionStringConfig;
-
+            ConnectionStringConfig = connectionStringConfig;
+            DatabaseType = dbType;
         }
 
         /// <summary>
@@ -63,18 +69,18 @@ namespace QYQ.Base.SqlSugar
         {
             var config = new ConnectionConfig() 
             {
-                DbType = DbType.MySql,
+                DbType = DatabaseType,
                 IsAutoCloseConnection = true,
                 InitKeyType = InitKeyType.Attribute
             };
-            if (!string.IsNullOrEmpty(_connectionString))
+            if (!string.IsNullOrEmpty(ConnectionString))
             {
-                config.ConnectionString = _connectionString;
+                config.ConnectionString = ConnectionString;
             }
-            else if (_connectionStringConfig != null)
+            else if (ConnectionStringConfig != null)
             {
-                config.ConnectionString = _connectionStringConfig.Master;
-                config.SlaveConnectionConfigs = _connectionStringConfig.SlaveConnections;
+                config.ConnectionString = ConnectionStringConfig.Master;
+                config.SlaveConnectionConfigs = ConnectionStringConfig.SlaveConnections;
             }
 
             SqlSugarClient  db = new(config);
@@ -89,7 +95,7 @@ namespace QYQ.Base.SqlSugar
         {
             var config = new ConnectionConfig()
             {
-                DbType = DbType.MySql,
+                DbType = DatabaseType,
                 IsAutoCloseConnection = true,
                 InitKeyType = InitKeyType.Attribute,
                 ConnectionString = connectionString
@@ -113,23 +119,23 @@ namespace QYQ.Base.SqlSugar
                 //打印SQL
                 if (_logger.IsEnabled(LogLevel.Debug) && sqlTime <= 200)
                 {
-                    string sqlString = UtilMethods.GetSqlString(DbType.MySql, sql, pars);
+                    string sqlString = UtilMethods.GetSqlString(DatabaseType, sql, pars);
                     //执行完了可以输出SQL执行时间 (OnLogExecutedDelegate) 
                     _logger.LogDebug("执行sql语句:{sql},time:{time}ms", sqlString, sqlTime);
                 }
                 else if (sqlTime > 200)
                 {
-                    string sqlString = UtilMethods.GetSqlString(DbType.MySql, sql, pars);
+                    string sqlString = UtilMethods.GetSqlString(DatabaseType, sql, pars);
                     //执行完了可以输出SQL执行时间 (OnLogExecutedDelegate) 
                     _logger.LogWarning("执行sql语句:{sql},time:{time}ms", sqlString, sqlTime);
                 }
             };
             db.Aop.OnError = (exp) =>//SQL报错
             {
-                ////获取无参数化 SQL  对性能有影响，特别大的SQL参数多的，调试使用
-                //string sqlString = UtilMethods.GetSqlString(DbType.MySql, exp.Sql, (SugarParameter[])exp.Parametres);
-                //string sqlTime = db.Ado.SqlExecutionTime.ToString();
-                //_logger.LogError("执行sql语句:{sql},time:{time}ms", sqlString, sqlTime);
+                //获取无参数化 SQL  对性能有影响，特别大的SQL参数多的，调试使用
+                string sqlString = UtilMethods.GetSqlString(DatabaseType, exp.Sql, (SugarParameter[])exp.Parametres);
+                string sqlTime = db.Ado.SqlExecutionTime.ToString();
+                _logger.LogError("执行sql语句:{sql},time:{time}ms", sqlString, sqlTime);
 
                 //if (currentRetryCount < maxRetryCount)
                 //{
@@ -156,6 +162,15 @@ namespace QYQ.Base.SqlSugar
             };
 
             return db;
+        }
+
+        /// <summary>
+        /// 初始化表
+        /// Db.CodeFirst.InitTables
+        /// </summary>
+        public virtual void InitTables()
+        {
+            //Db.CodeFirst.InitTables<CooperateApplyEntity>();
         }
 
 
@@ -215,7 +230,7 @@ namespace QYQ.Base.SqlSugar
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>
-        public virtual bool Update(TEntity entity)
+        public virtual bool UpdateByPrimaryKey(TEntity entity)
         {
             return Db.Updateable(entity).ExecuteCommandHasChange();
         }
@@ -225,7 +240,7 @@ namespace QYQ.Base.SqlSugar
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>
-        public virtual Task<bool> UpdateAsync(TEntity entity)
+        public virtual Task<bool> UpdateByPrimaryKeyAsync(TEntity entity)
         {
             return Db.Updateable(entity).ExecuteCommandHasChangeAsync();
         }

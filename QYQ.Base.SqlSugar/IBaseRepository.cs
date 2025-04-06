@@ -52,14 +52,14 @@ namespace QYQ.Base.SqlSugar
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>
-        public bool Update(TEntity entity);
+        public bool UpdateByPrimaryKey(TEntity entity);
 
         /// <summary>
         /// 修改
         /// </summary>
         /// <param name="entity"></param>
         /// <returns></returns>
-        public Task<bool> UpdateAsync(TEntity entity);
+        public Task<bool> UpdateByPrimaryKeyAsync(TEntity entity);
 
     }
 }
