@@ -5,7 +5,7 @@
     <Nullable>enable</Nullable>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <Title>SwaggerUI、Api版本控制</Title>
-    <Version>8.0.4</Version>
+    <Version>8.0.5</Version>
     <Company>QYQ</Company>
     <PackageProjectUrl>https://github.com/zhaoweijie1213/Base.Common.git</PackageProjectUrl>
     <RepositoryUrl>https://192.168.0.218:3000/zhaoweijie0817/QYQ.Base.Common</RepositoryUrl>
