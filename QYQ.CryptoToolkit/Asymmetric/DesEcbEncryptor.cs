@@ -38,7 +38,7 @@ namespace QYQ.CryptoToolkit.Asymmetric
             {
                 des.Key = key;
                 des.Mode = CipherMode.ECB;
-                des.Padding = PaddingMode.PKCS7;
+                des.Padding = PaddingMode.Zeros;
 
                 using (var encryptor = des.CreateEncryptor())
                 {
@@ -63,7 +63,7 @@ namespace QYQ.CryptoToolkit.Asymmetric
             {
                 des.Key = key;
                 des.Mode = CipherMode.ECB;
-                des.Padding = PaddingMode.PKCS7;
+                des.Padding = PaddingMode.Zeros;
 
                 using (var decryptor = des.CreateDecryptor())
                 {
