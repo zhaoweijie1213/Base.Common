@@ -3,7 +3,7 @@
 	<PropertyGroup>
 		<TargetFrameworks>netstandard2.0;netstandard2.1;net6.0;net8.0;net9.0</TargetFrameworks>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-		<Version>1.0.1</Version>
+		<Version>1.0.2</Version>
 		<Authors>zhaoweijie</Authors>
 		<Company>zhaoweijie</Company>
 		<Description>多框架兼容的加密工具包，支持 AES-CBC / AES-GCM / RSA 等加密算法。</Description>
