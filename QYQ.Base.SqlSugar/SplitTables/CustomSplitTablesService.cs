@@ -12,79 +12,82 @@ namespace QYQ.Base.SqlSugar.SplitTables
     public class CustomSplitTablesService : DateSplitTableService
     {
         /// <summary>
-        /// 获取所有表
+        /// 根据已有表信息，返回所有分表信息（用于查询时确定目标分表）
         /// </summary>
-        /// <param name="db"></param>
-        /// <param name="entityInfo"></param>
-        /// <param name="tableInfos"></param>
-        /// <returns></returns>
-        public override List<SplitTableInfo> GetAllTables(ISqlSugarClient db, EntityInfo entityInfo, List<DbTableInfo> tableInfos)
+        public override List<SplitTableInfo> GetAllTables(ISqlSugarClient db, EntityInfo EntityInfo, List<DbTableInfo> tableInfos)
         {
-            var template = entityInfo.DbTableName; // 例如：gamegameStartUser{year}{month}{day}
+            //CheckTableName(EntityInfo.DbTableName);
+            // 根据模板动态构造正则表达式
+            string regex = "^" + EntityInfo.DbTableName
+                .Replace("{year}", "([0-9]{2,4})");
 
-            // 动态生成正则表达式
-            string pattern = Regex.Escape(template) // 先把固定部分转义，避免特殊字符误匹配
-                .Replace(@"\{year\}", @"(?<year>\d{4})") // 年：4位数字
-                .Replace(@"\{month\}", @"(?<month>\d{0,2})") // 月：可选，最多2位
-                .Replace(@"\{day\}", @"(?<day>\d{0,2})"); // 日：可选，最多2位
+            bool hasMonth = EntityInfo.DbTableName.Contains("{month}");
+            bool hasDay = EntityInfo.DbTableName.Contains("{day}");
 
-            pattern = "^" + pattern + "$"; // 完整匹配表名
-
-            var result = new List<SplitTableInfo>();
-
-            foreach (var table in tableInfos.Select(it => it.Name).Reverse())
+            if (hasMonth)
             {
-                var match = Regex.Match(table, pattern, RegexOptions.IgnoreCase);
+                regex = regex.Replace("{month}", "([0-9]{1,2})");
+            }
+            if (hasDay)
+            {
+                regex = regex.Replace("{day}", "([0-9]{1,2})");
+            }
 
-                SplitTableInfo tableInfo = new SplitTableInfo
+            var currentTables = tableInfos
+                .Where(it => Regex.IsMatch(it.Name, regex, RegexOptions.IgnoreCase))
+                .Select(it => it.Name)
+                .Reverse()
+                .ToList();
+
+            List<SplitTableInfo> result = new List<SplitTableInfo>();
+            foreach (var item in currentTables)
+            {
+                SplitTableInfo tableInfo = new SplitTableInfo();
+                tableInfo.TableName = item;
+
+                //得到表前缀
+                string tableNamePrefix = Regex.Replace(item, @"(\d{4,})(\d{2})?(\d{2})?$", "");
+                //获取日期
+                string date = item.Replace(tableNamePrefix, "");
+                if (date.Length == 4)
                 {
-                    TableName = table,
-                    Date = DateTime.MinValue
-                };
-
-                if (match.Success)
-                {
-                    int year = ParseOrDefault(match.Groups["year"].Value, DateTime.Now.Year);
-                    int month = ParseOrDefault(match.Groups["month"].Value, 1); // 默认 1 月
-                    int day = ParseOrDefault(match.Groups["day"].Value, 1); // 默认 1 号
-
-                    tableInfo.Date = SafeCreateDate(year, month, day);
+                    tableInfo.Date = new DateTime(Convert.ToInt32(date), 1, 1);
                 }
-
+                else
+                {
+                    var match = Regex.Match(item, regex, RegexOptions.IgnoreCase);
+                    //var oldMatch = Regex.Match(item, oldRegex, RegexOptions.IgnoreCase);
+                    if (match.Success)
+                    {
+                        int year = 0, month = 1, day = 1; // 默认月日为1
+                        if (match.Groups.Count > 1)
+                        {
+                            int.TryParse(match.Groups[1].Value, out year);
+                        }
+                        if (hasMonth && match.Groups.Count > 2)
+                        {
+                            int.TryParse(match.Groups[2].Value, out month);
+                        }
+                        if (hasDay && match.Groups.Count > 3)
+                        {
+                            int.TryParse(match.Groups[3].Value, out day);
+                        }
+                        // 构造日期，如果year解析失败，则使用默认值（比如当前年份或其它逻辑）
+                        try
+                        {
+                            tableInfo.Date = new DateTime(year, month, day);
+                        }
+                        catch
+                        {
+                            tableInfo.Date = DateTime.MinValue;
+                        }
+                    }
+                }
                 result.Add(tableInfo);
             }
 
-            return result.OrderByDescending(it => it.Date).ToList();
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="value"></param>
-        /// <param name="defaultValue"></param>
-        /// <returns></returns>
-        private int ParseOrDefault(string value, int defaultValue)
-        {
-            return int.TryParse(value, out var result) ? result : defaultValue;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="year"></param>
-        /// <param name="month"></param>
-        /// <param name="day"></param>
-        /// <returns></returns>
-        private DateTime SafeCreateDate(int year, int month, int day)
-        {
-            try
-            {
-                return new DateTime(year, month, day);
-            }
-            catch
-            {
-                return DateTime.MinValue;
-            }
+            result = result.OrderByDescending(it => it.Date).ToList();
+            return result;
         }
     }
 }
