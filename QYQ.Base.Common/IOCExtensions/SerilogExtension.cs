@@ -23,7 +23,7 @@ namespace QYQ.Base.Common.IOCExtensions
         /// <param name="preserveStaticLogger">是否保留静态日志记录器</param>
         /// <param name="writeToProviders">是否写入日志提供者</param>
         /// <returns></returns>
-        public static HostApplicationBuilder AddQYQSerilog(this HostApplicationBuilder builder, bool preserveStaticLogger = true, bool writeToProviders = true)
+        public static HostApplicationBuilder AddQYQSerilog(this HostApplicationBuilder builder, bool preserveStaticLogger = false, bool writeToProviders = false)
         {
             if (builder == null) throw new ArgumentNullException(nameof(builder));
 
@@ -40,7 +40,7 @@ namespace QYQ.Base.Common.IOCExtensions
         /// <param name="preserveStaticLogger">是否保留静态日志记录器</param>
         /// <param name="writeToProviders">是否写入日志提供者</param>
         /// <returns></returns>
-        public static WebApplicationBuilder AddQYQSerilog(this WebApplicationBuilder builder, bool preserveStaticLogger = true, bool writeToProviders = true)
+        public static WebApplicationBuilder AddQYQSerilog(this WebApplicationBuilder builder, bool preserveStaticLogger = false, bool writeToProviders = false)
         {
             if (builder == null) throw new ArgumentNullException(nameof(builder));
 
