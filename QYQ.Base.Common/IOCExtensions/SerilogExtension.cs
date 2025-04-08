@@ -1,4 +1,5 @@
-﻿using Microsoft.Extensions.Configuration;
+﻿using Microsoft.AspNetCore.Builder;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Serilog;
@@ -23,6 +24,23 @@ namespace QYQ.Base.Common.IOCExtensions
         /// <param name="writeToProviders">是否写入日志提供者</param>
         /// <returns></returns>
         public static HostApplicationBuilder AddQYQSerilog(this HostApplicationBuilder builder, bool preserveStaticLogger = true, bool writeToProviders = true)
+        {
+            if (builder == null) throw new ArgumentNullException(nameof(builder));
+
+            builder.Services.AddQYQSerilog(builder.Configuration, preserveStaticLogger, writeToProviders);
+
+            return builder;
+        }
+
+
+        /// <summary>
+        /// 在 WebApplicationBuilder 中添加 QYQ Serilog 配置
+        /// </summary>
+        /// <param name="builder">主机构建器</param>
+        /// <param name="preserveStaticLogger">是否保留静态日志记录器</param>
+        /// <param name="writeToProviders">是否写入日志提供者</param>
+        /// <returns></returns>
+        public static WebApplicationBuilder AddQYQSerilog(this WebApplicationBuilder builder, bool preserveStaticLogger = true, bool writeToProviders = true)
         {
             if (builder == null) throw new ArgumentNullException(nameof(builder));
 
