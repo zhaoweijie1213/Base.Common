@@ -217,7 +217,7 @@ namespace QYQ.Base.Swagger.Extension
         /// <returns></returns>
         public static WebApplication UseQYQSwaggerUI(this WebApplication app, string name, bool apiGateway = true)
         {
-            if (app.Configuration.GetSection("apollo:Env").Get<string>() != "Pro")
+            if (app.Configuration.GetSection("apollo:Env").Get<string>() == "Dev")
             {
                 if (string.IsNullOrEmpty(name))
                 {
