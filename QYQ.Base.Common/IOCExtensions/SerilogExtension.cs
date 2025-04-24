@@ -57,7 +57,7 @@ namespace QYQ.Base.Common.IOCExtensions
         /// <param name="preserveStaticLogger">是否保留静态日志记录器</param>
         /// <param name="writeToProviders">是否写入日志提供者</param>
         /// <returns></returns>
-        public static IServiceCollection AddQYQSerilog(this IServiceCollection services, IConfiguration configuration, bool preserveStaticLogger = true, bool writeToProviders = true)
+        public static IServiceCollection AddQYQSerilog(this IServiceCollection services, IConfiguration configuration, bool preserveStaticLogger = false, bool writeToProviders = false)
         {
             if (services == null) throw new ArgumentNullException(nameof(services));
             if (configuration == null) throw new ArgumentNullException(nameof(configuration));
