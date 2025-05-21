@@ -37,9 +37,9 @@ namespace QYQ.Base.Consul.Grpc.Serivce
             var servicesList = await _consulClient.Agent.Services(CancellationToken.None);
             foreach (var service in servicesList.Response.Values)
             {
-                logger.LogInformation($"Service ID: {service.ID}, Address: {service.Address}, Port: {service.Port}");
                 if (service.Address == ipAddress && service.Port == port && service.Service.Equals(agent.ServiceName, StringComparison.OrdinalIgnoreCase))
                 {
+                    logger.LogInformation($"Service Name:{service.Service},Service ID: {service.ID}, Address: {service.Address}, Port: {service.Port}");
                     await _consulClient.Agent.ServiceDeregister(service.ID, CancellationToken.None);
                 }
             }
