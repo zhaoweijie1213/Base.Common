@@ -1,6 +1,7 @@
 ﻿using Consul;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,7 +14,7 @@ namespace QYQ.Base.Consul.Grpc.Serivce
     /// <summary>
     /// consul 注册 和 注销
     /// </summary>
-    public class ConsulGRPCHostedService(IConsulClient consulClient, IConfiguration configuration) : IHostedService
+    public class ConsulGRPCHostedService(ILogger<ConsulGRPCHostedService> logger,IConsulClient consulClient, IConfiguration configuration) : IHostedService
     {
         private readonly IConsulClient _consulClient = consulClient;
 
@@ -33,12 +34,13 @@ namespace QYQ.Base.Consul.Grpc.Serivce
             int port = agent.Port;
             agent.Meta.Add("Env", configuration["apollo:Env"]);
             // 在启动时移除相同地址和端口的旧服务
-            var servicesList = await _consulClient.Agent.Services(cancellationToken);
+            var servicesList = await _consulClient.Agent.Services(CancellationToken.None);
             foreach (var service in servicesList.Response.Values)
             {
-                if (service.Address == ipAddress && service.Port == port)
+                logger.LogInformation($"Service ID: {service.ID}, Address: {service.Address}, Port: {service.Port}");
+                if (service.Address == ipAddress && service.Port == port && service.Service.Equals(agent.ServiceName, StringComparison.OrdinalIgnoreCase))
                 {
-                    await _consulClient.Agent.ServiceDeregister(service.ID, cancellationToken);
+                    await _consulClient.Agent.ServiceDeregister(service.ID, CancellationToken.None);
                 }
             }
 
@@ -66,7 +68,7 @@ namespace QYQ.Base.Consul.Grpc.Serivce
             };
 
             //注册服务
-            await _consulClient.Agent.ServiceRegister(registration, cancellationToken);
+            await _consulClient.Agent.ServiceRegister(registration, CancellationToken.None);
         }
 
         /// <summary>
@@ -77,7 +79,7 @@ namespace QYQ.Base.Consul.Grpc.Serivce
         public async Task StopAsync(CancellationToken cancellationToken)
         {
             // 在停止时注销服务
-            await _consulClient.Agent.ServiceDeregister(_serviceId, cancellationToken);
+            await _consulClient.Agent.ServiceDeregister(_serviceId, CancellationToken.None);
         }
 
 

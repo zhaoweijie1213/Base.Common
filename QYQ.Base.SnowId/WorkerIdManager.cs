@@ -51,6 +51,7 @@ namespace QYQ.Base.SnowId
         {
             var redis = GetRedis();
 
+            _logger.LogInformation("开始注册 WorkerId...");
             //获取redis Key
             string key = GetWorkerIdKey();
 
@@ -69,6 +70,7 @@ namespace QYQ.Base.SnowId
                 if (res > 0)
                 {
                     _workerId = Convert.ToInt32(workerId);
+                    _logger.LogInformation("WorkerId 注册成功，workerId: {workerId}", _workerId);
                     break;
                 }
             }
@@ -104,8 +106,10 @@ namespace QYQ.Base.SnowId
         {
             if (_workerId < 0)
             {
+                _logger.LogError("WorkerId 未注册");
                 throw new SystemException("请先注册workerId!");
             }
+            _logger.LogDebug("当前注册的 WorkerId: {workerId}", _workerId);
             return _workerId;
         }
 
@@ -115,13 +119,14 @@ namespace QYQ.Base.SnowId
         /// <returns></returns>
         public async Task UnRegister()
         {
+            _logger.LogInformation("注销 WorkerId: {workerId}", _workerId);
             var redis = GetRedis();
 
             //从已使用集合移除id
             await redis.SRemAsync(GetUsageIdKey(), new List<long>() { _workerId });
 
             //_workerId = -1;
-
+            _logger.LogInformation("WorkerId 注销成功");
         }
 
 
@@ -135,8 +140,8 @@ namespace QYQ.Base.SnowId
             {
                 var redis = GetRedis();
                 //显示当前worker Id
-                _logger.LogDebug("Current Worker ID:{workerId}", _workerId);
                 redis.KeyExpire(GetUsageIdKey(), 15);
+                _logger.LogDebug("刷新 WorkerId 的有效期，workerId: {workerId}", _workerId);
             }
 
         }

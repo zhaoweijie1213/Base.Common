@@ -38,13 +38,14 @@ namespace QYQ.Base.Consul.Http
             int port = agent.Port;
             agent.Meta.Add("Env", configuration["apollo:Env"]);
             // 在启动时移除相同地址和端口的旧服务
-            var servicesList = await _consulClient.Agent.Services(cancellationToken);
-            var list = servicesList.Response.Where(i => i.Value.Service == agent.ServiceName && i.Value.Address == ipAddress && i.Value.Port == port).Select(i => i.Value).ToList();
-            //logger.LogInformation("StartAsync.查询相同Consul服务列表:{list}", JsonConvert.SerializeObject(list));
-            foreach (var service in list)
+            var servicesList = await _consulClient.Agent.Services(CancellationToken.None);
+            foreach (var service in servicesList.Response.Values)
             {
-                await _consulClient.Agent.ServiceDeregister(service.ID, cancellationToken);
-                logger.LogInformation("Deregistered existing service: {ServiceId}", service.ID);
+                logger.LogInformation($"Service ID: {service.ID}, Address: {service.Address}, Port: {service.Port}");
+                if (service.Address == ipAddress && service.Port == port && service.Service.Equals(agent.ServiceName, StringComparison.OrdinalIgnoreCase))
+                {
+                    await _consulClient.Agent.ServiceDeregister(service.ID, CancellationToken.None);
+                }
             }
 
             var registration = new AgentServiceRegistration
@@ -69,7 +70,7 @@ namespace QYQ.Base.Consul.Http
             };
 
             //注册服务
-            await _consulClient.Agent.ServiceRegister(registration, cancellationToken);
+            await _consulClient.Agent.ServiceRegister(registration, CancellationToken.None);
         }
 
         /// <summary>
@@ -80,7 +81,7 @@ namespace QYQ.Base.Consul.Http
         public async Task StopAsync(CancellationToken cancellationToken)
         {
             // 在停止时注销服务
-            await _consulClient.Agent.ServiceDeregister(_serviceId, cancellationToken);
+            await _consulClient.Agent.ServiceDeregister(_serviceId, CancellationToken.None);
         }
 
 
