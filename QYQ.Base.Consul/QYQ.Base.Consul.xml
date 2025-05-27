@@ -487,7 +487,7 @@
             consul 注册 和 注销
             </summary>
         </member>
-        <member name="M:QYQ.Base.Consul.Grpc.Serivce.ConsulGRPCHostedService.#ctor(Consul.IConsulClient,Microsoft.Extensions.Configuration.IConfiguration)">
+        <member name="M:QYQ.Base.Consul.Grpc.Serivce.ConsulGRPCHostedService.#ctor(Microsoft.Extensions.Logging.ILogger{QYQ.Base.Consul.Grpc.Serivce.ConsulGRPCHostedService},Consul.IConsulClient,Microsoft.Extensions.Configuration.IConfiguration)">
             <summary>
             consul 注册 和 注销
             </summary>
@@ -506,6 +506,13 @@
             </summary>
             <param name="cancellationToken"></param>
             <returns></returns>
+        </member>
+        <member name="M:QYQ.Base.Consul.Grpc.Serivce.ConsulGRPCHostedService.ServicesDeregisterAsync">
+            <summary>
+            移除重复注册的旧服务
+            </summary>
+            <returns></returns>
+            <exception cref="T:System.ArgumentException"></exception>
         </member>
         <member name="M:QYQ.Base.Consul.Grpc.Serivce.ConsulGRPCHostedService.GetIPAddress">
             <summary>
@@ -559,6 +566,13 @@
             </summary>
             <param name="cancellationToken"></param>
             <returns></returns>
+        </member>
+        <member name="M:QYQ.Base.Consul.Http.ConsulHttpHostedService.ServicesDeregisterAsync">
+            <summary>
+            移除重复注册的旧服务
+            </summary>
+            <returns></returns>
+            <exception cref="T:System.ArgumentException"></exception>
         </member>
         <member name="M:QYQ.Base.Consul.Http.ConsulHttpHostedService.GetIPAddress">
             <summary>

@@ -5,6 +5,7 @@ using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -33,16 +34,9 @@ namespace QYQ.Base.Consul.Grpc.Serivce
             var ipAddress = GetIPAddress();
             int port = agent.Port;
             agent.Meta.Add("Env", configuration["apollo:Env"]);
+
             // 在启动时移除相同地址和端口的旧服务
-            var servicesList = await _consulClient.Agent.Services(CancellationToken.None);
-            foreach (var service in servicesList.Response.Values)
-            {
-                if (service.Address == ipAddress && service.Port == port && service.Service.Equals(agent.ServiceName, StringComparison.OrdinalIgnoreCase))
-                {
-                    logger.LogInformation($"Service Name:{service.Service},Service ID: {service.ID}, Address: {service.Address}, Port: {service.Port}");
-                    await _consulClient.Agent.ServiceDeregister(service.ID, CancellationToken.None);
-                }
-            }
+            await ServicesDeregisterAsync();
 
             var registration = new AgentServiceRegistration
             {
@@ -80,8 +74,33 @@ namespace QYQ.Base.Consul.Grpc.Serivce
         {
             // 在停止时注销服务
             await _consulClient.Agent.ServiceDeregister(_serviceId, CancellationToken.None);
+
+            await ServicesDeregisterAsync();
         }
 
+
+        /// <summary>
+        /// 移除重复注册的旧服务
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
+        public async Task ServicesDeregisterAsync()
+        {
+            var _serviceOptions = configuration.GetSection("ConsulOptions").Get<ConsulServiceOptions>();
+            var agent = _serviceOptions.ConsulAgents.FirstOrDefault(i => i.AgentCategory == AgentCategory.GRPC) ?? throw new ArgumentException("Consul agent configuration not found");
+            var ipAddress = GetIPAddress();
+            int port = agent.Port;
+            // 在启动时移除相同地址和端口的旧服务
+            var servicesList = await _consulClient.Agent.Services();
+            foreach (var service in servicesList.Response.Values)
+            {
+                if (service.Address == ipAddress && service.Port == port && service.Service.Equals(agent.ServiceName, StringComparison.OrdinalIgnoreCase))
+                {
+                    logger.LogInformation($"Service Name:{service.Service},Service ID: {service.ID}, Address: {service.Address}, Port: {service.Port}");
+                    await _consulClient.Agent.ServiceDeregister(service.ID);
+                }
+            }
+        }
 
         /// <summary>
         /// 获取ip地址

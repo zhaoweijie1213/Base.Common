@@ -1,5 +1,5 @@
 using Asp.Versioning;
-using GamePlay.Grpc;
+//using GamePlay.Grpc;
 using Grpc.Net.ClientFactory;
 using Microsoft.AspNetCore.Mvc;
 using NSwag.Annotations;
@@ -55,15 +55,15 @@ namespace Test.Web.Controllers
         public async Task<IEnumerable<WeatherForecast>> Test(WeatherInput input)
         {
 
-            var client = _consulGrpcClientFactory.CreateClient<GamePlay.Grpc.GamePlay.GamePlayClient>("Gameplay");
+            //var client = _consulGrpcClientFactory.CreateClient<GamePlay.Grpc.GamePlay.GamePlayClient>("Gameplay");
 
-            var res = await client.TicketAsync(new TicketRequest()
-            {
-                GameId = "vs40wildwest",
-                UserId = 126730573,
-                Language = "en",
-                Platform = "web"
-            });
+            //var res = await client.TicketAsync(new TicketRequest()
+            //{
+            //    GameId = "vs40wildwest",
+            //    UserId = 126730573,
+            //    Language = "en",
+            //    Platform = "web"
+            //});
 
 
            var httpClient = _httpClientFactory.CreateClient("game-play");

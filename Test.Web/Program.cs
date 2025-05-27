@@ -18,7 +18,7 @@ builder.Services.AddConsulDispatcher(ConsulDispatcherType.Weight);
 builder.AddQYQConsul().AddQYQConsulHttp().AddQYQConsulgRPC();
 
 builder.Services.AddConsulHttpClient("game-play");
-builder.AddConsulGrpcClient<GamePlay.Grpc.GamePlay.GamePlayClient>("Gameplay", "game-play-grpc");
+//builder.AddConsulGrpcClient<GamePlay.Grpc.GamePlay.GamePlayClient>("Gameplay", "game-play-grpc");
 builder.AddQYQSwaggerAndApiVersioning(new OpenApiInfo { Title = "CommonTest" }, new Asp.Versioning.ApiVersion(1));
 
 //builder.Services.AddSnowIdRedisGenerator(builder.Configuration.GetSection("Redis").Get<RedisDBOptions>());
