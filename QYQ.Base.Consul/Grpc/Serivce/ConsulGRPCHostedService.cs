@@ -76,7 +76,7 @@ namespace QYQ.Base.Consul.Grpc.Serivce
             // 在停止时注销服务
             await _consulClient.Agent.ServiceDeregister(_serviceId, CancellationToken.None);
 
-            await ServicesDeregisterAsync();
+            //await ServicesDeregisterAsync();
         }
 
 
@@ -92,15 +92,15 @@ namespace QYQ.Base.Consul.Grpc.Serivce
             var ipAddress = GetIPAddress();
             int port = agent.Port;
             // 在启动时移除相同地址和端口的旧服务
-            var servicesList = await _consulClient.Agent.Services();
-            var services = servicesList.Response.Values.Where(i => i.Service.Equals(agent.ServiceName, StringComparison.OrdinalIgnoreCase));
+            var servicesList = await _consulClient.Catalog.Service(agent.ServiceName);
+            var services = servicesList.Response;
             logger.LogInformation("Consul Grpc服务列表: {services}", JsonConvert.SerializeObject(services));
             foreach (var service in services)
             {
-                if (service.Address == ipAddress && service.Port == port && service.Service.Equals(agent.ServiceName, StringComparison.OrdinalIgnoreCase))
+                if (service.ServiceAddress == ipAddress && service.ServicePort == port && service.ServiceName.Equals(agent.ServiceName, StringComparison.OrdinalIgnoreCase))
                 {
-                    logger.LogInformation($"Service Name:{service.Service},Service ID: {service.ID}, Address: {service.Address}, Port: {service.Port}");
-                    await _consulClient.Agent.ServiceDeregister(service.ID);
+                    logger.LogInformation($"Service Name:{service.ServiceName},Service ID: {service.ServiceID}, Address: {service.ServiceAddress}, Port: {service.ServicePort}");
+                    await _consulClient.Agent.ServiceDeregister(service.ServiceID);
                 }
             }
         }
