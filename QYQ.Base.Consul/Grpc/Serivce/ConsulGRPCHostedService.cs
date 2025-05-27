@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -92,7 +93,9 @@ namespace QYQ.Base.Consul.Grpc.Serivce
             int port = agent.Port;
             // 在启动时移除相同地址和端口的旧服务
             var servicesList = await _consulClient.Agent.Services();
-            foreach (var service in servicesList.Response.Values)
+            var services = servicesList.Response.Values.Where(i => i.Service.Equals(agent.ServiceName, StringComparison.OrdinalIgnoreCase));
+            logger.LogInformation("Consul Grpc服务列表: {services}", JsonConvert.SerializeObject(services));
+            foreach (var service in services)
             {
                 if (service.Address == ipAddress && service.Port == port && service.Service.Equals(agent.ServiceName, StringComparison.OrdinalIgnoreCase))
                 {
