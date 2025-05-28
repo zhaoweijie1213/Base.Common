@@ -91,16 +91,17 @@ namespace QYQ.Base.Consul.Grpc.Serivce
             var agent = _serviceOptions.ConsulAgents.FirstOrDefault(i => i.AgentCategory == AgentCategory.GRPC) ?? throw new ArgumentException("Consul agent configuration not found");
             var ipAddress = GetIPAddress();
             int port = agent.Port;
-            // 在启动时移除相同地址和端口的旧服务
-            var servicesList = await _consulClient.Catalog.Service(agent.ServiceName);
-            var services = servicesList.Response;
-            logger.LogInformation("Consul Grpc服务列表: {services}", JsonConvert.SerializeObject(services));
-            foreach (var service in services)
+            // 移除相同地址和端口的旧服务
+            var healthResult = await _consulClient.Health.Service(agent.ServiceName);
+            var healthyInstances = healthResult.Response;
+            logger.LogInformation("Consul Grpc服务列表: {services}", JsonConvert.SerializeObject(healthyInstances));
+            foreach (var entry in healthyInstances)
             {
-                if (service.ServiceAddress == ipAddress && service.ServicePort == port && service.ServiceName.Equals(agent.ServiceName, StringComparison.OrdinalIgnoreCase))
+                //var service = entry.Service;
+                if (entry.Service.Address == ipAddress && entry.Service.Port == port && entry.Service.Service.Equals(agent.ServiceName, StringComparison.OrdinalIgnoreCase))
                 {
-                    logger.LogInformation($"Service Name:{service.ServiceName},Service ID: {service.ServiceID}, Address: {service.ServiceAddress}, Port: {service.ServicePort}");
-                    await _consulClient.Agent.ServiceDeregister(service.ServiceID);
+                    logger.LogInformation($"Service Name:{entry.Service.Service},Service ID: {entry.Service.ID}, Address: {entry.Service.Address}, Port: {entry.Service.Port}");
+                    await _consulClient.Agent.ServiceDeregister(entry.Service.ID);
                 }
             }
         }
