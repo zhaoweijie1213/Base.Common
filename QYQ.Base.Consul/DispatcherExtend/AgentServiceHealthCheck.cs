@@ -27,7 +27,7 @@ namespace QYQ.Base.Consul.DispatcherExtend
             {
                 try
                 {
-                    await Task.Delay(30000, stoppingToken);
+                    await Task.Delay(30000, CancellationToken.None);
                     await consulDispatcher.CheckHealthService();
                     //switch (consulDispatcherOptions.Value.ConsulDispatcherType)
                     //{
