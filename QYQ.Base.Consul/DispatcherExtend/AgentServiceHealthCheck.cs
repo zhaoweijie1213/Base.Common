@@ -27,7 +27,7 @@ namespace QYQ.Base.Consul.DispatcherExtend
             {
                 try
                 {
-                    await Task.Delay(30000, CancellationToken.None);
+                    await Task.Delay(30000, stoppingToken);
                     await consulDispatcher.CheckHealthService();
                     //switch (consulDispatcherOptions.Value.ConsulDispatcherType)
                     //{
@@ -46,6 +46,17 @@ namespace QYQ.Base.Consul.DispatcherExtend
                     //    default:
                     //        break;
                     //}
+                }
+                catch (TaskCanceledException)
+                {
+                    // 当调用 Task.Delay 时，收到取消令牌就会抛出此异常
+                    // 认为是正常关闭流程，直接跳出循环，退出 ExecuteAsync
+                    break;
+                }
+                catch (OperationCanceledException)
+                {
+                    // 如果你在其他地方也可能抛出 OperationCanceledException，可以一并处理
+                    break;
                 }
                 catch (Exception e)
                 {
