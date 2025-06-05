@@ -34,21 +34,21 @@ namespace QYQ.Base.Consul.Http
         {
             var _serviceOptions = configuration.GetSection("ConsulOptions").Get<ConsulServiceOptions>();
             var agent = _serviceOptions.ConsulAgents.FirstOrDefault(i => i.AgentCategory == AgentCategory.HTTP) ?? throw new ArgumentException("Consul agent configuration not found");
-            var ipAddress = GetIPAddress();
+            var ipAddress = NetworkUtil.GetHostIPv4(_serviceOptions.HostIPAddress);
             int port = agent.Port;
             agent.Meta.Add("Env", configuration["apollo:Env"]);
 
             //移除重复注册的旧服务
-            await ServicesDeregisterAsync();
+            //await ServicesDeregisterAsync();
 
             var registration = new AgentServiceRegistration
             {
-                ID = _serviceId,
-                Name = agent.ServiceName,
-                Address = ipAddress,
-                Port = port,
-                Tags = agent.Tags,
-                Meta = agent.Meta,
+                ID = _serviceId,                      // 唯一标识，可用“服务名+实例IP+端口”等方式保证全局唯一
+                Name = agent.ServiceName,             // 在 Consul 中注册的服务名称，一般与逻辑服务名保持一致
+                Address = ipAddress,                  // 服务实例的IP（客户端调用时会用到）
+                Port = port,                          // 服务实例监听的端口
+                Tags = agent.Tags,                    // 可选：用来给服务打标签，便于按环境、版本或区域筛选
+                Meta = agent.Meta,                    // 可选：自定义元数据，比如版本号、权重等
                 Check = new AgentServiceCheck
                 {
                     // 注册超时
@@ -73,10 +73,18 @@ namespace QYQ.Base.Consul.Http
         /// <returns></returns>
         public async Task StopAsync(CancellationToken cancellationToken)
         {
-            // 在停止时注销服务
-            await _consulClient.Agent.ServiceDeregister(_serviceId, CancellationToken.None);
+            try
+            {
+                // 在停止时注销服务
+                await _consulClient.Agent.ServiceDeregister(_serviceId, CancellationToken.None);
+                //移除重复注册的旧服务
+                await ServicesDeregisterAsync();
+            }
+            catch (Exception e)
+            {
+                logger.LogError("StopAsync:{Message}\r\n{StackTrace}", e.Message, e.StackTrace);
+            }
 
-            //await ServicesDeregisterAsync();
         }
 
         /// <summary>
@@ -88,10 +96,10 @@ namespace QYQ.Base.Consul.Http
         {
             var _serviceOptions = configuration.GetSection("ConsulOptions").Get<ConsulServiceOptions>();
             var agent = _serviceOptions.ConsulAgents.FirstOrDefault(i => i.AgentCategory == AgentCategory.HTTP) ?? throw new ArgumentException("Consul agent configuration not found");
-            var ipAddress = GetIPAddress();
+            var ipAddress = NetworkUtil.GetHostIPv4(_serviceOptions.HostIPAddress);
             int port = agent.Port;
             // 移除相同地址和端口的旧服务
-            var healthResult = await _consulClient.Health.Service(agent.ServiceName);
+            var healthResult = await _consulClient.Health.Service(agent.ServiceName, tag: "", passingOnly: true);
             var healthyInstances = healthResult.Response;
             logger.LogInformation("Consul Grpc服务列表: {services}", JsonConvert.SerializeObject(healthyInstances));
             foreach (var entry in healthyInstances)
@@ -106,19 +114,5 @@ namespace QYQ.Base.Consul.Http
         }
 
 
-        /// <summary>
-        /// 获取ip地址
-        /// </summary>
-        /// <returns></returns>
-        public static string GetIPAddress()
-        {
-            string ip = System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces()
-                        .Select(p => p.GetIPProperties())
-                        .SelectMany(p => p.UnicastAddresses)
-                        .Where(p => p.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork && !System.Net.IPAddress.IsLoopback(p.Address))
-                        .FirstOrDefault()?.Address.ToString();
-
-            return ip;
-        }
     }
 }

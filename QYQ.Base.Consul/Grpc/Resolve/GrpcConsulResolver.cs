@@ -76,12 +76,12 @@ namespace QYQ.Base.Consul.Grpc.Resolve
                 c.Token = ConsulClientOption.Token;
             });
             //consul实例获取
-            var entrys = await client.Health.Service(ServiceName);
+            var entrys = await client.Health.Service(ServiceName, tag: "", passingOnly: true);
             var services = entrys.Response.Select(i => i.Service).ToArray();
             var addresses = services.Select(x => new BalancerAddress(x.Address, x.Port)).ToArray();
             if(addresses.Length == 0)
             {
-                _logger.LogWarning("ResolveAsync:Resolver returned no {ServiceName} addresses.", ServiceName);
+                _logger.LogWarning("ResolveAsync:解析器没有返回{ServiceName}服务地址", ServiceName);
             }
             // Pass the results back to the channel.
             Listener(ResolverResult.ForResult(addresses));

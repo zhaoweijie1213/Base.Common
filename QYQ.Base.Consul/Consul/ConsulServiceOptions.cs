@@ -19,6 +19,11 @@ namespace QYQ.Base.Consul
         public string Token { get; set; }
 
         /// <summary>
+        /// 本机IP地址
+        /// </summary>
+        public string HostIPAddress { get; set; }
+
+        /// <summary>
         /// 代理配置
         /// </summary>
         public List<ConsulAgentOptions> ConsulAgents { get; set; }

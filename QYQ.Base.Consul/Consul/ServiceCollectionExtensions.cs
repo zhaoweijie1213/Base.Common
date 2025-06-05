@@ -314,18 +314,14 @@ namespace QYQ.Base.Consul
         /// <param name="name">客户端实例名</param>
         /// <param name="consulServiceName">consul注册的服务名</param>
         /// <param name="configuration">配置信息</param>
-        public static IServiceCollection AddConsulGrpcClient<TClient>(this IServiceCollection services, string name,string consulServiceName,IConfiguration configuration)
+        public static IServiceCollection AddConsulGrpcClient<TClient>(this IServiceCollection services, string name, string consulServiceName, IConfiguration configuration)
             where TClient : class
         {
+            //consul负载均衡器
+            services.AddSingleton<ResolverFactory, GrpcConsulResolverFactory>();
+            // 必须加这一行，否则根本拿不到 RoundRobinConfig
+            services.AddSingleton<RoundRobinConfig>();
 
-            //services.Configure<GrpcConsulServiceNameOptions>(name, options =>
-            //{
-            //    options.Metadata = new Metadata()
-            //    {
-            //        { "Consul-Service", consulServiceName }
-            //    };
-            //});
-   
             services.AddGrpcClient<TClient>(name, client =>
             {
                 Uri addresss = configuration.GetSection("ConsulOptions:ConsulAddress").Get<Uri>();
@@ -345,16 +341,13 @@ namespace QYQ.Base.Consul
                     //channel.MaxRetryAttempts = 1000;
                     //channel.MaxSendMessageSize= int.MaxValue;
                     //channel.MaxReceiveMessageSize = null;
-                    var serviceConfig = new ServiceConfig();
-                    serviceConfig.Inner.Add("ServiceName", consulServiceName);
                     //配置通道
-                    channel.ServiceConfig = serviceConfig;
+                    channel.ServiceConfig ??= new ServiceConfig();
+                    channel.ServiceConfig.Inner.Add("ServiceName", consulServiceName);
+                    channel.ServiceConfig.LoadBalancingConfigs.Add(new RoundRobinConfig());
+
                 });
             });
-
-            //consul负载均衡器
-            services.AddSingleton<ResolverFactory, GrpcConsulResolverFactory>();
-            //services.AddTransient<ConsulGrpcClientFactory>();
             return services;
         }
 

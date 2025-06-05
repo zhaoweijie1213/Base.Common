@@ -43,6 +43,11 @@
             token
             </summary>
         </member>
+        <member name="P:QYQ.Base.Consul.ConsulServiceOptions.HostIPAddress">
+            <summary>
+            本机IP地址
+            </summary>
+        </member>
         <member name="P:QYQ.Base.Consul.ConsulServiceOptions.ConsulAgents">
             <summary>
             代理配置
@@ -514,12 +519,6 @@
             <returns></returns>
             <exception cref="T:System.ArgumentException"></exception>
         </member>
-        <member name="M:QYQ.Base.Consul.Grpc.Serivce.ConsulGRPCHostedService.GetIPAddress">
-            <summary>
-            获取ip地址
-            </summary>
-            <returns></returns>
-        </member>
         <member name="T:QYQ.Base.Consul.Grpc.Serivce.HealthCheckService">
             <summary>
             Grpc健康检查
@@ -574,12 +573,6 @@
             <returns></returns>
             <exception cref="T:System.ArgumentException"></exception>
         </member>
-        <member name="M:QYQ.Base.Consul.Http.ConsulHttpHostedService.GetIPAddress">
-            <summary>
-            获取ip地址
-            </summary>
-            <returns></returns>
-        </member>
         <member name="T:QYQ.Base.Consul.Http.ConsulHttpMessageHandler">
             <summary>
             consul发送http请求中间件
@@ -606,6 +599,20 @@
             <param name="request"></param>
             <param name="cancellationToken"></param>
             <returns></returns>
+        </member>
+        <member name="T:QYQ.Base.Consul.NetworkUtil">
+            <summary>
+            网络相关工具类
+            </summary>
+        </member>
+        <member name="M:QYQ.Base.Consul.NetworkUtil.GetHostIPv4(System.String)">
+            <summary>
+            获取“最合适”的主机 IPv4 地址：
+            1、优先从配置中读 HostIPAddress（如果外部传入了），
+            2、其次通过 UDP 模拟出口路由获取，
+            3、最后回退到遍历网卡挑第一个 Up/非 Loopback/非 Tunnel 的 IPv4。
+            如果三者都失败，则返回空字符串。
+            </summary>
         </member>
         <member name="T:Grpc.Health.V1.HealthCheckServiceReflection">
             <summary>Holder for reflection information generated from Grpc/Proto/HealthCheckService.proto</summary>
