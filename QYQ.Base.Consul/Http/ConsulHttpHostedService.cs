@@ -35,6 +35,7 @@ namespace QYQ.Base.Consul.Http
             var _serviceOptions = configuration.GetSection("ConsulOptions").Get<ConsulServiceOptions>();
             var agent = _serviceOptions.ConsulAgents.FirstOrDefault(i => i.AgentCategory == AgentCategory.HTTP) ?? throw new ArgumentException("Consul agent configuration not found");
             var ipAddress = NetworkUtil.GetHostIPv4(_serviceOptions.HostIPAddress);
+            logger.LogInformation("StartAsync:Consul注册当前IP地址{ipAddress}", ipAddress);
             int port = agent.Port;
             agent.Meta.Add("Env", configuration["apollo:Env"]);
 
@@ -97,6 +98,7 @@ namespace QYQ.Base.Consul.Http
             var _serviceOptions = configuration.GetSection("ConsulOptions").Get<ConsulServiceOptions>();
             var agent = _serviceOptions.ConsulAgents.FirstOrDefault(i => i.AgentCategory == AgentCategory.HTTP) ?? throw new ArgumentException("Consul agent configuration not found");
             var ipAddress = NetworkUtil.GetHostIPv4(_serviceOptions.HostIPAddress);
+            logger.LogInformation("ServicesDeregisterAsync:Consul注册当前IP地址{ipAddress}", ipAddress);
             int port = agent.Port;
             // 移除相同地址和端口的旧服务
             var healthResult = await _consulClient.Health.Service(agent.ServiceName, tag: "", passingOnly: true);
