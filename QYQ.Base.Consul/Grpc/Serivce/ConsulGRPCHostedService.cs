@@ -104,7 +104,7 @@ namespace QYQ.Base.Consul.Grpc.Serivce
             // 移除相同地址和端口的旧服务
             var healthResult = await _consulClient.Health.Service(agent.ServiceName, tag: "", passingOnly: true);
             var healthyInstances = healthResult.Response;
-            logger.LogInformation("Consul Grpc服务列表: {services}", JsonConvert.SerializeObject(healthyInstances));
+            logger.LogInformation("Consul服务列表: {services}", JsonConvert.SerializeObject(healthyInstances));
             foreach (var entry in healthyInstances)
             {
                 //var service = entry.Service;
