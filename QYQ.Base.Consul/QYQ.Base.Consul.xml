@@ -497,6 +497,16 @@
             consul 注册 和 注销
             </summary>
         </member>
+        <member name="F:QYQ.Base.Consul.Grpc.Serivce.ConsulGRPCHostedService._consulClient">
+            <summary>
+            consul客户端
+            </summary>
+        </member>
+        <member name="P:QYQ.Base.Consul.Grpc.Serivce.ConsulGRPCHostedService.ServiceId">
+            <summary>
+            consul服务ID
+            </summary>
+        </member>
         <member name="M:QYQ.Base.Consul.Grpc.Serivce.ConsulGRPCHostedService.StartAsync(System.Threading.CancellationToken)">
             <summary>
             
@@ -549,6 +559,16 @@
         <member name="M:QYQ.Base.Consul.Http.ConsulHttpHostedService.#ctor(Microsoft.Extensions.Logging.ILogger{QYQ.Base.Consul.Http.ConsulHttpHostedService},Consul.IConsulClient,Microsoft.Extensions.Configuration.IConfiguration)">
             <summary>
             consul 注册 和 注销
+            </summary>
+        </member>
+        <member name="F:QYQ.Base.Consul.Http.ConsulHttpHostedService._consulClient">
+            <summary>
+            consul客户端
+            </summary>
+        </member>
+        <member name="P:QYQ.Base.Consul.Http.ConsulHttpHostedService.ServiceId">
+            <summary>
+            consul服务ID
             </summary>
         </member>
         <member name="M:QYQ.Base.Consul.Http.ConsulHttpHostedService.StartAsync(System.Threading.CancellationToken)">

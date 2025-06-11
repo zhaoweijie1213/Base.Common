@@ -19,9 +19,15 @@ namespace QYQ.Base.Consul.Grpc.Serivce
     /// </summary>
     public class ConsulGRPCHostedService(ILogger<ConsulGRPCHostedService> logger,IConsulClient consulClient, IConfiguration configuration) : IHostedService
     {
+        /// <summary>
+        /// consul客户端
+        /// </summary>
         private readonly IConsulClient _consulClient = consulClient;
 
-        private readonly string _serviceId = Guid.NewGuid().ToString();
+        /// <summary>
+        /// consul服务ID
+        /// </summary>
+        private string ServiceId { get; set; }
 
         /// <summary>
         /// 
@@ -38,12 +44,14 @@ namespace QYQ.Base.Consul.Grpc.Serivce
             int port = agent.Port;
             agent.Meta.Add("Env", configuration["apollo:Env"]);
 
+            // 生成一个唯一的服务ID，通常可以用服务名+IP+端口等方式保证全局唯一
+            ServiceId = $"{agent.ServiceName}-{Environment.MachineName}-{ipAddress}-{port}";
             // 在启动时移除相同地址和端口的旧服务
             //await ServicesDeregisterAsync();
 
             var registration = new AgentServiceRegistration
             {
-                ID = _serviceId,
+                ID = ServiceId,
                 Name = agent.ServiceName,
                 Address = ipAddress,
                 Port = port,
@@ -65,7 +73,7 @@ namespace QYQ.Base.Consul.Grpc.Serivce
             };
 
             //注册服务
-            await _consulClient.Agent.ServiceRegister(registration, CancellationToken.None);
+            await _consulClient.Agent.ServiceRegister(registration, replaceExistingChecks: true, CancellationToken.None);
         }
 
         /// <summary>
@@ -78,7 +86,7 @@ namespace QYQ.Base.Consul.Grpc.Serivce
             try
             {
                 // 在停止时注销服务
-                await _consulClient.Agent.ServiceDeregister(_serviceId, CancellationToken.None);
+                await _consulClient.Agent.ServiceDeregister(ServiceId, CancellationToken.None);
                 //移除重复注册的旧服务
                 await ServicesDeregisterAsync();
             }
@@ -109,7 +117,7 @@ namespace QYQ.Base.Consul.Grpc.Serivce
             foreach (var entry in healthyInstances)
             {
                 //var service = entry.Service;
-                if (entry.Service.Address == ipAddress && entry.Service.Port == port && entry.Service.Service.Equals(agent.ServiceName, StringComparison.OrdinalIgnoreCase) && entry.Service.ID != _serviceId)
+                if (entry.Service.Address == ipAddress && entry.Service.Port == port && entry.Service.Service.Equals(agent.ServiceName, StringComparison.OrdinalIgnoreCase) && entry.Service.ID != ServiceId)
                 {
                     logger.LogInformation($"Service Name:{entry.Service.Service},Service ID: {entry.Service.ID}, Address: {entry.Service.Address}, Port: {entry.Service.Port}");
                     try

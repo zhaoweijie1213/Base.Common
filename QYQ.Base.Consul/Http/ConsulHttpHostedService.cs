@@ -19,10 +19,15 @@ namespace QYQ.Base.Consul.Http
     /// </summary>
     public class ConsulHttpHostedService(ILogger<ConsulHttpHostedService> logger,IConsulClient consulClient, IConfiguration configuration) : IHostedService
     {
-
+        /// <summary>
+        /// consul客户端
+        /// </summary>
         private readonly IConsulClient _consulClient = consulClient;
 
-        private readonly string _serviceId = Guid.NewGuid().ToString();
+        /// <summary>
+        /// consul服务ID
+        /// </summary>
+        private string ServiceId { get; set; }
 
         /// <summary>
         /// 开始
@@ -39,12 +44,14 @@ namespace QYQ.Base.Consul.Http
             int port = agent.Port;
             agent.Meta.Add("Env", configuration["apollo:Env"]);
 
+            // 生成一个唯一的服务ID，通常可以用服务名+IP+端口等方式保证全局唯一
+            ServiceId = $"{agent.ServiceName}-{Environment.MachineName}-{ipAddress}-{port}";
             //移除重复注册的旧服务
             //await ServicesDeregisterAsync();
 
             var registration = new AgentServiceRegistration
             {
-                ID = _serviceId,                      // 唯一标识，可用“服务名+实例IP+端口”等方式保证全局唯一
+                ID = ServiceId,                      // 唯一标识，可用“服务名+实例IP+端口”等方式保证全局唯一
                 Name = agent.ServiceName,             // 在 Consul 中注册的服务名称，一般与逻辑服务名保持一致
                 Address = ipAddress,                  // 服务实例的IP（客户端调用时会用到）
                 Port = port,                          // 服务实例监听的端口
@@ -64,7 +71,7 @@ namespace QYQ.Base.Consul.Http
             };
 
             //注册服务
-            await _consulClient.Agent.ServiceRegister(registration, CancellationToken.None);
+            await _consulClient.Agent.ServiceRegister(registration, replaceExistingChecks: true, CancellationToken.None);
         }
 
         /// <summary>
@@ -77,7 +84,7 @@ namespace QYQ.Base.Consul.Http
             try
             {
                 // 在停止时注销服务
-                await _consulClient.Agent.ServiceDeregister(_serviceId, CancellationToken.None);
+                await _consulClient.Agent.ServiceDeregister(ServiceId, CancellationToken.None);
                 //移除重复注册的旧服务
                 await ServicesDeregisterAsync();
             }
@@ -107,7 +114,7 @@ namespace QYQ.Base.Consul.Http
             foreach (var entry in healthyInstances)
             {
                 //var service = entry.Service;
-                if (entry.Service.Address == ipAddress && entry.Service.Port == port && entry.Service.Service.Equals(agent.ServiceName, StringComparison.OrdinalIgnoreCase) && entry.Service.ID != _serviceId)
+                if (entry.Service.Address == ipAddress && entry.Service.Port == port && entry.Service.Service.Equals(agent.ServiceName, StringComparison.OrdinalIgnoreCase) && entry.Service.ID != ServiceId)
                 {
                     logger.LogInformation($"Service Name:{entry.Service.Service},Service ID: {entry.Service.ID}, Address: {entry.Service.Address}, Port: {entry.Service.Port}");
                     try
