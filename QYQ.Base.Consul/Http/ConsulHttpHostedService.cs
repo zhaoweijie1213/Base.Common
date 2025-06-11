@@ -107,10 +107,17 @@ namespace QYQ.Base.Consul.Http
             foreach (var entry in healthyInstances)
             {
                 //var service = entry.Service;
-                if (entry.Service.Address == ipAddress && entry.Service.Port == port && entry.Service.Service.Equals(agent.ServiceName, StringComparison.OrdinalIgnoreCase))
+                if (entry.Service.Address == ipAddress && entry.Service.Port == port && entry.Service.Service.Equals(agent.ServiceName, StringComparison.OrdinalIgnoreCase) && entry.Service.ID != _serviceId)
                 {
                     logger.LogInformation($"Service Name:{entry.Service.Service},Service ID: {entry.Service.ID}, Address: {entry.Service.Address}, Port: {entry.Service.Port}");
-                    await _consulClient.Agent.ServiceDeregister(entry.Service.ID);
+                    try
+                    {
+                        await _consulClient.Agent.ServiceDeregister(entry.Service.ID);
+                    }
+                    catch (Exception e)
+                    {
+                        logger.LogError("ServicesDeregisterAsync:{Message}\r\n{StackTrace}", e.Message, e.StackTrace);
+                    }
                 }
             }
         }
