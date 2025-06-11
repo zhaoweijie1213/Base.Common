@@ -10,6 +10,7 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Xml.Linq;
 
 namespace QYQ.Base.Consul.Grpc.Serivce
 {
@@ -113,7 +114,17 @@ namespace QYQ.Base.Consul.Grpc.Serivce
                     logger.LogInformation($"Service Name:{entry.Service.Service},Service ID: {entry.Service.ID}, Address: {entry.Service.Address}, Port: {entry.Service.Port}");
                     try
                     {
-                        await _consulClient.Agent.ServiceDeregister(entry.Service.ID);
+                        var node = entry.Node;
+                        // ③ Catalog 级删除
+                        var dereg = new CatalogDeregistration
+                        {
+                            Datacenter = node.Datacenter, // 可省略；默认取客户端配置
+                            Node = node.Name,       // 节点名（UI Catalog 页的 Node 列）
+                            ServiceID = entry.Service.ID           // 要删除的实例 ID
+                        };
+
+                        await _consulClient.Catalog.Deregister(dereg);
+                        logger.LogInformation("ServicesDeregisterAsync.Catalog.Deregister 成功 {ID}", entry.Service.ID);
                     }
                     catch (Exception e)
                     {
