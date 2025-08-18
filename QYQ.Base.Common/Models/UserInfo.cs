@@ -56,6 +56,13 @@ namespace QYQ.Base.Common.Models
         [JsonProperty("lobby", NullValueHandling = NullValueHandling.Ignore)]
         public int Lobby { get; set; }
 
+
+        /// <summary>
+        /// 配置
+        /// </summary>
+        [JsonProperty("config", NullValueHandling = NullValueHandling.Ignore)]
+        public Dictionary<string, string> Config { get; set; } = new();
+
         /// <summary>
         /// 时区
         /// </summary>

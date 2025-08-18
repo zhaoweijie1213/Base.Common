@@ -42,6 +42,11 @@ namespace QYQ.Base.Common.Extension
             {
                 user.ExtraProperties = JsonConvert.DeserializeObject<ExtraProperties>(extra);
             }
+            var config = claimsPrincipal.FindFirstValue(CustomClaimTypes.Config);
+            if (!string.IsNullOrEmpty(config))
+            {
+                user.Config = JsonConvert.DeserializeObject<Dictionary<string, string>>(config) ?? [];
+            }
             return user;
         }
     }

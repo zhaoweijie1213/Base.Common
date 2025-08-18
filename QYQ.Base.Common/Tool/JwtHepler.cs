@@ -71,6 +71,7 @@ namespace QYQ.Base.Common.Tool
                 new Claim(CustomClaimTypes.Email, info.Email),
                 new Claim(CustomClaimTypes.Sex, info.Sex),
                 new Claim(CustomClaimTypes.Lobby, info.Lobby.ToString()),
+                new Claim(CustomClaimTypes.Config, JsonConvert.SerializeObject(info.Config)),
                 new Claim(CustomClaimTypes.TimeZone, info.TimeZone.ToString()),
                 new Claim(CustomClaimTypes.Country, info.Country.ToString()),
                 new Claim(CustomClaimTypes.Currency, info.Currency.ToString()),

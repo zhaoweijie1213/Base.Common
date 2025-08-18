@@ -47,6 +47,11 @@ namespace QYQ.Base.Common
         public const string Lobby = "Lobby";
 
         /// <summary>
+        /// 配置
+        /// </summary>
+        public const string Config = "Config";
+
+        /// <summary>
         /// 时区
         /// </summary>
         public const string TimeZone = "TimeZone";
