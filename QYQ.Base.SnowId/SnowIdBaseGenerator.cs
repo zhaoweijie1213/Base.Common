@@ -110,19 +110,45 @@ namespace QYQ.Base.SnowId
             return idGenerator.NewLong();
         }
 
+
+        /// <summary>
+        /// 根据时间生成id
+        /// </summary>
+        /// <param name="dateTime"></param>
+        /// <param name="isMillisecondPrecision"></param>
+        /// <returns></returns>
+        public virtual long CreateId(DateTime dateTime, bool isMillisecondPrecision = true)
+        {
+            var workerId = _random.Next(1, 50);
+            return CreateId(workerId, dateTime, isMillisecondPrecision);
+        }
+
+        /// <summary>
+        /// 根据时间生成id
+        /// </summary>
+        /// <param name="workId"></param>
+        /// <param name="dateTime"></param>
+        /// <param name="isMillisecondPrecision"></param>
+        /// <returns></returns>
+        public virtual long CreateId(int workId, DateTime dateTime, bool isMillisecondPrecision = true)
+        {
+            var idGenerator = GetIIdGenerator(workId);
+            return idGenerator.NextId(dateTime, isMillisecondPrecision);
+        }
+
         /// <summary>
         /// 
         /// </summary>
-        /// <param name="serverId"></param>
+        /// <param name="workId"></param>
         /// <returns></returns>
-        public IIdGenerator GetIIdGenerator(int serverId)
+        public IIdGenerator GetIIdGenerator(int workId)
         {
             //if (!_IdGeneratorsDic.TryGetValue(serverId, out var idGenerator))
             //{
             //    idGenerator = CreateIIdGenerator(serverId);
             //}
 
-            var idGenerator = _IdGeneratorsDic.GetOrAdd(serverId, CreateIIdGenerator);
+            var idGenerator = _IdGeneratorsDic.GetOrAdd(workId, CreateIIdGenerator);
             return idGenerator;
 
         }
@@ -135,7 +161,6 @@ namespace QYQ.Base.SnowId
         /// <returns></returns>
         public virtual long GetSnowId(DateTime time)
         {
-
             return (long)(time - BaseTime).TotalMilliseconds << (workerIdBitLength + seqBitLength + dataCenterIdBitLength);
         }
 

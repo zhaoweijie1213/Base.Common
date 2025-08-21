@@ -41,5 +41,15 @@ namespace QYQ.Base.SnowId
             return base.CreateId(workerId);
         }
 
+        /// <summary>
+        /// 根据指定时间创建雪花Id
+        /// </summary>
+        /// <param name="dateTime"></param>
+        /// <param name="isMillisecondPrecision"></param>
+        /// <returns></returns>
+        public override long CreateId(DateTime dateTime, bool isMillisecondPrecision = true)
+        {
+            return base.CreateId(workerId, dateTime, isMillisecondPrecision);
+        }
     }
 }
