@@ -86,11 +86,17 @@ namespace Test.Web.Controllers
         {
             ApiResult<string> result = new();
 
-            var id = _snowIdGenerator.CreateId(DateTime.Now, true);
+            var dateTimeNow = DateTime.UtcNow;
+
+            var id = _snowIdGenerator.CreateId(dateTimeNow);
 
             DateTime dateTime = _snowIdGenerator.GetDateTime(id);
 
-            result.SetRsult(ApiResultCode.Success, $"{dateTime:g} ID:{id}");
+            if (dateTimeNow.ToString("yyyy-MM-dd HH:mm:ss:fff") == dateTime.ToString("yyyy-MM-dd HH:mm:ss:fff"))
+            {
+                result.SetRsult(ApiResultCode.Success, $"{dateTime:g} ID:{id}");
+            }
+
             return result;
 
         }
