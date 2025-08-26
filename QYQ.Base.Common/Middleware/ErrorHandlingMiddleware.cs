@@ -4,6 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using QYQ.Base.Common.ApiResult;
+using QYQ.Base.Common.Extension;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -49,9 +50,9 @@ namespace QYQ.Base.Common.Middleware
         {
             ApiResult<string> data = new()
             {
-                Code = context.Response.StatusCode,
+                Code = (int)ApiResultCode.InternalServerError,
                 Data = null,
-                Message = msg
+                Message = ApiResultCode.InternalServerError.GetDescription()
             };
             //var result = JsonConvert.SerializeObject(data);
             //context.Response.ContentType = "application/json;charset=utf-8";
