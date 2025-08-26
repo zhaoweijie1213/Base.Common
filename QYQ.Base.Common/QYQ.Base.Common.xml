@@ -479,6 +479,11 @@
             大厅
             </summary>
         </member>
+        <member name="F:QYQ.Base.Common.CustomClaimTypes.Config">
+            <summary>
+            配置
+            </summary>
+        </member>
         <member name="F:QYQ.Base.Common.CustomClaimTypes.TimeZone">
             <summary>
             时区
@@ -923,6 +928,11 @@
         <member name="P:QYQ.Base.Common.Models.UserInfo.Lobby">
             <summary>
             大厅
+            </summary>
+        </member>
+        <member name="P:QYQ.Base.Common.Models.UserInfo.Config">
+            <summary>
+            配置
             </summary>
         </member>
         <member name="P:QYQ.Base.Common.Models.UserInfo.TimeZone">

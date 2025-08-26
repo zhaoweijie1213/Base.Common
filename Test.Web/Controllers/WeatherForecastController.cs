@@ -32,17 +32,15 @@ namespace Test.Web.Controllers
 
         private readonly ISnowIdGenerator _snowIdGenerator;
 
-        private readonly GrpcClientFactory _consulGrpcClientFactory;
 
         private readonly IHttpClientFactory _httpClientFactory;
 
         /// <summary>
         /// 
         /// </summary>
-        public WeatherForecastController(ILogger<WeatherForecastController> logger, GrpcClientFactory consulGrpcClientFactory, ISnowIdGenerator snowIdGenerator, IHttpClientFactory httpClientFactory)
+        public WeatherForecastController(ILogger<WeatherForecastController> logger,ISnowIdGenerator snowIdGenerator, IHttpClientFactory httpClientFactory)
         {
             _logger = logger;
-            _consulGrpcClientFactory = consulGrpcClientFactory;
             _snowIdGenerator = snowIdGenerator;
             _httpClientFactory = httpClientFactory;
         }
@@ -88,7 +86,7 @@ namespace Test.Web.Controllers
         {
             ApiResult<string> result = new();
 
-            var id = _snowIdGenerator.CreateId();
+            var id = _snowIdGenerator.CreateId(DateTime.Now, true);
 
             DateTime dateTime = _snowIdGenerator.GetDateTime(id);
 
