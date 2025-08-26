@@ -3,7 +3,7 @@
     <TargetFramework>net8.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Version>8.1.4</Version>
+    <Version>8.1.5</Version>
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <Description>AddDefaultSnowIdGenerator/AddSnowIdRedisGenerator
@@ -34,8 +34,5 @@
     <PackageReference Include="EasyCaching.Serialization.Json" Version="1.9.2" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="9.0.0" />
     <PackageReference Include="Microsoft.Extensions.Hosting" Version="9.0.0" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\Yitter.IdGenerator\Yitter.IdGenerator.csproj" />
   </ItemGroup>
 </Project>
