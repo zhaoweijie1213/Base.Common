@@ -18,7 +18,7 @@ namespace QYQ.Base.Common.Extension
         /// </summary>
         /// <param name="value"></param>
         /// <returns></returns>
-        public static string GetDescription(this Enum value)
+        public static string GetDescription(this System.Enum value)
         {
             return value.GetType().GetMember(value.ToString()).FirstOrDefault()?.GetCustomAttribute<DescriptionAttribute>()?.Description ?? "";
         }

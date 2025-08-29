@@ -1,6 +1,6 @@
 ﻿using Newtonsoft.Json;
-using QYQ.Base.Common.Enum;
 using QYQ.Base.Common.Models;
+using QYQ.Base.Common.Models.Enum;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics.Metrics;

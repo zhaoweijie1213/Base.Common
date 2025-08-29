@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace QYQ.Base.Common.Enum
+namespace QYQ.Base.Common.Models.Enum
 {
     /// <summary>
     /// 
