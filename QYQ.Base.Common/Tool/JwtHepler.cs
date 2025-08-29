@@ -1,6 +1,7 @@
 ﻿using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
+using QYQ.Base.Common.Enum;
 using QYQ.Base.Common.Models;
 using System;
 using System.Collections.Generic;
@@ -59,26 +60,11 @@ namespace QYQ.Base.Common.Tool
         /// <param name="issuer"></param>
         /// <param name="audience"></param>
         /// <param name="expires">过期时间(单位:秒)</param>
+        /// <param name="tokenType">类型枚举: 根据类型的不同，token里包含的用户信息也不同</param>
         /// <returns></returns>
-        public static string GenerateToken(UserInfo info,string secretKey,string issuer,string audience,int expires)
+        public static string GenerateToken(UserInfo info,string secretKey,string issuer,string audience,int expires, UserInfoTokenType tokenType)
         {
-            var claims = new[]
-            {
-                new Claim(CustomClaimTypes.UserId, info.UserId.ToString()),
-                new Claim(CustomClaimTypes.UserName, info.Name),
-                new Claim(CustomClaimTypes.HeadImg, info.HeadImg),
-                new Claim(CustomClaimTypes.Phone, info.Phone),
-                new Claim(CustomClaimTypes.Email, info.Email),
-                new Claim(CustomClaimTypes.Sex, info.Sex),
-                new Claim(CustomClaimTypes.Lobby, info.Lobby.ToString()),
-                new Claim(CustomClaimTypes.Config, JsonConvert.SerializeObject(info.Config)),
-                new Claim(CustomClaimTypes.TimeZone, info.TimeZone.ToString()),
-                new Claim(CustomClaimTypes.Country, info.Country.ToString()),
-                new Claim(CustomClaimTypes.Currency, info.Currency.ToString()),
-                new Claim(CustomClaimTypes.Symbol, info.Symbol.ToString()),
-                new Claim(CustomClaimTypes.AppId, info.AppId.ToString()),
-                new Claim(CustomClaimTypes.ExtraProperties, JsonConvert.SerializeObject(info.ExtraProperties))
-            };
+            var claims = BuildClaims(info, tokenType);
 
             var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secretKey));
             var credentials = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
@@ -93,6 +79,48 @@ namespace QYQ.Base.Common.Tool
 
             var tokenHandler = new JwtSecurityTokenHandler();
             return tokenHandler.WriteToken(token);
+        }
+
+
+        private static IEnumerable<Claim> BuildClaims(UserInfo info, UserInfoTokenType tokenType)
+        {
+            // 公共字段（国内/海外都写入）
+            var claims = new List<Claim>
+            {
+                new(CustomClaimTypes.TokenType, ((int)tokenType).ToString()),           // ⭐ 写入类型
+                new(CustomClaimTypes.UserId,   info.UserId.ToString()),
+                new(CustomClaimTypes.UserName, info.Name ?? string.Empty),
+                new(CustomClaimTypes.HeadImg,  info.HeadImg ?? string.Empty),
+                new(CustomClaimTypes.Phone, info.Phone),
+                new(CustomClaimTypes.ExtraProperties, JsonConvert.SerializeObject(info.ExtraProperties ?? new()))
+            };
+
+            // 差异字段：按国内/海外分别写
+            switch (tokenType)
+            {
+                case UserInfoTokenType.Domestic:
+                    // 国内
+                    claims.Add(new Claim(CustomClaimTypes.Sex, info.Sex ?? string.Empty));
+                    claims.Add(new Claim(CustomClaimTypes.Config, JsonConvert.SerializeObject(info.Config)));
+                    claims.Add(new Claim(CustomClaimTypes.RealName, info.RealName.ToString()));
+                    claims.Add(new Claim(CustomClaimTypes.PlayCount, info.PlayCount.ToString()));
+                    claims.Add(new Claim(CustomClaimTypes.PayMoney, info.PayMoney.ToString()));
+                    break;
+
+                case UserInfoTokenType.Overseas:
+                    // 海外：常见需要邮箱、国家、货币、货币符号、时区等
+                    claims.Add(new Claim(CustomClaimTypes.Email, info.Email ?? string.Empty));
+                    claims.Add(new Claim(CustomClaimTypes.Country, info.Country ?? string.Empty));
+                    claims.Add(new Claim(CustomClaimTypes.Currency, info.Currency ?? string.Empty));
+                    claims.Add(new Claim(CustomClaimTypes.Symbol, info.Symbol ?? string.Empty));
+                    claims.Add(new Claim(CustomClaimTypes.TimeZone, info.TimeZone.ToString()));
+                    claims.Add(new Claim(CustomClaimTypes.AppId, info.AppId.ToString()));
+                    claims.Add(new Claim(CustomClaimTypes.Lobby, info.Lobby.ToString()));
+                    // 海外可选：手机号/性别/大厅不一定需要，如要兼容可一并写入
+                    break;
+            }
+
+            return claims;
         }
 
         /// <summary>

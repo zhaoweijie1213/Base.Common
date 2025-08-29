@@ -99,6 +99,24 @@ namespace QYQ.Base.Common.Models
 		[JsonProperty("extraProperties", NullValueHandling = NullValueHandling.Ignore)]
         public ExtraProperties? ExtraProperties { get; set; }
 
+        /// <summary>
+        /// 是否实名认证
+        /// </summary>
+        [JsonProperty("realName", NullValueHandling = NullValueHandling.Ignore)]
+        public bool RealName { get; set; }
+
+        /// <summary>
+        /// 游戏局数
+        /// </summary>
+        [JsonProperty("playCount", NullValueHandling = NullValueHandling.Ignore)]
+        public int PlayCount { get; set; }
+
+        /// <summary>
+        /// 支付金额
+        /// </summary>
+        [JsonProperty("payMoney", NullValueHandling = NullValueHandling.Ignore)]
+        public decimal PayMoney { get; set; }
+
     }
 
     /// <summary>

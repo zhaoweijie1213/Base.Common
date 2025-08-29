@@ -80,5 +80,25 @@ namespace QYQ.Base.Common
         /// 扩展属性
         /// </summary>
         public const string ExtraProperties = "ExtraProperties";
+
+        /// <summary>
+        /// 实名认证
+        /// </summary>
+        public const string RealName = "RealName";
+
+        /// <summary>
+        /// token 类型：0=Domestic, 1=Overseas
+        /// </summary>
+        public const string TokenType = "tt";
+
+        /// <summary>
+        /// 游戏局数
+        /// </summary>
+        public const string PlayCount = "PlayCount";
+
+        /// <summary>
+        /// 支付金额
+        /// </summary>
+        public const string PayMoney = "PayMoney";
     }
 }
