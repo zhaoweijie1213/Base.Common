@@ -45,16 +45,19 @@ namespace QYQ.Base.SnowId
         /// <summary>
         /// workId的长度
         /// </summary>
-        private const byte workerIdBitLength = 6;
+        public const byte workerIdBitLength = 6;
 
         /// <summary>
         /// SeqBitLength，序列数位长，默认值6，取值范围 [3, 21]（建议不小于4），决定每毫秒基础生成的ID个数。
         /// 规则要求：DataCenterIdBitLength + WorkerIdBitLength + SeqBitLength 不超过 22。
         /// </summary>
-        private const byte seqBitLength = 10;
+        private const byte seqBitLength = 14;
 
+        /// <summary>
+        /// 数据中心ID长度
+        /// </summary>
 
-        private const byte dataCenterIdBitLength = 6;
+        private const byte dataCenterIdBitLength = 2;
 
         private readonly Random _random = new();
 

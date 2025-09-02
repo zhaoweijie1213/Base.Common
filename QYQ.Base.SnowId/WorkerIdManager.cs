@@ -20,7 +20,7 @@ namespace QYQ.Base.SnowId
         /// </summary>
         private int _workerId { get; set; } = -1;
 
-        private const int max = 32;
+        private const int max = 63;
 
         private readonly IEasyCachingProviderFactory _easyCachingProviderFactory;
 
@@ -62,8 +62,8 @@ namespace QYQ.Base.SnowId
                 if (workerId > max)
                 {
                     //将值初始化
-                    bool status = await redis.StringSetAsync(key, "1");
-                    if (status) workerId = 1;
+                    bool status = await redis.StringSetAsync(key, "0");
+                    if (status) workerId = 0;
                 }
                 //将workerId放入已使用集合
                 var res = await redis.SAddAsync(GetUsageIdKey(), new List<long>() { workerId });

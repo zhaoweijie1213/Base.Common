@@ -26,8 +26,8 @@ namespace QYQ.Base.SnowId
         public SnowIdDefaultGenerator(ILogger<SnowIdDefaultGenerator> logger, IConfiguration configuration, IOptions<SnowIdOptions> options)
             : base(options)
         {
-            workerId = configuration.GetSection("SnowServerId").Get<int?>() ?? new Random().Next(1, 20);
-            DataCenterId = configuration.GetSection("DataCenterId").Get<uint?>() ?? Convert.ToUInt32(new Random().Next(1, 20));
+            workerId = configuration.GetSection("SnowServerId").Get<int?>() ?? new Random().Next(0, 20);
+            DataCenterId = configuration.GetSection("DataCenterId").Get<uint?>() ?? Convert.ToUInt32(new Random().Next(0, 20));
             logger.LogInformation("Init WorkerId:{workerId}", workerId);
             logger.LogInformation("Init DataCenterId:{DataCenterId}", DataCenterId);
         }
