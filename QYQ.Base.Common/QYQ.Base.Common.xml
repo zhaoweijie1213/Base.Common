@@ -514,6 +514,26 @@
             扩展属性
             </summary>
         </member>
+        <member name="F:QYQ.Base.Common.CustomClaimTypes.RealName">
+            <summary>
+            实名认证
+            </summary>
+        </member>
+        <member name="F:QYQ.Base.Common.CustomClaimTypes.TokenType">
+            <summary>
+            token 类型：0=Domestic, 1=Overseas
+            </summary>
+        </member>
+        <member name="F:QYQ.Base.Common.CustomClaimTypes.PlayCount">
+            <summary>
+            游戏局数
+            </summary>
+        </member>
+        <member name="F:QYQ.Base.Common.CustomClaimTypes.PayMoney">
+            <summary>
+            支付金额
+            </summary>
+        </member>
         <member name="T:QYQ.Base.Common.Tool.DateTimeExtension">
             <summary>
             时间扩展
@@ -558,7 +578,7 @@
             <param name="jwtSettings"></param>
             <returns></returns>
         </member>
-        <member name="M:QYQ.Base.Common.Tool.JwtHepler.GenerateToken(QYQ.Base.Common.Models.UserInfo,System.String,System.String,System.String,System.Int32)">
+        <member name="M:QYQ.Base.Common.Tool.JwtHepler.GenerateToken(QYQ.Base.Common.Models.UserInfo,System.String,System.String,System.String,System.Int32,QYQ.Base.Common.Models.Enum.UserInfoTokenType)">
             <summary>
             生成token
             </summary>
@@ -567,6 +587,7 @@
             <param name="issuer"></param>
             <param name="audience"></param>
             <param name="expires">过期时间(单位:秒)</param>
+            <param name="tokenType">类型枚举: 根据类型的不同，token里包含的用户信息也不同</param>
             <returns></returns>
         </member>
         <member name="M:QYQ.Base.Common.Tool.JwtHepler.ParseToken(System.String,System.String)">
@@ -671,10 +692,13 @@
         </member>
         <member name="M:QYQ.Base.Common.Extension.UserExtension.GetUserInfoFromClaimsPrincipal(System.Security.Claims.ClaimsPrincipal)">
             <summary>
-            获取用户信息
+            获取用户信息（兼容 Domestic / Overseas 两种 Token；健壮的 TryParse 解析）
             </summary>
-            <param name="claimsPrincipal"></param>
-            <returns></returns>
+        </member>
+        <member name="M:QYQ.Base.Common.Extension.UserExtension.GetTokenType(System.Security.Claims.ClaimsPrincipal)">
+            <summary>
+            获取 Token 类型（0=Domestic,1=Overseas），解析失败返回 null
+            </summary>
         </member>
         <member name="T:QYQ.Base.Common.IOCExtensions.ApolloConfigExtension">
             <summary>
@@ -835,6 +859,21 @@
             <param name="logger"></param>
             <returns></returns>
         </member>
+        <member name="T:QYQ.Base.Common.Models.Enum.UserInfoTokenType">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="F:QYQ.Base.Common.Models.Enum.UserInfoTokenType.Domestic">
+            <summary>
+            国内
+            </summary>
+        </member>
+        <member name="F:QYQ.Base.Common.Models.Enum.UserInfoTokenType.Overseas">
+            <summary>
+            海外
+            </summary>
+        </member>
         <member name="T:QYQ.Base.Common.Models.JwtSettings">
             <summary>
             jwt设置
@@ -963,6 +1002,21 @@
         <member name="P:QYQ.Base.Common.Models.UserInfo.ExtraProperties">
             <summary>
             扩展属性
+            </summary>
+        </member>
+        <member name="P:QYQ.Base.Common.Models.UserInfo.RealName">
+            <summary>
+            是否实名认证
+            </summary>
+        </member>
+        <member name="P:QYQ.Base.Common.Models.UserInfo.PlayCount">
+            <summary>
+            游戏局数
+            </summary>
+        </member>
+        <member name="P:QYQ.Base.Common.Models.UserInfo.PayMoney">
+            <summary>
+            支付金额
             </summary>
         </member>
         <member name="T:QYQ.Base.Common.Models.ExtraProperties">

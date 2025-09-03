@@ -26,7 +26,7 @@ namespace QYQ.Base.SnowId
             : base(options)
         {
             _workerIdManager = workerIdManager;
-            DataCenterId = configuration.GetSection("DataCenterId").Get<uint?>() ?? Convert.ToUInt32(new Random().Next(0, 3));
+            DataCenterId = configuration.GetSection("DataCenterId").Get<uint?>() ?? 0;
             logger.LogInformation("Init DataCenterId:{DataCenterId}", DataCenterId);
         }
 
