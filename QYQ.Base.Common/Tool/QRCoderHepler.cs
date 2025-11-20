@@ -1,11 +1,5 @@
 ﻿using QRCoder;
-using SixLabors.ImageSharp.PixelFormats;
-using SixLabors.ImageSharp;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace QYQ.Base.Common.Tool
@@ -15,72 +9,69 @@ namespace QYQ.Base.Common.Tool
     /// </summary>
     public class QRCoderHepler
     {
+        #region 简单调用（保持原有签名）
+
         /// <summary>
-        /// 生成二维码
+        /// 生成 PNG 二维码字节流（默认配置）
         /// </summary>
-        /// <param name="url"></param>
-        /// <returns></returns>
-        public static async Task<byte[]> GenerateQRCodeAsync(string url)
+        public static Task<byte[]> GenerateQRCodeAsync(string url)
         {
-            return await Task.Run(() =>
-            {
-                var png = GeneratePng(url, pr => pr.GetGraphic(20));
-                return png;
-            });
+            // 兼容旧逻辑：默认像素 20
+            return GenerateQRCodeAsync(url, qr => qr.GetGraphic(20));
         }
 
         /// <summary>
-        /// 生成base64二维码
+        /// 生成 Base64 PNG 二维码（默认配置）
         /// </summary>
-        /// <param name="url"></param>
-        /// <returns></returns>
-        public static async Task<string> GenerateBase64QRCodeAsync(string url)
+        public static Task<string> GenerateBase64QRCodeAsync(string url)
         {
-            return await Task.Run(() =>
-            {
-                var png = GenerateBase64QRCode(url, pr => pr.GetGraphic(10));
-                return $"data:image/png;base64,{png}";
-            });
+            // 兼容旧逻辑：默认像素 10
+            return GenerateBase64QRCodeAsync(url, qr => qr.GetGraphic(20));
         }
 
+        #endregion
+
+        #region 高级调用（把 GetGraphic 逻辑传进来）
+
         /// <summary>
-        /// 生成Image
+        /// 生成 PNG 二维码字节流，调用方可完全控制 GetGraphic 参数
         /// </summary>
-        /// <param name="content"></param>
-        /// <param name="getGraphic"></param>
-        /// <returns></returns>
-        public static Image<Rgba32> GenerateImage(string content, Func<QRCode, Image<Rgba32>> getGraphic)
+        /// <param name="url">内容</param>
+        /// <param name="getGraphic">
+        ///  例如：qr => qr.GetGraphic(20)
+        ///        qr => qr.GetGraphic(20, darkColorRgba, lightColorRgba, drawQuietZones: true)
+        /// </param>
+        public static Task<byte[]> GenerateQRCodeAsync(
+            string url,
+            Func<PngByteQRCode, byte[]> getGraphic)
         {
             QRCodeGenerator gen = new();
-            QRCodeData data = gen.CreateQrCode(content, QRCodeGenerator.ECCLevel.H);
-            return getGraphic(new QRCode(data));
+            QRCodeData data = gen.CreateQrCode(url, QRCodeGenerator.ECCLevel.H);
+
+            var png = getGraphic(new PngByteQRCode(data));
+            return Task.FromResult(png);
         }
 
         /// <summary>
-        /// 生成PNG
+        /// 生成 Base64 PNG 二维码，调用方可完全控制 GetGraphic 参数
         /// </summary>
-        /// <param name="content"></param>
-        /// <param name="getGraphic"></param>
-        /// <returns></returns>
-        public static byte[] GeneratePng(string content, Func<PngByteQRCode, byte[]> getGraphic)
+        /// <param name="url">内容</param>
+        /// <param name="getGraphic">
+        ///  例如：qr => qr.GetGraphic(20)
+        ///        qr => qr.GetGraphic(20, darkColorRgba, lightColorRgba, drawQuietZones: true)
+        /// </param>
+        public static Task<string> GenerateBase64QRCodeAsync(
+            string url,
+            Func<Base64QRCode, string> getGraphic)
         {
             QRCodeGenerator gen = new();
-            QRCodeData data = gen.CreateQrCode(content, QRCodeGenerator.ECCLevel.L);
-            return getGraphic(new PngByteQRCode(data));
+            QRCodeData data = gen.CreateQrCode(url, QRCodeGenerator.ECCLevel.H);
+
+            var base64 = getGraphic(new Base64QRCode(data));
+            return Task.FromResult($"data:image/png;base64,{base64}");
         }
 
-        /// <summary>
-        /// 生成PNG
-        /// </summary>
-        /// <param name="content"></param>
-        /// <param name="getGraphic"></param>
-        /// <returns></returns>
-        public static string GenerateBase64QRCode(string content, Func<Base64QRCode, string> getGraphic)
-        {
-            QRCodeGenerator gen = new();
-            QRCodeData data = gen.CreateQrCode(content, QRCodeGenerator.ECCLevel.L);
-            return getGraphic(new Base64QRCode(data));
-        }
+        #endregion
 
     }
 }
