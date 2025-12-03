@@ -100,5 +100,11 @@ namespace QYQ.Base.Common
         /// 支付金额
         /// </summary>
         public const string PayMoney = "PayMoney";
+
+
+        /// <summary>
+        /// 令牌
+        /// </summary>
+        public const string Token = "Token";
     }
 }

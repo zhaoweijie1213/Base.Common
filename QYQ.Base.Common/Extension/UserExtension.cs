@@ -47,6 +47,7 @@ namespace QYQ.Base.Common.Extension
             if (tokenType == UserInfoTokenType.Domestic)
             {
                 user.Sex = claimsPrincipal.FindFirstValue(CustomClaimTypes.Sex) ?? string.Empty;
+                user.Token = claimsPrincipal.FindFirstValue(CustomClaimTypes.Token) ?? string.Empty;
 
                 // Config (JSON -> Dictionary<string,string>)
                 var cfg = claimsPrincipal.FindFirstValue(CustomClaimTypes.Config);
@@ -63,6 +64,7 @@ namespace QYQ.Base.Common.Extension
                 // PayMoney: 这里按 decimal 解析；如你的 UserInfo 定义是 double/long，请替换为对应类型
                 if (decimal.TryParse(claimsPrincipal.FindFirstValue(CustomClaimTypes.PayMoney), out var pm))
                     user.PayMoney = pm;
+
             }
             else // Overseas
             {

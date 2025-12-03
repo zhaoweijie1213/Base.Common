@@ -105,6 +105,7 @@ namespace QYQ.Base.Common.Tool
                     claims.Add(new Claim(CustomClaimTypes.RealName, info.RealName.ToString()));
                     claims.Add(new Claim(CustomClaimTypes.PlayCount, info.PlayCount.ToString()));
                     claims.Add(new Claim(CustomClaimTypes.PayMoney, info.PayMoney.ToString()));
+                    claims.Add(new Claim(CustomClaimTypes.Token, info.Token ?? string.Empty));
                     break;
 
                 case UserInfoTokenType.Overseas:

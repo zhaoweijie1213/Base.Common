@@ -117,6 +117,12 @@ namespace QYQ.Base.Common.Models
         [JsonProperty("payMoney", NullValueHandling = NullValueHandling.Ignore)]
         public decimal PayMoney { get; set; }
 
+        /// <summary>
+        /// 支付金额
+        /// </summary>
+        [JsonProperty("token", NullValueHandling = NullValueHandling.Ignore)]
+        public string Token { get; set; } = string.Empty;
+
     }
 
     /// <summary>
