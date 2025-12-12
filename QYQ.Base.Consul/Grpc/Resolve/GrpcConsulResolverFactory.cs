@@ -1,4 +1,5 @@
 ﻿using Grpc.Net.Client.Balancer;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
@@ -35,7 +36,27 @@ namespace QYQ.Base.Consul.Grpc.Resolve
         /// <returns></returns>
         public override Resolver Create(ResolverOptions options)
         {
-            string name = options.ChannelOptions.ServiceConfig.Inner["ServiceName"].ToString();
+            var logger = options.LoggerFactory.CreateLogger<GrpcConsulResolverFactory>();
+
+            string? name = null;
+            if (options.ChannelOptions?.ServiceConfig?.Inner != null
+                && options.ChannelOptions.ServiceConfig.Inner.TryGetValue("ServiceName", out var serviceName))
+            {
+                name = serviceName?.ToString();
+            }
+            else if (!string.IsNullOrWhiteSpace(options.Address?.Host))
+            {
+                name = options.Address.Host;
+                logger.LogWarning("Create:未在ServiceConfig中找到ServiceName，使用地址主机名{ServiceName}", name);
+            }
+
+            if (string.IsNullOrWhiteSpace(name))
+            {
+                const string message = "Create:通道配置未包含ServiceName且地址主机名为空，无法创建Consul解析器";
+                logger.LogError(message);
+                throw new InvalidOperationException(message);
+            }
+
             var resolver = new GrpcConsulResolver(options.LoggerFactory)
             {
                 ConsulClientOption = _consulOptions.CurrentValue,
