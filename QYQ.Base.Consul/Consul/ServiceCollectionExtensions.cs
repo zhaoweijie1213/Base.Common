@@ -1,6 +1,5 @@
 ﻿using Consul;
 using Consul.AspNetCore;
-using Google.Protobuf.Reflection;
 using Grpc.Core;
 using Grpc.Net.Client.Balancer;
 using Grpc.Net.Client.Configuration;
@@ -17,10 +16,7 @@ using QYQ.Base.Consul.Grpc.Resolve;
 using QYQ.Base.Consul.Grpc.Serivce;
 using QYQ.Base.Consul.Http;
 using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Net.Http;
-using System.Text;
 
 namespace QYQ.Base.Consul
 {
@@ -299,11 +295,12 @@ namespace QYQ.Base.Consul
         /// <param name="builder"></param>
         /// <param name="name"></param>
         /// <param name="consulServiceName"></param>
+        /// <param name="configureServiceConfig">可选的 ServiceConfig 配置委托，可用于自定义或禁用重试策略。</param>
         /// <returns></returns>
-        public static WebApplicationBuilder AddConsulGrpcClient<TClient>(this WebApplicationBuilder builder, string name, string consulServiceName)
+        public static WebApplicationBuilder AddConsulGrpcClient<TClient>(this WebApplicationBuilder builder, string name, string consulServiceName, Action<ServiceConfig>? configureServiceConfig = null)
             where TClient : class
         {
-            builder.Services.AddConsulGrpcClient<TClient>(name, consulServiceName, builder.Configuration);
+            builder.Services.AddConsulGrpcClient<TClient>(name, consulServiceName, builder.Configuration, configureServiceConfig);
             return builder;
         }
 
@@ -314,28 +311,14 @@ namespace QYQ.Base.Consul
         /// <param name="name">客户端实例名</param>
         /// <param name="consulServiceName">consul注册的服务名</param>
         /// <param name="configuration">配置信息</param>
-        public static IServiceCollection AddConsulGrpcClient<TClient>(this IServiceCollection services, string name, string consulServiceName, IConfiguration configuration)
+        /// <param name="configureServiceConfig">可选的 ServiceConfig 配置委托，可用于自定义或禁用重试策略。</param>
+        public static IServiceCollection AddConsulGrpcClient<TClient>(this IServiceCollection services, string name, string consulServiceName, IConfiguration configuration, Action<ServiceConfig>? configureServiceConfig = null)
             where TClient : class
         {
             //consul负载均衡器
             services.AddSingleton<ResolverFactory, GrpcConsulResolverFactory>();
             // 必须加这一行，否则根本拿不到 RoundRobinConfig
             services.AddSingleton<RoundRobinConfig>();
-
-
-            var defaultMethodConfig = new MethodConfig
-            {
-                Names = { MethodName.Default },
-                RetryPolicy = new RetryPolicy
-                {
-                    MaxAttempts = 5,
-                    InitialBackoff = TimeSpan.FromSeconds(1),
-                    MaxBackoff = TimeSpan.FromSeconds(5),
-                    BackoffMultiplier = 1.5,
-                    RetryableStatusCodes = { StatusCode.Unavailable }
-                }
-            };
-
 
             services.AddGrpcClient<TClient>(name, client =>
             {
@@ -357,12 +340,16 @@ namespace QYQ.Base.Consul
                     //channel.MaxSendMessageSize= int.MaxValue;
                     //channel.MaxReceiveMessageSize = null;
                     //配置通道
-                    channel.ServiceConfig ??= new ServiceConfig()
+                    var serviceConfig = channel.ServiceConfig ?? new ServiceConfig();
+                    configureServiceConfig?.Invoke(serviceConfig);
+
+                    serviceConfig.Inner["ServiceName"] = consulServiceName;
+                    if (!serviceConfig.LoadBalancingConfigs.Any(config => config is RoundRobinConfig))
                     {
-                        MethodConfigs = { defaultMethodConfig }
-                    };
-                    channel.ServiceConfig.Inner.Add("ServiceName", consulServiceName);
-                    channel.ServiceConfig.LoadBalancingConfigs.Add(new RoundRobinConfig());
+                        serviceConfig.LoadBalancingConfigs.Add(new RoundRobinConfig());
+                    }
+
+                    channel.ServiceConfig = serviceConfig;
 
                 });
             });

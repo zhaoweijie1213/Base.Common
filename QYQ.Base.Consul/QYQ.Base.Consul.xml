@@ -195,7 +195,7 @@
             <param name="services"></param>
             <param name="name"></param>
         </member>
-        <member name="M:QYQ.Base.Consul.ServiceCollectionExtensions.AddConsulGrpcClient``1(Microsoft.AspNetCore.Builder.WebApplicationBuilder,System.String,System.String)">
+        <member name="M:QYQ.Base.Consul.ServiceCollectionExtensions.AddConsulGrpcClient``1(Microsoft.AspNetCore.Builder.WebApplicationBuilder,System.String,System.String,System.Action{Grpc.Net.Client.Configuration.ServiceConfig})">
             <summary>
             添加consul Grpc客户端
             </summary>
@@ -203,9 +203,10 @@
             <param name="builder"></param>
             <param name="name"></param>
             <param name="consulServiceName"></param>
+            <param name="configureServiceConfig">可选的 ServiceConfig 配置委托，可用于自定义或禁用重试策略。</param>
             <returns></returns>
         </member>
-        <member name="M:QYQ.Base.Consul.ServiceCollectionExtensions.AddConsulGrpcClient``1(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.String,System.String,Microsoft.Extensions.Configuration.IConfiguration)">
+        <member name="M:QYQ.Base.Consul.ServiceCollectionExtensions.AddConsulGrpcClient``1(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.String,System.String,Microsoft.Extensions.Configuration.IConfiguration,System.Action{Grpc.Net.Client.Configuration.ServiceConfig})">
             <summary>
             添加consul 发送Grpc请求处理
             </summary>
@@ -213,6 +214,7 @@
             <param name="name">客户端实例名</param>
             <param name="consulServiceName">consul注册的服务名</param>
             <param name="configuration">配置信息</param>
+            <param name="configureServiceConfig">可选的 ServiceConfig 配置委托，可用于自定义或禁用重试策略。</param>
         </member>
         <member name="M:QYQ.Base.Consul.ServiceCollectionExtensions.UseHttpHealthcheck(Microsoft.AspNetCore.Builder.WebApplication)">
             <summary>
@@ -437,6 +439,17 @@
             <summary>
             Grpc自定义解析程序
             </summary>
+            <remarks>
+            _consulClientOption
+            </remarks>
+        </member>
+        <member name="M:QYQ.Base.Consul.Grpc.Resolve.GrpcConsulResolver.#ctor(Microsoft.Extensions.Logging.ILoggerFactory)">
+            <summary>
+            Grpc自定义解析程序
+            </summary>
+            <remarks>
+            _consulClientOption
+            </remarks>
         </member>
         <member name="P:QYQ.Base.Consul.Grpc.Resolve.GrpcConsulResolver.ConsulClientOption">
             <summary>
@@ -446,11 +459,6 @@
         <member name="P:QYQ.Base.Consul.Grpc.Resolve.GrpcConsulResolver.ServiceName">
             <summary>
             服务名称
-            </summary>
-        </member>
-        <member name="M:QYQ.Base.Consul.Grpc.Resolve.GrpcConsulResolver.#ctor(Microsoft.Extensions.Logging.ILoggerFactory)">
-            <summary>
-            _consulClientOption
             </summary>
         </member>
         <member name="M:QYQ.Base.Consul.Grpc.Resolve.GrpcConsulResolver.OnStarted">

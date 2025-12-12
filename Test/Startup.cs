@@ -1,4 +1,6 @@
 ﻿using EasyCaching.Redis;
+using Grpc.Core;
+using Grpc.Net.Client.Configuration;
 using Grpc.Team;
 using LobbyWebManagement;
 using Microsoft.Extensions.Configuration;
@@ -33,8 +35,25 @@ namespace Test
            {
                services.AddControllers();
                services.AddQYQConsul(context.Configuration);
-               services.AddConsulGrpcClient<Team.TeamClient>("team", "pokervegas-invite-job-grpc", context.Configuration).AddConsulDispatcher();
-               services.AddConsulGrpcClient<GamePlay.Grpc.GamePlay.GamePlayClient>("Gameplay", "game-play-grpc", context.Configuration);
+               services.AddConsulGrpcClient<Team.TeamClient>("team", "pokervegas-invite-job-grpc", context.Configuration, serviceConfig =>
+               {
+                   serviceConfig.MethodConfigs.Add(new MethodConfig
+                   {
+                       Names = { MethodName.Default },
+                       RetryPolicy = new RetryPolicy
+                       {
+                           MaxAttempts = 3,
+                           InitialBackoff = TimeSpan.FromSeconds(0.5),
+                           MaxBackoff = TimeSpan.FromSeconds(2),
+                           BackoffMultiplier = 1.2,
+                           RetryableStatusCodes = { StatusCode.Unavailable }
+                       }
+                   });
+               }).AddConsulDispatcher();
+               services.AddConsulGrpcClient<GamePlay.Grpc.GamePlay.GamePlayClient>("Gameplay", "game-play-grpc", context.Configuration, serviceConfig =>
+               {
+                   serviceConfig.MethodConfigs.Clear(); // 不配置 RetryPolicy 即可禁用重试
+               });
                services.AddConsulHttpClient("game-integration").AddConsulDispatcher();
                services.AddSnowIdRedisGenerator(context.Configuration.GetSection("Redis").Get<RedisDBOptions>()!);
                services.AddScoped<GameIntegrationApi>();
