@@ -322,6 +322,21 @@ namespace QYQ.Base.Consul
             // 必须加这一行，否则根本拿不到 RoundRobinConfig
             services.AddSingleton<RoundRobinConfig>();
 
+
+            var defaultMethodConfig = new MethodConfig
+            {
+                Names = { MethodName.Default },
+                RetryPolicy = new RetryPolicy
+                {
+                    MaxAttempts = 5,
+                    InitialBackoff = TimeSpan.FromSeconds(1),
+                    MaxBackoff = TimeSpan.FromSeconds(5),
+                    BackoffMultiplier = 1.5,
+                    RetryableStatusCodes = { StatusCode.Unavailable }
+                }
+            };
+
+
             services.AddGrpcClient<TClient>(name, client =>
             {
                 Uri addresss = configuration.GetSection("ConsulOptions:ConsulAddress").Get<Uri>();
@@ -342,7 +357,10 @@ namespace QYQ.Base.Consul
                     //channel.MaxSendMessageSize= int.MaxValue;
                     //channel.MaxReceiveMessageSize = null;
                     //配置通道
-                    channel.ServiceConfig ??= new ServiceConfig();
+                    channel.ServiceConfig ??= new ServiceConfig()
+                    {
+                        MethodConfigs = { defaultMethodConfig }
+                    };
                     channel.ServiceConfig.Inner.Add("ServiceName", consulServiceName);
                     channel.ServiceConfig.LoadBalancingConfigs.Add(new RoundRobinConfig());
 
