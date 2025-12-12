@@ -18,9 +18,12 @@ namespace QYQ.Base.Consul.Grpc.Resolve
     /// <summary>
     /// Grpc自定义解析程序
     /// </summary>
-    public class GrpcConsulResolver : PollingResolver
+    /// <remarks>
+    /// _consulClientOption
+    /// </remarks>
+    public class GrpcConsulResolver(ILoggerFactory loggerFactory) : PollingResolver(loggerFactory)
     {
-        private readonly ILogger _logger;
+        private readonly ILogger _logger = loggerFactory.CreateLogger<GrpcConsulResolver>();
 
         //private readonly Uri _address;
         //private readonly int _port;
@@ -28,26 +31,16 @@ namespace QYQ.Base.Consul.Grpc.Resolve
         /// <summary>
         /// 
         /// </summary>
-        public ConsulServiceOptions ConsulClientOption { get; set; }
+        public ConsulServiceOptions? ConsulClientOption { get; set; }
 
         /// <summary>
         /// 服务名称
         /// </summary>
         public string ServiceName { get; set; } = string.Empty;
 
-        private System.Threading.Timer _timer;
+        private System.Threading.Timer? _timer;
 
-        private readonly TimeSpan _refreshInterval;
-
-        /// <summary>
-        /// _consulClientOption
-        /// </summary>
-        public GrpcConsulResolver(ILoggerFactory loggerFactory)
-            : base(loggerFactory)
-        {
-            _logger = loggerFactory.CreateLogger<GrpcConsulResolver>();
-            _refreshInterval = TimeSpan.FromSeconds(30);
-        }
+        private readonly TimeSpan _refreshInterval = TimeSpan.FromSeconds(30);
 
         /// <summary>
         /// 
@@ -70,6 +63,12 @@ namespace QYQ.Base.Consul.Grpc.Resolve
         /// <returns></returns>
         protected override async Task ResolveAsync(CancellationToken cancellationToken)
         {
+            if (ConsulClientOption == null)
+            {
+                const string message = "ResolveAsync:ConsulClientOption未配置，无法解析服务地址";
+                _logger.LogError(message);
+                throw new InvalidOperationException(message);
+            }
             using ConsulClient client = new(c =>
             {
                 c.Address = new Uri(ConsulClientOption.ConsulAddress);
@@ -88,7 +87,7 @@ namespace QYQ.Base.Consul.Grpc.Resolve
             {
                 _logger.LogWarning("ResolveAsync:解析器没有返回{ServiceName}服务地址", ServiceName);
             }
-            // Pass the results back to the channel.
+            // 解析结果通知负载均衡器
             Listener(ResolverResult.ForResult(addresses));
         }
 

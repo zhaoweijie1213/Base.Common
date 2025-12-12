@@ -339,7 +339,7 @@ namespace QYQ.Base.Consul
 
             services.AddGrpcClient<TClient>(name, client =>
             {
-                Uri addresss = configuration.GetSection("ConsulOptions:ConsulAddress").Get<Uri>();
+                Uri addresss = configuration.GetSection("ConsulOptions:ConsulAddress").Get<Uri>() ?? throw new Exception("未配置ConsulAddress");
                 client.Address = new Uri($"consul://{addresss.Host}:{addresss.Port}");
                 client.ChannelOptionsActions.Add(channel =>
                 {
@@ -447,7 +447,7 @@ namespace QYQ.Base.Consul
                         .Select(p => p.GetIPProperties())
                         .SelectMany(p => p.UnicastAddresses)
                         .Where(p => p.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork && !System.Net.IPAddress.IsLoopback(p.Address))
-                        .FirstOrDefault()?.Address.ToString();
+                        .FirstOrDefault()?.Address.ToString() ?? string.Empty;
 
             return ip;
         }
