@@ -26,13 +26,18 @@ namespace QYQ.Base.SnowId
         {
             try
             {
-                await _workerIdManager.RegisterWorkerId();
+                var registered = await _workerIdManager.RegisterWorkerId();
+                if (!registered)
+                {
+                    throw new InvalidOperationException("WorkerId 注册失败，无法启动刷新任务。");
+                }
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "注册 WorkerId 时发生错误");
+                throw;
             }
-    
+
             await base.StartAsync(cancellationToken);
             //await base.StartAsync(cancellationToken);
         }
@@ -54,9 +59,16 @@ namespace QYQ.Base.SnowId
                     await Task.Delay(5000, stoppingToken);
 
                     _logger.LogDebug("刷新 WorkerId 的有效期...");
-                    await _workerIdManager.Refresh();
+                    var refreshed = await _workerIdManager.Refresh();
+                    if (refreshed)
+                    {
+                        failCount = 0; // 成功就清零
+                        continue;
+                    }
 
-                    failCount = 0; // 成功就清零
+                    failCount++;
+                    _logger.LogWarning("刷新 WorkerId 心跳或过期时间失败（第 {FailCount} 次）", failCount);
+                    await BackoffDelayAsync(failCount, stoppingToken);
                 }
                 catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
                 {
