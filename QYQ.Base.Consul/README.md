@@ -82,6 +82,34 @@ app.MapGet("/api/Health", () => "healthy");
 app.Run();
 ```
 
+### 自定义 gRPC 客户端重试与负载均衡
+`AddConsulGrpcClient` 现支持通过可选的 `ServiceConfig` 委托自定义重试策略或禁用重试，内部仍会自动注入 Consul 解析与轮询负载均衡配置：
+
+```csharp
+// 自定义重试策略
+services.AddConsulGrpcClient<Team.TeamClient>("team", "team-service", configuration, serviceConfig =>
+{
+    serviceConfig.MethodConfigs.Add(new MethodConfig
+    {
+        Names = { MethodName.Default },
+        RetryPolicy = new RetryPolicy
+        {
+            MaxAttempts = 3,
+            InitialBackoff = TimeSpan.FromSeconds(0.5),
+            MaxBackoff = TimeSpan.FromSeconds(2),
+            BackoffMultiplier = 1.2,
+            RetryableStatusCodes = { StatusCode.Unavailable }
+        }
+    });
+});
+
+// 禁用重试
+services.AddConsulGrpcClient<GamePlayClient>("game", "game-service", configuration, serviceConfig =>
+{
+    serviceConfig.MethodConfigs.Clear();
+});
+```
+
 ### 配置注意事项
 - `ConsulOptions` 是默认配置节名，可通过传入其他节名覆写。
 - `ConsulAddress` 与可选的 `Token` 用于连接 Consul 服务器，`HostIPAddress` 可显式指定注册地址。
