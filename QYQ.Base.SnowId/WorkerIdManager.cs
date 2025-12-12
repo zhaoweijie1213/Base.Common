@@ -2,6 +2,7 @@
 using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,6 +23,9 @@ namespace QYQ.Base.SnowId
 
         private const int max = 63;
 
+        private const int HeartbeatTtlSeconds = 25;
+        private static readonly TimeSpan UsageKeyExpire = TimeSpan.FromSeconds(30);
+
         private readonly IEasyCachingProviderFactory _easyCachingProviderFactory;
 
 
@@ -29,7 +33,7 @@ namespace QYQ.Base.SnowId
         /// <summary>
         /// 
         /// </summary>
-        public WorkerIdManager(ILogger<WorkerIdManager> logger,IEasyCachingProviderFactory easyCachingProviderFactory)
+        public WorkerIdManager(ILogger<WorkerIdManager> logger, IEasyCachingProviderFactory easyCachingProviderFactory)
         {
             _logger = logger;
             _easyCachingProviderFactory = easyCachingProviderFactory;
@@ -47,13 +51,15 @@ namespace QYQ.Base.SnowId
         /// <summary>
         /// 注册workerId
         /// </summary>
-        public async Task RegisterWorkerId()
+        public async Task<bool> RegisterWorkerId()
         {
             var redis = GetRedis();
 
             _logger.LogInformation("开始注册 WorkerId...");
             //获取redis Key
             string key = GetWorkerIdKey();
+            string usageKey = GetUsageIdKey();
+            string instanceIdentity = GetInstanceIdentity();
 
             while (true)
             {
@@ -65,19 +71,31 @@ namespace QYQ.Base.SnowId
                     bool status = await redis.StringSetAsync(key, "0");
                     if (status) workerId = 0;
                 }
+                var heartbeatKey = GetHeartbeatKey(Convert.ToInt32(workerId));
+                var heartbeatExists = await redis.KeyExistsAsync(heartbeatKey);
+                if (heartbeatExists)
+                {
+                    _logger.LogWarning("WorkerId {workerId} 已存在心跳，跳过当前候选。", workerId);
+                    continue;
+                }
+
                 //将workerId放入已使用集合
-                var res = await redis.SAddAsync(GetUsageIdKey(), new List<long>() { workerId });
+                var res = await redis.SAddAsync(usageKey, new List<long>() { workerId });
                 if (res > 0)
                 {
+                    var heartbeatSet = await redis.StringSetAsync(heartbeatKey, instanceIdentity, TimeSpan.FromSeconds(HeartbeatTtlSeconds));
+                    if (!heartbeatSet)
+                    {
+                        _logger.LogError("WorkerId {workerId} 心跳写入失败，停止注册。", workerId);
+                        return false;
+                    }
+
                     _workerId = Convert.ToInt32(workerId);
-                    _logger.LogInformation("WorkerId 注册成功，workerId: {workerId}", _workerId);
-                    break;
+                    _logger.LogInformation("WorkerId 注册成功，workerId: {workerId}，实例标识: {instanceIdentity}", _workerId, instanceIdentity);
+                    return true;
                 }
+                _logger.LogWarning("WorkerId {workerId} 抢占失败，可能已被其他实例占用。", workerId);
             }
-   
-
-
-            //return _workerId;
         }
 
         /// <summary>
@@ -96,6 +114,21 @@ namespace QYQ.Base.SnowId
         public static string GetUsageIdKey()
         {
             return $"{AppDomain.CurrentDomain.FriendlyName}_SnowUsageIds";
+        }
+
+        /// <summary>
+        /// 获取心跳 key
+        /// </summary>
+        /// <param name="workerId"></param>
+        /// <returns></returns>
+        public static string GetHeartbeatKey(int workerId)
+        {
+            return $"{AppDomain.CurrentDomain.FriendlyName}_SnowWorkerHeartbeat:{workerId}";
+        }
+
+        private static string GetInstanceIdentity()
+        {
+            return $"{Environment.MachineName}:{Process.GetCurrentProcess().Id}:{AppDomain.CurrentDomain.FriendlyName}";
         }
 
         /// <summary>
@@ -124,8 +157,9 @@ namespace QYQ.Base.SnowId
 
             //从已使用集合移除id
             await redis.SRemAsync(GetUsageIdKey(), new List<long>() { _workerId });
+            await redis.KeyDelAsync(GetHeartbeatKey(_workerId));
 
-            //_workerId = -1;
+            _workerId = -1;
             _logger.LogInformation("WorkerId 注销成功");
         }
 
@@ -134,16 +168,37 @@ namespace QYQ.Base.SnowId
         /// 刷新有效期
         /// </summary>
         /// <returns></returns>
-        public async Task Refresh()
+        public async Task<bool> Refresh()
         {
             if (_workerId != -1)
             {
-                var redis = GetRedis();
-                //显示当前worker Id
-                await redis.KeyExpireAsync(GetUsageIdKey(), 15);
-                _logger.LogDebug("刷新 WorkerId 的有效期，workerId: {workerId}", _workerId);
-            }
+                try
+                {
+                    var redis = GetRedis();
+                    var usageRenewed = await redis.KeyExpireAsync(GetUsageIdKey(), (int)UsageKeyExpire.TotalSeconds);
+                    var heartbeatRenewed = await redis.KeyExpireAsync(GetHeartbeatKey(_workerId), HeartbeatTtlSeconds);
 
+                    if (!usageRenewed)
+                    {
+                        _logger.LogWarning("刷新 WorkerId 集合过期时间失败，workerId: {workerId}", _workerId);
+                    }
+
+                    if (!heartbeatRenewed)
+                    {
+                        _logger.LogWarning("刷新 WorkerId 心跳失败，workerId: {workerId}", _workerId);
+                    }
+
+                    _logger.LogDebug("刷新 WorkerId 的有效期，workerId: {workerId}", _workerId);
+                    return usageRenewed && heartbeatRenewed;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "刷新 WorkerId 的有效期时出现异常，workerId: {workerId}", _workerId);
+                    return false;
+                }
+            }
+            _logger.LogWarning("刷新 WorkerId 有效期失败，尚未注册 WorkerId。");
+            return false;
         }
 
     }
