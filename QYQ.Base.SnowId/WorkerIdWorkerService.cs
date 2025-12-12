@@ -46,24 +46,51 @@ namespace QYQ.Base.SnowId
         protected override async Task ExecuteAsync(CancellationToken stoppingToken)
         {
             _logger.LogInformation("WorkerId 任务开始执行...");
+            var failCount = 0;
             while (!stoppingToken.IsCancellationRequested)
             {
-                //五秒刷新
-                await Task.Delay(5000, stoppingToken);
                 try
                 {
+                    await Task.Delay(5000, stoppingToken);
+
                     _logger.LogDebug("刷新 WorkerId 的有效期...");
                     await _workerIdManager.Refresh();
-                }
-                catch (Exception e)
-                {
-                    _logger.LogError(e, "刷新 WorkerId 有效期时发生错误");
-                }
 
+                    failCount = 0; // 成功就清零
+                }
+                catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                {
+                    // 正常停止
+                    break;
+                }
+                catch (StackExchange.Redis.RedisTimeoutException ex)
+                {
+                    failCount++;
+                    _logger.LogError(ex, "刷新 WorkerId 超时（第 {FailCount} 次）", failCount);
+                    await BackoffDelayAsync(failCount, stoppingToken);
+                }
+                catch (StackExchange.Redis.RedisConnectionException ex)
+                {
+                    failCount++;
+                    _logger.LogError(ex, "刷新 WorkerId 连接异常（第 {FailCount} 次）", failCount);
+                    await BackoffDelayAsync(failCount, stoppingToken);
+                }
+                catch (Exception ex)
+                {
+                    failCount++;
+                    _logger.LogError(ex, "刷新 WorkerId 未知异常（第 {FailCount} 次）", failCount);
+                    await BackoffDelayAsync(failCount, stoppingToken);
+                }
             }
             _logger.LogInformation("WorkerId 任务停止.");
         }
 
+        private static Task BackoffDelayAsync(int failCount, CancellationToken token)
+        {
+            // 1s, 2s, 4s, 8s... 最大 30s
+            var seconds = Math.Min(30, (int)Math.Pow(2, Math.Min(failCount, 5)));
+            return Task.Delay(TimeSpan.FromSeconds(seconds), token);
+        }
 
         /// <summary>
         /// 注销workerId
