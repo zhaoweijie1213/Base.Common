@@ -134,13 +134,13 @@ namespace QYQ.Base.SnowId
         /// 刷新有效期
         /// </summary>
         /// <returns></returns>
-        public void Refresh()
+        public async Task Refresh()
         {
             if (_workerId != -1)
             {
                 var redis = GetRedis();
                 //显示当前worker Id
-                redis.KeyExpire(GetUsageIdKey(), 15);
+                await redis.KeyExpireAsync(GetUsageIdKey(), 15);
                 _logger.LogDebug("刷新 WorkerId 的有效期，workerId: {workerId}", _workerId);
             }
 
