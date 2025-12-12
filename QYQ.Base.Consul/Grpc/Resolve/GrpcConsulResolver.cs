@@ -76,24 +76,13 @@ namespace QYQ.Base.Consul.Grpc.Resolve
                 c.Token = ConsulClientOption.Token;
             });
             //consul实例获取
-            var entrys = await client.Health.Service(ServiceName, tag: "", passingOnly: true);
+            var entrys = await client.Health.Service(ServiceName, tag: "", passingOnly: true, cancellationToken);
             var addresses = entrys.Response
                 .Select(entry =>
                 {
                     var address = entry.Service.Address;
-                    if (string.IsNullOrWhiteSpace(address))
-                    {
-                        address = entry.Node?.Address;
-                    }
-
-                    if (string.IsNullOrWhiteSpace(address) || entry.Service.Port <= 0)
-                    {
-                        return null;
-                    }
-
                     return new BalancerAddress(address, entry.Service.Port);
                 })
-                .Where(address => address != null)
                 .ToArray();
             if (addresses.Length == 0)
             {
