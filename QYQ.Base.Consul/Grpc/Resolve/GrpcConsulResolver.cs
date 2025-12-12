@@ -22,8 +22,8 @@ namespace QYQ.Base.Consul.Grpc.Resolve
     {
         private readonly ILogger _logger;
 
-        private readonly Uri _address;
-        private readonly int _port;
+        //private readonly Uri _address;
+        //private readonly int _port;
 
         /// <summary>
         /// 
@@ -87,7 +87,7 @@ namespace QYQ.Base.Consul.Grpc.Resolve
             Listener(ResolverResult.ForResult(addresses));
         }
 
-        private void OnTimerCallback(object state)
+        private void OnTimerCallback(object? state)
         {
             try
             {
