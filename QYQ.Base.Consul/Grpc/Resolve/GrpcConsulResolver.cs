@@ -77,9 +77,25 @@ namespace QYQ.Base.Consul.Grpc.Resolve
             });
             //consul实例获取
             var entrys = await client.Health.Service(ServiceName, tag: "", passingOnly: true);
-            var services = entrys.Response.Select(i => i.Service).ToArray();
-            var addresses = services.Select(x => new BalancerAddress(x.Address, x.Port)).ToArray();
-            if(addresses.Length == 0)
+            var addresses = entrys.Response
+                .Select(entry =>
+                {
+                    var address = entry.Service.Address;
+                    if (string.IsNullOrWhiteSpace(address))
+                    {
+                        address = entry.Node?.Address;
+                    }
+
+                    if (string.IsNullOrWhiteSpace(address) || entry.Service.Port <= 0)
+                    {
+                        return null;
+                    }
+
+                    return new BalancerAddress(address, entry.Service.Port);
+                })
+                .Where(address => address != null)
+                .ToArray();
+            if (addresses.Length == 0)
             {
                 _logger.LogWarning("ResolveAsync:解析器没有返回{ServiceName}服务地址", ServiceName);
             }
