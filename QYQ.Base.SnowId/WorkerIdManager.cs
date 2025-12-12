@@ -168,7 +168,7 @@ namespace QYQ.Base.SnowId
         /// 刷新有效期
         /// </summary>
         /// <returns></returns>
-        public async Task<bool> Refresh()
+        public async Task<bool> RefreshAsync()
         {
             if (_workerId != -1)
             {
@@ -188,7 +188,7 @@ namespace QYQ.Base.SnowId
                         _logger.LogWarning("刷新 WorkerId 心跳失败，workerId: {workerId}", _workerId);
                     }
 
-                    _logger.LogDebug("刷新 WorkerId 的有效期，workerId: {workerId}", _workerId);
+                    //_logger.LogDebug("刷新 WorkerId 的有效期，workerId: {workerId}", _workerId);
                     return usageRenewed && heartbeatRenewed;
                 }
                 catch (Exception ex)
