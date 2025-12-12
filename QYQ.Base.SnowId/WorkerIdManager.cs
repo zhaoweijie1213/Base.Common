@@ -63,6 +63,7 @@ namespace QYQ.Base.SnowId
 
             while (true)
             {
+                //只是作为分配计数器使用，在注册时通过 INCR 获取下一个候选值，超过上限后会被重置为 0
                 long workerId = await redis.IncrByAsync(key);
                 //判断workid是否大于最大值
                 if (workerId > max)
@@ -128,7 +129,7 @@ namespace QYQ.Base.SnowId
 
         private static string GetInstanceIdentity()
         {
-            return $"{Environment.MachineName}:{Process.GetCurrentProcess().Id}:{AppDomain.CurrentDomain.FriendlyName}";
+            return $"{Environment.MachineName}:{Environment.ProcessId}:{AppDomain.CurrentDomain.FriendlyName}";
         }
 
         /// <summary>
