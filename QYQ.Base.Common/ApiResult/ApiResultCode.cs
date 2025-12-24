@@ -384,8 +384,11 @@ namespace QYQ.Base.Common.ApiResult
         [Description("In the game already")]
         InTheGameAlready = 6002,
 
-
-
+        /// <summary>
+        /// 分页上下文已过期
+        /// </summary>
+        [Description("Pagination Context Expired")]
+        PaginationContextExpired = 70001
     }
 
 }
