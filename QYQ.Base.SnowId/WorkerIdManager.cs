@@ -1,5 +1,7 @@
 ﻿using EasyCaching.Core;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using QYQ.Base.SnowId.Options;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -27,16 +29,20 @@ namespace QYQ.Base.SnowId
         private static readonly TimeSpan UsageKeyExpire = TimeSpan.FromSeconds(30);
 
         private readonly IEasyCachingProviderFactory _easyCachingProviderFactory;
+        private readonly string _providerName;
 
 
 
         /// <summary>
         /// 
         /// </summary>
-        public WorkerIdManager(ILogger<WorkerIdManager> logger, IEasyCachingProviderFactory easyCachingProviderFactory)
+        public WorkerIdManager(ILogger<WorkerIdManager> logger, IEasyCachingProviderFactory easyCachingProviderFactory, IOptions<SnowIdRedisOptions> options)
         {
             _logger = logger;
             _easyCachingProviderFactory = easyCachingProviderFactory;
+            _providerName = string.IsNullOrWhiteSpace(options.Value?.ProviderName)
+                ? SnowIdRedisOptions.DefaultProviderName
+                : options.Value.ProviderName;
         }
 
         /// <summary>
@@ -45,7 +51,7 @@ namespace QYQ.Base.SnowId
         /// <returns></returns>
         public IRedisCachingProvider GetRedis()
         {
-           return  _easyCachingProviderFactory.GetRedisProvider("SnowIdRedis");
+           return  _easyCachingProviderFactory.GetRedisProvider(_providerName);
         }
 
         /// <summary>
