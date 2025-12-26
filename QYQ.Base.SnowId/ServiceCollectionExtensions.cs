@@ -41,6 +41,7 @@ namespace QYQ.Base.SnowId
         /// </summary>
         /// <param name="services"></param>
         /// <param name="redis"></param>
+        /// <param name="providerName"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
         public static IServiceCollection AddSnowIdRedisGenerator(this IServiceCollection services, RedisDBOptions? redis, string providerName = SnowIdRedisOptions.DefaultProviderName)

@@ -1,10 +1,13 @@
+using EasyCaching.Redis;
+using EasyCaching.Serialization.Json;
+using Microsoft.Extensions.DependencyInjection;
+using Newtonsoft.Json;
 using NSwag;
+using QYQ.Base.Common;
 using QYQ.Base.Common.Middleware;
 using QYQ.Base.Consul;
-using QYQ.Base.Swagger.Extension;
 using QYQ.Base.SnowId;
-using EasyCaching.Redis;
-using QYQ.Base.Common;
+using QYQ.Base.Swagger.Extension;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -21,7 +24,25 @@ builder.Services.AddConsulHttpClient("game-play");
 //builder.AddConsulGrpcClient<GamePlay.Grpc.GamePlay.GamePlayClient>("Gameplay", "game-play-grpc");
 builder.AddQYQSwaggerAndApiVersioning(new OpenApiInfo { Title = "CommonTest" }, new Asp.Versioning.ApiVersion(1));
 
-builder.Services.AddSnowIdRedisGenerator(builder.Configuration.GetSection("Redis").Get<RedisDBOptions>());
+#region EasyCaching×¢²á
+
+builder.Services.AddEasyCaching(options =>
+{
+    var redis = builder.Configuration.GetSection("Redis").Get<RedisDBOptions>();
+    Action<EasyCachingJsonSerializerOptions> easycaching = x =>
+    {
+        x.NullValueHandling = NullValueHandling.Ignore;
+        x.TypeNameHandling = TypeNameHandling.None;
+    };
+    options.UseRedis(config =>
+    {
+        config.DBConfig = redis;
+    }, "DefaultRedis").WithJson(easycaching, "DefaultRedis");
+});
+
+#endregion
+
+builder.Services.AddSnowIdRedisGenerator(null, "DefaultRedis");
 //builder.Services.AddDefaultSnowIdGenerator();
 
 builder.Services.AddQYQHttpLogging();

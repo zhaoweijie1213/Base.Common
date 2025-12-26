@@ -355,6 +355,11 @@
             已在游戏中
             </summary>
         </member>
+        <member name="F:QYQ.Base.Common.ApiResult.ApiResultCode.PaginationContextExpired">
+            <summary>
+            分页上下文已过期
+            </summary>
+        </member>
         <member name="T:QYQ.Base.Common.ApiResult.ApiResultFilter">
             <summary>
             返回结果处理
@@ -534,6 +539,11 @@
             支付金额
             </summary>
         </member>
+        <member name="F:QYQ.Base.Common.CustomClaimTypes.Token">
+            <summary>
+            令牌
+            </summary>
+        </member>
         <member name="T:QYQ.Base.Common.Tool.DateTimeExtension">
             <summary>
             时间扩展
@@ -619,41 +629,33 @@
         </member>
         <member name="M:QYQ.Base.Common.Tool.QRCoderHepler.GenerateQRCodeAsync(System.String)">
             <summary>
-            生成二维码
+            生成 PNG 二维码字节流（默认配置）
             </summary>
-            <param name="url"></param>
-            <returns></returns>
         </member>
         <member name="M:QYQ.Base.Common.Tool.QRCoderHepler.GenerateBase64QRCodeAsync(System.String)">
             <summary>
-            生成base64二维码
+            生成 Base64 PNG 二维码（默认配置）
             </summary>
-            <param name="url"></param>
-            <returns></returns>
         </member>
-        <member name="M:QYQ.Base.Common.Tool.QRCoderHepler.GenerateImage(System.String,System.Func{QRCoder.QRCode,SixLabors.ImageSharp.Image{SixLabors.ImageSharp.PixelFormats.Rgba32}})">
+        <member name="M:QYQ.Base.Common.Tool.QRCoderHepler.GenerateQRCodeAsync(System.String,System.Func{QRCoder.PngByteQRCode,System.Byte[]})">
             <summary>
-            生成Image
+            生成 PNG 二维码字节流，调用方可完全控制 GetGraphic 参数
             </summary>
-            <param name="content"></param>
-            <param name="getGraphic"></param>
-            <returns></returns>
+            <param name="url">内容</param>
+            <param name="getGraphic">
+             例如：qr => qr.GetGraphic(20)
+                   qr => qr.GetGraphic(20, darkColorRgba, lightColorRgba, drawQuietZones: true)
+            </param>
         </member>
-        <member name="M:QYQ.Base.Common.Tool.QRCoderHepler.GeneratePng(System.String,System.Func{QRCoder.PngByteQRCode,System.Byte[]})">
+        <member name="M:QYQ.Base.Common.Tool.QRCoderHepler.GenerateBase64QRCodeAsync(System.String,System.Func{QRCoder.Base64QRCode,System.String})">
             <summary>
-            生成PNG
+            生成 Base64 PNG 二维码，调用方可完全控制 GetGraphic 参数
             </summary>
-            <param name="content"></param>
-            <param name="getGraphic"></param>
-            <returns></returns>
-        </member>
-        <member name="M:QYQ.Base.Common.Tool.QRCoderHepler.GenerateBase64QRCode(System.String,System.Func{QRCoder.Base64QRCode,System.String})">
-            <summary>
-            生成PNG
-            </summary>
-            <param name="content"></param>
-            <param name="getGraphic"></param>
-            <returns></returns>
+            <param name="url">内容</param>
+            <param name="getGraphic">
+             例如：qr => qr.GetGraphic(20)
+                   qr => qr.GetGraphic(20, darkColorRgba, lightColorRgba, drawQuietZones: true)
+            </param>
         </member>
         <member name="T:QYQ.Base.Common.Extension.EnumExtension">
             <summary>
@@ -1015,6 +1017,11 @@
             </summary>
         </member>
         <member name="P:QYQ.Base.Common.Models.UserInfo.PayMoney">
+            <summary>
+            支付金额
+            </summary>
+        </member>
+        <member name="P:QYQ.Base.Common.Models.UserInfo.Token">
             <summary>
             支付金额
             </summary>
