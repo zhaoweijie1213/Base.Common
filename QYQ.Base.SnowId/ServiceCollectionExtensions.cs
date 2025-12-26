@@ -1,4 +1,5 @@
-﻿using EasyCaching.Redis;
+﻿using EasyCaching.Core;
+using EasyCaching.Redis;
 using EasyCaching.Serialization.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
@@ -42,30 +43,39 @@ namespace QYQ.Base.SnowId
         /// <param name="redis"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public static IServiceCollection AddSnowIdRedisGenerator(this IServiceCollection services, RedisDBOptions? redis)
+        public static IServiceCollection AddSnowIdRedisGenerator(this IServiceCollection services, RedisDBOptions? redis, string providerName = SnowIdRedisOptions.DefaultProviderName)
         {
+            var resolvedProviderName = string.IsNullOrWhiteSpace(providerName)
+                ? SnowIdRedisOptions.DefaultProviderName
+                : providerName;
+
+            services.Configure<SnowIdRedisOptions>(options => options.ProviderName = resolvedProviderName);
             services.AddSingleton<ISnowIdGenerator, SnowIdRedisGenerator>();
             services.AddSingleton<WorkerIdManager>();
 
-            if (redis == null)
+            var hasEasyCaching = services.Any(sd => sd.ServiceType == typeof(IEasyCachingProviderFactory));
+            if (redis == null && !hasEasyCaching)
             {
                 throw new Exception("请添加Redis配置!");
             }
 
             #region EasyCaching注册
 
-            services.AddEasyCaching(options =>
+            if (!hasEasyCaching)
             {
-                Action<EasyCachingJsonSerializerOptions> easycaching = x =>
+                services.AddEasyCaching(options =>
                 {
-                    x.NullValueHandling = NullValueHandling.Ignore;
-                    x.TypeNameHandling = TypeNameHandling.None;
-                };
-                options.UseRedis(config =>
-                {
-                    config.DBConfig = redis;
-                }, "SnowIdRedis").WithJson(easycaching, "SnowIdRedis");
-            });
+                    Action<EasyCachingJsonSerializerOptions> easycaching = x =>
+                    {
+                        x.NullValueHandling = NullValueHandling.Ignore;
+                        x.TypeNameHandling = TypeNameHandling.None;
+                    };
+                    options.UseRedis(config =>
+                    {
+                        config.DBConfig = redis;
+                    }, resolvedProviderName).WithJson(easycaching, resolvedProviderName);
+                });
+            }
 
             #endregion
 

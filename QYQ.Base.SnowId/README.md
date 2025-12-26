@@ -68,6 +68,31 @@ long customTimeId = generator.CreateId(DateTime.UtcNow.AddSeconds(-30));
 ```
 `AddSnowIdRedisGenerator` 会自动注册后台服务以完成 WorkerId 的申请、心跳刷新与注销。
 
+#### 复用已有 EasyCaching Provider
+当你的应用已注册 EasyCaching（例如在其他模块中统一配置），可以复用已存在的 provider，并通过 `providerName` 指定要使用的 Redis Provider 名称：
+```csharp
+using EasyCaching.Core.Configurations;
+using EasyCaching.Redis;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using QYQ.Base.SnowId;
+
+var builder = Host.CreateDefaultBuilder(args)
+    .ConfigureServices((context, services) =>
+    {
+        services.AddEasyCaching(options =>
+        {
+            options.UseRedis(config =>
+            {
+                config.DBConfig = context.Configuration.GetSection("SnowId:Redis").Get<RedisDBOptions>();
+            }, "MyRedisProvider");
+        });
+
+        services.AddSnowIdRedisGenerator(redis: null, providerName: "MyRedisProvider");
+    });
+```
+> 若已注册 EasyCaching，`AddSnowIdRedisGenerator` 会跳过重复的 `AddEasyCaching(...)`，仅注册 SnowId 相关服务。
+
 ## 配置与环境变量
 ### 默认生成器
 - `SnowServerId`：可通过环境变量或配置提供当前实例的 WorkerId；未设置时将随机生成一个 0-19 的 WorkerId。
@@ -88,6 +113,7 @@ long customTimeId = generator.CreateId(DateTime.UtcNow.AddSeconds(-30));
 ### Redis 生成器
 - `DataCenterId`：数据中心标识，默认值为 `0`。
 - `SnowId:Redis`：`RedisDBOptions` 结构的完整 Redis 连接配置（密码、节点、库号等）。
+- `providerName`：`AddSnowIdRedisGenerator` 的可选参数，指定使用的 EasyCaching Redis Provider 名称，默认 `SnowIdRedis`。
 
 典型 `appsettings.json` 片段：
 ```json
