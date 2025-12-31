@@ -184,19 +184,50 @@ namespace QYQ.Base.SnowId
                     var redis = GetRedis();
                     var usageRenewed = await redis.KeyExpireAsync(GetUsageIdKey(), (int)UsageKeyExpire.TotalSeconds);
                     var heartbeatRenewed = await redis.KeyExpireAsync(GetHeartbeatKey(_workerId), HeartbeatTtlSeconds);
+                    var usageRewritten = false;
+                    var heartbeatRewritten = false;
+                    var instanceIdentity = GetInstanceIdentity();
 
                     if (!usageRenewed)
                     {
                         _logger.LogWarning("刷新 WorkerId 集合过期时间失败，workerId: {workerId}", _workerId);
+                        var usageAdded = await redis.SAddAsync(GetUsageIdKey(), new List<long> { _workerId });
+                        if (usageAdded > 0)
+                        {
+                            var usageExpireSet = await redis.KeyExpireAsync(GetUsageIdKey(), (int)UsageKeyExpire.TotalSeconds);
+                            if (usageExpireSet)
+                            {
+                                usageRewritten = true;
+                                _logger.LogInformation("已补写 WorkerId 集合项并设置过期时间，workerId: {workerId}", _workerId);
+                            }
+                            else
+                            {
+                                _logger.LogWarning("补写 WorkerId 集合项成功但设置过期时间失败，workerId: {workerId}", _workerId);
+                            }
+                        }
+                        else
+                        {
+                            _logger.LogWarning("补写 WorkerId 集合项失败，workerId: {workerId}", _workerId);
+                        }
                     }
 
                     if (!heartbeatRenewed)
                     {
                         _logger.LogWarning("刷新 WorkerId 心跳失败，workerId: {workerId}", _workerId);
+                        var heartbeatSet = await redis.StringSetAsync(GetHeartbeatKey(_workerId), instanceIdentity, TimeSpan.FromSeconds(HeartbeatTtlSeconds));
+                        if (heartbeatSet)
+                        {
+                            heartbeatRewritten = true;
+                            _logger.LogInformation("已补写 WorkerId 心跳，workerId: {workerId}，实例标识: {instanceIdentity}", _workerId, instanceIdentity);
+                        }
+                        else
+                        {
+                            _logger.LogWarning("补写 WorkerId 心跳失败，workerId: {workerId}", _workerId);
+                        }
                     }
 
                     //_logger.LogDebug("刷新 WorkerId 的有效期，workerId: {workerId}", _workerId);
-                    return usageRenewed && heartbeatRenewed;
+                    return (usageRenewed || usageRewritten) && (heartbeatRenewed || heartbeatRewritten);
                 }
                 catch (Exception ex)
                 {
