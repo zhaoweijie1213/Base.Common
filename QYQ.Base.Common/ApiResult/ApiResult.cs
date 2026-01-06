@@ -44,7 +44,7 @@ namespace QYQ.Base.Common.ApiResult
         /// <param name="code"></param>
         /// <param name="data"></param>
         /// <param name="message"></param>
-        public ApiResult<T> SetRsult(int code, T? data, string message = "success")
+        public ApiResult<T> SetResult(int code, T? data, string message = "success")
         {
             Code = code;
             Data = data;
@@ -58,7 +58,7 @@ namespace QYQ.Base.Common.ApiResult
         /// <param name="code"></param>
         /// <param name="data"></param>
         /// <param name="message"></param>
-        public ApiResult<T> SetRsult(ApiResultCode code, T? data, string message)
+        public ApiResult<T> SetResult(ApiResultCode code, T? data, string message)
         {
             Code = (int)code;
             Data = data;
@@ -72,7 +72,7 @@ namespace QYQ.Base.Common.ApiResult
         /// </summary>
         /// <param name="code"></param>
         /// <param name="data"></param>
-        public ApiResult<T> SetRsult(ApiResultCode code, T? data)
+        public ApiResult<T> SetResult(ApiResultCode code, T? data)
         {
             Code = (int)code;
             Data = data;
