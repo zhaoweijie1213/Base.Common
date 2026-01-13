@@ -21,6 +21,11 @@ namespace QYQ.Base.SnowId
         private readonly int workerId;
 
         /// <summary>
+        /// 默认生成器无需注册 WorkerId
+        /// </summary>
+        public bool IsWorkerIdRegistered => true;
+
+        /// <summary>
         /// 
         /// </summary>
         public SnowIdDefaultGenerator(ILogger<SnowIdDefaultGenerator> logger, IConfiguration configuration, IOptions<SnowIdOptions> options)

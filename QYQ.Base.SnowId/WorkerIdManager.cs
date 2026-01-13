@@ -23,6 +23,11 @@ namespace QYQ.Base.SnowId
         /// </summary>
         private int _workerId { get; set; } = -1;
 
+        /// <summary>
+        /// 是否已成功注册 WorkerId
+        /// </summary>
+        public bool IsRegistered => _workerId >= 0;
+
         private const int max = 63;
 
         private const int HeartbeatTtlSeconds = 25;
