@@ -58,5 +58,10 @@ namespace QYQ.Base.SnowId.Interface
         /// <returns></returns>
         public DateTime GetDateTime(long sonwId);
 
+        /// <summary>
+        /// 是否已完成 WorkerId 注册
+        /// </summary>
+        public bool IsWorkerIdRegistered { get; }
+
     }
 }

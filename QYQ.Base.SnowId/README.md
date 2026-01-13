@@ -42,8 +42,11 @@ var builder = Host.CreateDefaultBuilder(args)
 
 using var host = builder.Build();
 var generator = host.Services.GetRequiredService<ISnowIdGenerator>();
-long id = generator.CreateId();
-long customTimeId = generator.CreateId(DateTime.UtcNow.AddMinutes(-1));
+if (generator.IsWorkerIdRegistered)
+{
+    long id = generator.CreateId();
+    long customTimeId = generator.CreateId(DateTime.UtcNow.AddMinutes(-1));
+}
 ```
 
 ### Redis 生成器（分布式 WorkerId 注册）
@@ -63,8 +66,11 @@ var builder = Host.CreateDefaultBuilder(args)
 
 using var host = builder.Build();
 var generator = host.Services.GetRequiredService<ISnowIdGenerator>();
-long id = generator.CreateId();
-long customTimeId = generator.CreateId(DateTime.UtcNow.AddSeconds(-30));
+if (generator.IsWorkerIdRegistered)
+{
+    long id = generator.CreateId();
+    long customTimeId = generator.CreateId(DateTime.UtcNow.AddSeconds(-30));
+}
 ```
 `AddSnowIdRedisGenerator` 会自动注册后台服务以完成 WorkerId 的申请、心跳刷新与注销。
 

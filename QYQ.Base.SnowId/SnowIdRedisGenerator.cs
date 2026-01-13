@@ -20,6 +20,11 @@ namespace QYQ.Base.SnowId
         private readonly WorkerIdManager _workerIdManager;
 
         /// <summary>
+        /// 是否已完成 WorkerId 注册
+        /// </summary>
+        public bool IsWorkerIdRegistered => _workerIdManager.IsRegistered;
+
+        /// <summary>
         /// 
         /// </summary>
         public SnowIdRedisGenerator(ILogger<SnowIdRedisGenerator> logger, WorkerIdManager workerIdManager, IConfiguration configuration, IOptions<SnowIdOptions> options)
