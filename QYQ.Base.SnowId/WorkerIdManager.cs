@@ -171,7 +171,7 @@ namespace QYQ.Base.SnowId
             await redis.SRemAsync(GetUsageIdKey(), new List<long>() { _workerId });
             await redis.KeyDelAsync(GetHeartbeatKey(_workerId));
 
-            _workerId = -1;
+            //_workerId = -1;
             _logger.LogInformation("WorkerId 注销成功");
         }
 
