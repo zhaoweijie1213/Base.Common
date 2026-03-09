@@ -1,17 +1,10 @@
 ﻿using Consul;
 using Grpc.Net.Client.Balancer;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Timers;
 
 namespace QYQ.Base.Consul.Grpc.Resolve
 {
@@ -42,6 +35,8 @@ namespace QYQ.Base.Consul.Grpc.Resolve
 
         private readonly TimeSpan _refreshInterval = TimeSpan.FromSeconds(30);
 
+        private ConsulClient? _consulClient;
+
         /// <summary>
         /// 
         /// </summary>
@@ -69,13 +64,13 @@ namespace QYQ.Base.Consul.Grpc.Resolve
                 _logger.LogError(message);
                 throw new InvalidOperationException(message);
             }
-            using ConsulClient client = new(c =>
+            _consulClient ??= new ConsulClient(c =>
             {
                 c.Address = new Uri(ConsulClientOption.ConsulAddress);
                 c.Token = ConsulClientOption.Token;
             });
             //consul实例获取
-            var entrys = await client.Health.Service(ServiceName, tag: "", passingOnly: true, cancellationToken);
+            var entrys = await _consulClient.Health.Service(ServiceName, tag: "", passingOnly: true, cancellationToken);
             var addresses = entrys.Response
                 .Select(entry =>
                 {
@@ -89,6 +84,13 @@ namespace QYQ.Base.Consul.Grpc.Resolve
             }
             // 解析结果通知负载均衡器
             Listener(ResolverResult.ForResult(addresses));
+        }
+
+        public override void Dispose()
+        {
+            _timer?.Dispose();
+            _consulClient?.Dispose();
+            base.Dispose();
         }
 
         private void OnTimerCallback(object? state)
