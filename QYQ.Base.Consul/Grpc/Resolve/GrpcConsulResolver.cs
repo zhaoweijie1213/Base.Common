@@ -86,13 +86,6 @@ namespace QYQ.Base.Consul.Grpc.Resolve
             Listener(ResolverResult.ForResult(addresses));
         }
 
-        public override void Dispose()
-        {
-            _timer?.Dispose();
-            _consulClient?.Dispose();
-            base.Dispose();
-        }
-
         private void OnTimerCallback(object? state)
         {
             try

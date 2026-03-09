@@ -94,7 +94,7 @@ namespace Test.Web.Controllers
 
             if (dateTimeNow.ToString("yyyy-MM-dd HH:mm:ss:fff") == dateTime.ToString("yyyy-MM-dd HH:mm:ss:fff"))
             {
-                result.SetRsult(ApiResultCode.Success, $"{dateTime:g} ID:{id}");
+                result.SetResult(ApiResultCode.Success, $"{dateTime:g} ID:{id}");
             }
 
             return result;
@@ -110,7 +110,7 @@ namespace Test.Web.Controllers
         public ApiResult<string> Email([FromForm] EmailInput input)
         {
             ApiResult<string> result = new();
-            result.SetRsult(ApiResultCode.Success, input.Email);
+            result.SetResult(ApiResultCode.Success, input.Email);
             return result;
 
         }
@@ -125,7 +125,7 @@ namespace Test.Web.Controllers
         {
             ApiResult<byte[]> result = new();
             var qr = await QRCoderHepler.GenerateQRCodeAsync(content);
-            result.SetRsult(ApiResultCode.Success, qr);
+            result.SetResult(ApiResultCode.Success, qr);
             return result;
 
         }
@@ -140,7 +140,7 @@ namespace Test.Web.Controllers
         {
             ApiResult<string> result = new();
             var qr = await QRCoderHepler.GenerateBase64QRCodeAsync(content);
-            result.SetRsult(ApiResultCode.Success, qr);
+            result.SetResult(ApiResultCode.Success, qr);
             return result;
 
         }
