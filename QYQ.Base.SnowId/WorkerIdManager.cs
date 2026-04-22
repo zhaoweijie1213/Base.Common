@@ -10,12 +10,18 @@ namespace QYQ.Base.SnowId
     /// <summary>
     /// 管理 SnowId 的 WorkerId 注册、续租与注销，确保同一实例在 Redis 中独占槽位。
     /// </summary>
-    public class WorkerIdManager
+    /// <remarks>
+    /// 初始化 <see cref="WorkerIdManager"/>，并读取 Redis Provider 配置。
+    /// </remarks>
+    /// <param name="logger">日志记录器，用于输出注册与续租过程的运行信息。</param>
+    /// <param name="easyCachingProviderFactory">EasyCaching Provider 工厂，用于获取 Redis Provider。</param>
+    /// <param name="options">SnowId Redis 配置选项，包含 ProviderName 等参数。</param>
+    public class WorkerIdManager(ILogger<WorkerIdManager> logger, IEasyCachingProviderFactory easyCachingProviderFactory, IOptions<SnowIdRedisOptions> options)
     {
         /// <summary>
         /// 记录 WorkerId 生命周期相关日志。
         /// </summary>
-        private readonly ILogger<WorkerIdManager> _logger;
+        private readonly ILogger<WorkerIdManager> _logger = logger;
 
         /// <summary>
         /// 当前注册的workerId
@@ -50,29 +56,14 @@ namespace QYQ.Base.SnowId
         /// <summary>
         /// EasyCaching Provider 工厂。
         /// </summary>
-        private readonly IEasyCachingProviderFactory _easyCachingProviderFactory;
+        private readonly IEasyCachingProviderFactory _easyCachingProviderFactory = easyCachingProviderFactory;
 
         /// <summary>
         /// Redis Provider 名称。
         /// </summary>
-        private readonly string _providerName;
-
-
-
-        /// <summary>
-        /// 初始化 <see cref="WorkerIdManager"/>，并读取 Redis Provider 配置。
-        /// </summary>
-        /// <param name="logger">日志记录器，用于输出注册与续租过程的运行信息。</param>
-        /// <param name="easyCachingProviderFactory">EasyCaching Provider 工厂，用于获取 Redis Provider。</param>
-        /// <param name="options">SnowId Redis 配置选项，包含 ProviderName 等参数。</param>
-        public WorkerIdManager(ILogger<WorkerIdManager> logger, IEasyCachingProviderFactory easyCachingProviderFactory, IOptions<SnowIdRedisOptions> options)
-        {
-            _logger = logger;
-            _easyCachingProviderFactory = easyCachingProviderFactory;
-            _providerName = string.IsNullOrWhiteSpace(options.Value?.ProviderName)
+        private readonly string _providerName = string.IsNullOrWhiteSpace(options.Value?.ProviderName)
                 ? SnowIdRedisOptions.DefaultProviderName
                 : options.Value.ProviderName;
-        }
 
         /// <summary>
         /// 获取当前配置对应的 Redis 缓存 Provider。
@@ -85,6 +76,7 @@ namespace QYQ.Base.SnowId
 
         /// <summary>
         /// 尝试注册可用的 WorkerId 槽位，并在成功后写入心跳 Key。
+        /// 在 Redis 中为当前进程抢占一个唯一的 WorkerId（0~63），供 SnowId 生成器使用，避免多实例冲突
         /// </summary>
         /// <returns>
         /// 注册成功返回 <c>true</c>；当全部槽位均不可用且重试结束后返回 <c>false</c>。
@@ -92,9 +84,43 @@ namespace QYQ.Base.SnowId
         public async Task<bool> RegisterWorkerId()
         {
             var redis = GetRedis();
+            //计算重试等待时间
             var delaySeconds = HeartbeatTtlSeconds / 2;
 
             _logger.LogInformation("开始注册 WorkerId...");
+            /***
+             * 每一轮都会随机选一个起点 start（0~63），然后遍历全部 64 个槽位
+             * 方法流程（按执行顺序）
+                获取 Redis provider：var redis = GetRedis();
+                计算重试等待时间：delaySeconds = HeartbeatTtlSeconds / 2
+                    当前 HeartbeatTtlSeconds = 25，所以等待约 12 秒。
+                最多进行 MaxRegisterSweeps = 3 轮扫描。
+                每一轮都会随机选一个起点 start（0~63），然后遍历全部 64 个槽位：
+                    计算候选 workerId = (start + i) % 64
+                    构造心跳键：{AppDomain}_SnowWorkerHeartbeat:{workerId}
+                    执行 Redis SET key value EX 25 NX
+                    NX 表示只在 key 不存在时写入，相当于“抢锁”
+                    value 是当前实例唯一标识 InstanceIdentity
+                一旦某个槽位抢占成功：
+                    把 _workerId 设为该值
+                    记录成功日志
+                    立即返回 true
+                若本轮没抢到且还有下一轮：
+                    记录 warning 日志
+                    Task.Delay 等待后继续下一轮
+                三轮都失败：
+                    记录 error 日志（64 个槽位都被占用）
+                    返回 false
+                关键点总结
+                    并发安全来源：Redis 的 SET NX + 过期时间 原子语义。
+                    防僵死：心跳 key 有 TTL（25 秒），实例挂掉后槽位会自动释放。
+                    负载均衡考虑：每轮随机起点，减少多个实例总从 0 开始抢导致的热点冲突。
+                返回值语义：
+                    true：注册成功，_workerId 已可用
+                    false：当前阶段无法拿到任何 WorkerId（通常应视为启动失败）
+             * 
+             * ***/
+
             for (var sweep = 1; sweep <= MaxRegisterSweeps; sweep++)
             {
                 var start = Random.Shared.Next(0, max + 1);
@@ -224,7 +250,7 @@ namespace QYQ.Base.SnowId
                     }
 
                     _logger.LogError("WorkerId {workerId} 已被其他实例 {owner} 占用，放弃该 slot。", _workerId, owner);
-                    _workerId = -1;
+                    //_workerId = -1;
                     return false;
                 }
                 catch (Exception ex)
