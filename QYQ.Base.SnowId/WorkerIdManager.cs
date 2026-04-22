@@ -3,10 +3,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using QYQ.Base.SnowId.Options;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace QYQ.Base.SnowId
@@ -29,9 +25,10 @@ namespace QYQ.Base.SnowId
         public bool IsRegistered => _workerId >= 0;
 
         private const int max = 63;
+        private const int MaxRegisterSweeps = 3;
 
         private const int HeartbeatTtlSeconds = 25;
-        private static readonly TimeSpan UsageKeyExpire = TimeSpan.FromSeconds(30);
+        private static readonly string InstanceIdentity = BuildInstanceIdentity();
 
         private readonly IEasyCachingProviderFactory _easyCachingProviderFactory;
         private readonly string _providerName;
@@ -65,67 +62,37 @@ namespace QYQ.Base.SnowId
         public async Task<bool> RegisterWorkerId()
         {
             var redis = GetRedis();
+            var delaySeconds = HeartbeatTtlSeconds / 2;
 
             _logger.LogInformation("开始注册 WorkerId...");
-            //获取redis Key
-            string key = GetWorkerIdKey();
-            string usageKey = GetUsageIdKey();
-            string instanceIdentity = GetInstanceIdentity();
-
-            while (true)
+            for (var sweep = 1; sweep <= MaxRegisterSweeps; sweep++)
             {
-                //只是作为分配计数器使用，在注册时通过 INCR 获取下一个候选值，超过上限后会被重置为 0
-                long workerId = await redis.IncrByAsync(key);
-                //判断workid是否大于最大值
-                if (workerId > max)
+                var start = Random.Shared.Next(0, max + 1);
+                for (var i = 0; i <= max; i++)
                 {
-                    //将值初始化
-                    bool status = await redis.StringSetAsync(key, "0");
-                    if (status) workerId = 0;
-                }
-                var heartbeatKey = GetHeartbeatKey(Convert.ToInt32(workerId));
-                var heartbeatExists = await redis.KeyExistsAsync(heartbeatKey);
-                if (heartbeatExists)
-                {
-                    _logger.LogWarning("WorkerId {workerId} 已存在心跳，跳过当前候选。", workerId);
-                    continue;
-                }
+                    var workerId = (start + i) % (max + 1);
+                    var heartbeatKey = GetHeartbeatKey(workerId);
+                    var acquired = await redis.StringSetAsync(
+                        heartbeatKey,
+                        InstanceIdentity,
+                        TimeSpan.FromSeconds(HeartbeatTtlSeconds),
+                        "nx");
+                    if (!acquired) continue;
 
-                //将workerId放入已使用集合
-                var res = await redis.SAddAsync(usageKey, new List<long>() { workerId });
-                if (res > 0)
-                {
-                    var heartbeatSet = await redis.StringSetAsync(heartbeatKey, instanceIdentity, TimeSpan.FromSeconds(HeartbeatTtlSeconds));
-                    if (!heartbeatSet)
-                    {
-                        _logger.LogError("WorkerId {workerId} 心跳写入失败，停止注册。", workerId);
-                        return false;
-                    }
-
-                    _workerId = Convert.ToInt32(workerId);
-                    _logger.LogInformation("WorkerId 注册成功，workerId: {workerId}，实例标识: {instanceIdentity}", _workerId, instanceIdentity);
+                    _workerId = workerId;
+                    _logger.LogInformation("WorkerId 注册成功，workerId: {workerId}，实例标识: {instanceIdentity}", _workerId, InstanceIdentity);
                     return true;
                 }
-                _logger.LogWarning("WorkerId {workerId} 抢占失败，可能已被其他实例占用。", workerId);
+
+                if (sweep < MaxRegisterSweeps)
+                {
+                    _logger.LogWarning("WorkerId 注册第 {sweep} 轮未抢到槽位，等待 {delay}s 后重试。", sweep, delaySeconds);
+                    await Task.Delay(TimeSpan.FromSeconds(delaySeconds));
+                }
             }
-        }
 
-        /// <summary>
-        /// workerId的key
-        /// </summary>
-        /// <returns></returns>
-        public static string GetWorkerIdKey()
-        {
-            return $"{AppDomain.CurrentDomain.FriendlyName}_SnowWorkerIds";
-        }
-
-        /// <summary>
-        /// 获取已使用id的key
-        /// </summary>
-        /// <returns></returns>
-        public static string GetUsageIdKey()
-        {
-            return $"{AppDomain.CurrentDomain.FriendlyName}_SnowUsageIds";
+            _logger.LogError("WorkerId 注册失败：全部 {slotCount} 个槽位均被占用，启动中止。", max + 1);
+            return false;
         }
 
         /// <summary>
@@ -138,9 +105,9 @@ namespace QYQ.Base.SnowId
             return $"{AppDomain.CurrentDomain.FriendlyName}_SnowWorkerHeartbeat:{workerId}";
         }
 
-        private static string GetInstanceIdentity()
+        private static string BuildInstanceIdentity()
         {
-            return $"{Environment.MachineName}:{Environment.ProcessId}:{AppDomain.CurrentDomain.FriendlyName}";
+            return $"{Environment.MachineName}:{Environment.ProcessId}:{AppDomain.CurrentDomain.FriendlyName}:{Guid.NewGuid():N}";
         }
 
         /// <summary>
@@ -165,11 +132,24 @@ namespace QYQ.Base.SnowId
         public async Task UnRegister()
         {
             _logger.LogInformation("注销 WorkerId: {workerId}", _workerId);
-            var redis = GetRedis();
+            if (_workerId < 0)
+            {
+                _logger.LogInformation("尚未注册 WorkerId，无需注销。");
+                return;
+            }
 
-            //从已使用集合移除id
-            await redis.SRemAsync(GetUsageIdKey(), new List<long>() { _workerId });
-            await redis.KeyDelAsync(GetHeartbeatKey(_workerId));
+            var redis = GetRedis();
+            var heartbeatKey = GetHeartbeatKey(_workerId);
+            var owner = await redis.StringGetAsync(heartbeatKey);
+
+            if (owner == InstanceIdentity)
+            {
+                await redis.KeyDelAsync(heartbeatKey);
+            }
+            else
+            {
+                _logger.LogWarning("WorkerId {workerId} 当前归属为 {owner}，跳过删除心跳。", _workerId, owner);
+            }
 
             //_workerId = -1;
             _logger.LogInformation("WorkerId 注销成功");
@@ -187,52 +167,32 @@ namespace QYQ.Base.SnowId
                 try
                 {
                     var redis = GetRedis();
-                    var usageRenewed = await redis.KeyExpireAsync(GetUsageIdKey(), (int)UsageKeyExpire.TotalSeconds);
-                    var heartbeatRenewed = await redis.KeyExpireAsync(GetHeartbeatKey(_workerId), HeartbeatTtlSeconds);
-                    var usageRewritten = false;
-                    var heartbeatRewritten = false;
-                    var instanceIdentity = GetInstanceIdentity();
+                    var heartbeatKey = GetHeartbeatKey(_workerId);
+                    var owner = await redis.StringGetAsync(heartbeatKey);
 
-                    if (!usageRenewed)
+                    if (owner == InstanceIdentity)
                     {
-                        _logger.LogWarning("刷新 WorkerId 集合过期时间失败，workerId: {workerId}", _workerId);
-                        var usageAdded = await redis.SAddAsync(GetUsageIdKey(), new List<long> { _workerId });
-                        if (usageAdded > 0)
-                        {
-                            var usageExpireSet = await redis.KeyExpireAsync(GetUsageIdKey(), (int)UsageKeyExpire.TotalSeconds);
-                            if (usageExpireSet)
-                            {
-                                usageRewritten = true;
-                                _logger.LogInformation("已补写 WorkerId 集合项并设置过期时间，workerId: {workerId}", _workerId);
-                            }
-                            else
-                            {
-                                _logger.LogWarning("补写 WorkerId 集合项成功但设置过期时间失败，workerId: {workerId}", _workerId);
-                            }
-                        }
-                        else
-                        {
-                            _logger.LogWarning("补写 WorkerId 集合项失败，workerId: {workerId}", _workerId);
-                        }
+                        return await redis.KeyExpireAsync(heartbeatKey, HeartbeatTtlSeconds);
                     }
 
-                    if (!heartbeatRenewed)
+                    if (string.IsNullOrWhiteSpace(owner))
                     {
-                        _logger.LogWarning("刷新 WorkerId 心跳失败，workerId: {workerId}", _workerId);
-                        var heartbeatSet = await redis.StringSetAsync(GetHeartbeatKey(_workerId), instanceIdentity, TimeSpan.FromSeconds(HeartbeatTtlSeconds));
-                        if (heartbeatSet)
+                        var reacquired = await redis.StringSetAsync(
+                            heartbeatKey,
+                            InstanceIdentity,
+                            TimeSpan.FromSeconds(HeartbeatTtlSeconds),
+                            "nx");
+                        if (reacquired)
                         {
-                            heartbeatRewritten = true;
-                            _logger.LogInformation("已补写 WorkerId 心跳，workerId: {workerId}，实例标识: {instanceIdentity}", _workerId, instanceIdentity);
+                            return true;
                         }
-                        else
-                        {
-                            _logger.LogWarning("补写 WorkerId 心跳失败，workerId: {workerId}", _workerId);
-                        }
+
+                        owner = await redis.StringGetAsync(heartbeatKey);
                     }
 
-                    //_logger.LogDebug("刷新 WorkerId 的有效期，workerId: {workerId}", _workerId);
-                    return (usageRenewed || usageRewritten) && (heartbeatRenewed || heartbeatRewritten);
+                    _logger.LogError("WorkerId {workerId} 已被其他实例 {owner} 占用，放弃该 slot。", _workerId, owner);
+                    _workerId = -1;
+                    return false;
                 }
                 catch (Exception ex)
                 {
