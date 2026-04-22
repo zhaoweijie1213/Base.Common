@@ -8,10 +8,13 @@ using System.Threading.Tasks;
 namespace QYQ.Base.SnowId
 {
     /// <summary>
-    /// workerId管理
+    /// 管理 SnowId 的 WorkerId 注册、续租与注销，确保同一实例在 Redis 中独占槽位。
     /// </summary>
     public class WorkerIdManager
     {
+        /// <summary>
+        /// 记录 WorkerId 生命周期相关日志。
+        /// </summary>
         private readonly ILogger<WorkerIdManager> _logger;
 
         /// <summary>
@@ -24,20 +27,44 @@ namespace QYQ.Base.SnowId
         /// </summary>
         public bool IsRegistered => _workerId >= 0;
 
+        /// <summary>
+        /// WorkerId 槽位最大值（包含边界）。
+        /// </summary>
         private const int max = 63;
+
+        /// <summary>
+        /// 注册 WorkerId 时的最大扫描轮次。
+        /// </summary>
         private const int MaxRegisterSweeps = 3;
 
+        /// <summary>
+        /// 心跳 Key 过期时间（秒）。
+        /// </summary>
         private const int HeartbeatTtlSeconds = 25;
+
+        /// <summary>
+        /// 当前实例唯一标识，用于校验心跳 Key 归属。
+        /// </summary>
         private static readonly string InstanceIdentity = BuildInstanceIdentity();
 
+        /// <summary>
+        /// EasyCaching Provider 工厂。
+        /// </summary>
         private readonly IEasyCachingProviderFactory _easyCachingProviderFactory;
+
+        /// <summary>
+        /// Redis Provider 名称。
+        /// </summary>
         private readonly string _providerName;
 
 
 
         /// <summary>
-        /// 
+        /// 初始化 <see cref="WorkerIdManager"/>，并读取 Redis Provider 配置。
         /// </summary>
+        /// <param name="logger">日志记录器，用于输出注册与续租过程的运行信息。</param>
+        /// <param name="easyCachingProviderFactory">EasyCaching Provider 工厂，用于获取 Redis Provider。</param>
+        /// <param name="options">SnowId Redis 配置选项，包含 ProviderName 等参数。</param>
         public WorkerIdManager(ILogger<WorkerIdManager> logger, IEasyCachingProviderFactory easyCachingProviderFactory, IOptions<SnowIdRedisOptions> options)
         {
             _logger = logger;
@@ -48,17 +75,20 @@ namespace QYQ.Base.SnowId
         }
 
         /// <summary>
-        /// 获取redis
+        /// 获取当前配置对应的 Redis 缓存 Provider。
         /// </summary>
-        /// <returns></returns>
+        /// <returns>可用于执行 WorkerId 相关 Redis 操作的 <see cref="IRedisCachingProvider"/>。</returns>
         public IRedisCachingProvider GetRedis()
         {
            return  _easyCachingProviderFactory.GetRedisProvider(_providerName);
         }
 
         /// <summary>
-        /// 注册workerId
+        /// 尝试注册可用的 WorkerId 槽位，并在成功后写入心跳 Key。
         /// </summary>
+        /// <returns>
+        /// 注册成功返回 <c>true</c>；当全部槽位均不可用且重试结束后返回 <c>false</c>。
+        /// </returns>
         public async Task<bool> RegisterWorkerId()
         {
             var redis = GetRedis();
@@ -96,10 +126,10 @@ namespace QYQ.Base.SnowId
         }
 
         /// <summary>
-        /// 获取心跳 key
+        /// 生成指定 WorkerId 的心跳 Key。
         /// </summary>
-        /// <param name="workerId"></param>
-        /// <returns></returns>
+        /// <param name="workerId">WorkerId 槽位编号。</param>
+        /// <returns>用于标识该 WorkerId 心跳状态的 Redis Key。</returns>
         public static string GetHeartbeatKey(int workerId)
         {
             return $"{AppDomain.CurrentDomain.FriendlyName}_SnowWorkerHeartbeat:{workerId}";
@@ -111,9 +141,10 @@ namespace QYQ.Base.SnowId
         }
 
         /// <summary>
-        /// 获取workerid
+        /// 获取当前实例已注册的 WorkerId。
         /// </summary>
-        /// <returns></returns>
+        /// <returns>当前实例持有的 WorkerId。</returns>
+        /// <exception cref="SystemException">当实例尚未注册 WorkerId 时抛出。</exception>
         public int GetWorkerId()
         {
             if (_workerId < 0)
@@ -126,9 +157,9 @@ namespace QYQ.Base.SnowId
         }
 
         /// <summary>
-        /// 注销
+        /// 注销当前 WorkerId，并在归属校验通过后删除对应心跳 Key。
         /// </summary>
-        /// <returns></returns>
+        /// <returns>表示异步注销流程的任务。</returns>
         public async Task UnRegister()
         {
             _logger.LogInformation("注销 WorkerId: {workerId}", _workerId);
@@ -157,9 +188,11 @@ namespace QYQ.Base.SnowId
 
 
         /// <summary>
-        /// 刷新有效期
+        /// 刷新当前 WorkerId 的心跳有效期，必要时尝试重新抢占同一槽位。
         /// </summary>
-        /// <returns></returns>
+        /// <returns>
+        /// 刷新或重新抢占成功返回 <c>true</c>；若丢失归属、未注册或发生异常则返回 <c>false</c>。
+        /// </returns>
         public async Task<bool> RefreshAsync()
         {
             if (_workerId != -1)
