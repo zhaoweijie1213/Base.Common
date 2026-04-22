@@ -31,7 +31,7 @@
             结果
             </summary>
         </member>
-        <member name="M:QYQ.Base.Common.ApiResult.ApiResult`1.SetRsult(System.Int32,`0,System.String)">
+        <member name="M:QYQ.Base.Common.ApiResult.ApiResult`1.SetResult(System.Int32,`0,System.String)">
             <summary>
             设置返回结果
             </summary>
@@ -39,7 +39,7 @@
             <param name="data"></param>
             <param name="message"></param>
         </member>
-        <member name="M:QYQ.Base.Common.ApiResult.ApiResult`1.SetRsult(QYQ.Base.Common.ApiResult.ApiResultCode,`0,System.String)">
+        <member name="M:QYQ.Base.Common.ApiResult.ApiResult`1.SetResult(QYQ.Base.Common.ApiResult.ApiResultCode,`0,System.String)">
             <summary>
             设置返回结果
             </summary>
@@ -47,7 +47,7 @@
             <param name="data"></param>
             <param name="message"></param>
         </member>
-        <member name="M:QYQ.Base.Common.ApiResult.ApiResult`1.SetRsult(QYQ.Base.Common.ApiResult.ApiResultCode,`0)">
+        <member name="M:QYQ.Base.Common.ApiResult.ApiResult`1.SetResult(QYQ.Base.Common.ApiResult.ApiResultCode,`0)">
             <summary>
             设置返回结果
             返回枚举描述信息
@@ -712,6 +712,20 @@
             添加apollo配置
             </summary>
             <param name="builder"></param>
+            <returns></returns>
+        </member>
+        <member name="M:QYQ.Base.Common.IOCExtensions.ApolloConfigExtension.UseQYQApolloLogger(Microsoft.AspNetCore.Builder.WebApplication)">
+            <summary>
+            启用 Apollo 日志
+            </summary>
+            <param name="app"></param>
+            <returns></returns>
+        </member>
+        <member name="M:QYQ.Base.Common.IOCExtensions.ApolloConfigExtension.UseQYQApolloLogger(Microsoft.Extensions.Hosting.IHost)">
+            <summary>
+            启用 Apollo 日志
+            </summary>
+            <param name="app"></param>
             <returns></returns>
         </member>
         <member name="T:QYQ.Base.Common.IOCExtensions.AuthenticationExtension">
