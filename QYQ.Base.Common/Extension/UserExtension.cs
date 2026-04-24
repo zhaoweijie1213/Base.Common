@@ -48,6 +48,7 @@ namespace QYQ.Base.Common.Extension
             {
                 user.Sex = claimsPrincipal.FindFirstValue(CustomClaimTypes.Sex) ?? string.Empty;
                 user.Token = claimsPrincipal.FindFirstValue(CustomClaimTypes.Token) ?? string.Empty;
+                user.Pf = claimsPrincipal.FindFirstValue(CustomClaimTypes.Pf) ?? string.Empty;
 
                 // Config (JSON -> Dictionary<string,string>)
                 var cfg = claimsPrincipal.FindFirstValue(CustomClaimTypes.Config);

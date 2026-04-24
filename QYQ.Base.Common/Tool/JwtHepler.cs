@@ -101,6 +101,7 @@ namespace QYQ.Base.Common.Tool
                 case UserInfoTokenType.Domestic:
                     // 国内
                     claims.Add(new Claim(CustomClaimTypes.Sex, info.Sex ?? string.Empty));
+                    claims.Add(new Claim(CustomClaimTypes.Pf, info.Pf ?? string.Empty));
                     claims.Add(new Claim(CustomClaimTypes.Config, JsonConvert.SerializeObject(info.Config)));
                     claims.Add(new Claim(CustomClaimTypes.RealName, info.RealName.ToString()));
                     claims.Add(new Claim(CustomClaimTypes.PlayCount, info.PlayCount.ToString()));

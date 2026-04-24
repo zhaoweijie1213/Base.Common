@@ -56,6 +56,12 @@ namespace QYQ.Base.Common.Models
         [JsonProperty("lobby", NullValueHandling = NullValueHandling.Ignore)]
         public int Lobby { get; set; }
 
+        /// <summary>
+        /// 大厅标识
+        /// </summary>
+        [JsonProperty("pf", NullValueHandling = NullValueHandling.Ignore)]
+        public string Pf { get; set; } = string.Empty;
+
 
         /// <summary>
         /// 配置

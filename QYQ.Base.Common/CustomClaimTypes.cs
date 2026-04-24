@@ -47,6 +47,11 @@ namespace QYQ.Base.Common
         public const string Lobby = "Lobby";
 
         /// <summary>
+        /// 大厅标识
+        /// </summary>
+        public const string Pf = "Pf";
+
+        /// <summary>
         /// 配置
         /// </summary>
         public const string Config = "Config";
