@@ -27,7 +27,7 @@ namespace QYQ.Base.Common.IOCExtensions
         /// <returns></returns>
         public static IApolloConfigurationBuilder AddQYQApollo(this IConfigurationBuilder builder)
         {
-            LogManager.UseConsoleLogging(Com.Ctrip.Framework.Apollo.Logging.LogLevel.Trace);
+            LogManager.UseConsoleLogging(Com.Ctrip.Framework.Apollo.Logging.LogLevel.Warning);
             var configuration = builder.Build();
             if (configuration == null)
             {
