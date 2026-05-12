@@ -26,6 +26,13 @@ namespace QYQ.Base.Swagger
         /// <param name="context">Swagger 文档处理上下文。</param>
         public void Process(DocumentProcessorContext context)
         {
+            var operationTagNames = context.Document.Operations
+                .SelectMany(item => item.Operation.Tags)
+                .Where(item => !string.IsNullOrWhiteSpace(item))
+                .ToHashSet(StringComparer.Ordinal);
+
+            RemoveUnusedDocumentTags(context, operationTagNames);
+
             foreach (var controllerType in context.ControllerTypes)
             {
                 var description = _xmlCommentProvider.GetSummary(controllerType);
@@ -35,6 +42,11 @@ namespace QYQ.Base.Swagger
                 }
 
                 var tagName = GetControllerTagName(controllerType);
+                if (!operationTagNames.Contains(tagName))
+                {
+                    continue;
+                }
+
                 var tag = context.Document.Tags.FirstOrDefault(item => item.Name == tagName);
                 if (tag == null)
                 {
@@ -53,7 +65,19 @@ namespace QYQ.Base.Swagger
             }
         }
 
-        private static string GetControllerTagName(Type controllerType)
+        private static void RemoveUnusedDocumentTags(DocumentProcessorContext context, HashSet<string> operationTagNames)
+        {
+            var unusedTags = context.Document.Tags
+                .Where(item => !operationTagNames.Contains(item.Name))
+                .ToList();
+
+            foreach (var unusedTag in unusedTags)
+            {
+                context.Document.Tags.Remove(unusedTag);
+            }
+        }
+
+        internal static string GetControllerTagName(Type controllerType)
         {
             const string controllerSuffix = "Controller";
             return controllerType.Name.EndsWith(controllerSuffix, StringComparison.Ordinal)

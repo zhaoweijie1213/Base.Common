@@ -183,6 +183,7 @@ namespace QYQ.Base.Swagger.Extension
                       document.ApiGroupNames = new[] { description.GroupName };
 
                       //枚举处理
+                      document.OperationProcessors.Add(new ControllerOperationTagProcessor());
                       document.SchemaSettings.SchemaProcessors.Add(new EnumProcessor(xmlCommentProvider));
                       document.DocumentProcessors.Add(new ControllerXmlCommentTagProcessor(xmlCommentProvider));
                       if (IsProduction && apiGateway)

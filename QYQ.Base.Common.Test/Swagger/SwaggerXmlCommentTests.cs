@@ -31,16 +31,28 @@ namespace QYQ.Base.Common.Test.Swagger
         }
 
         /// <summary>
-        /// 枚举成员同时存在 DescriptionAttribute 和 XML Summary 时应优先使用特性说明。
+        /// 枚举成员同时存在 DescriptionAttribute 和 XML Summary 时应同时显示两类说明。
         /// </summary>
         [Fact]
-        public void Process_ShouldUseDescriptionAttributeFirst_WhenEnumFieldHasBothComments()
+        public void Process_ShouldAppendXmlSummary_WhenEnumFieldHasDescriptionAttribute()
         {
             var processor = new EnumProcessor(CreateXmlCommentProvider());
             var schema = CreateSchema(typeof(AttributeFirstEnum), processor);
 
-            Assert.Contains("1:Active,特性优先状态;", schema.Description);
-            Assert.DoesNotContain("XML 状态说明", schema.Description);
+            Assert.Contains("1:Active,特性优先状态（XML 状态说明）;", schema.Description);
+        }
+
+        /// <summary>
+        /// 枚举成员的 DescriptionAttribute 和 XML Summary 相同时不应重复显示。
+        /// </summary>
+        [Fact]
+        public void Process_ShouldDeduplicateDescription_WhenEnumFieldCommentsAreSame()
+        {
+            var processor = new EnumProcessor(CreateXmlCommentProvider());
+            var schema = CreateSchema(typeof(SameDescriptionEnum), processor);
+
+            Assert.Contains("1:Enabled,相同说明;", schema.Description);
+            Assert.DoesNotContain("相同说明（相同说明）", schema.Description);
         }
 
         /// <summary>
@@ -50,7 +62,7 @@ namespace QYQ.Base.Common.Test.Swagger
         public void Process_ShouldSetTagDescription_WhenControllerTagHasNoDescription()
         {
             var processor = new ControllerXmlCommentTagProcessor(CreateXmlCommentProvider());
-            var document = new OpenApiDocument();
+            var document = CreateDocumentWithOperationTag("Sample");
             document.Tags.Add(new OpenApiTag { Name = "Sample" });
 
             processor.Process(CreateDocumentProcessorContext(document, typeof(SampleController)));
@@ -65,12 +77,58 @@ namespace QYQ.Base.Common.Test.Swagger
         public void Process_ShouldKeepExistingTagDescription_WhenTagHasDescription()
         {
             var processor = new ControllerXmlCommentTagProcessor(CreateXmlCommentProvider());
-            var document = new OpenApiDocument();
+            var document = CreateDocumentWithOperationTag("Sample");
             document.Tags.Add(new OpenApiTag { Name = "Sample", Description = "显式说明" });
 
             processor.Process(CreateDocumentProcessorContext(document, typeof(SampleController)));
 
             Assert.Equal("显式说明", document.Tags.Single(item => item.Name == "Sample").Description);
+        }
+
+        /// <summary>
+        /// 没有实际接口引用的 Swagger Tag 不应显示为空分组。
+        /// </summary>
+        [Fact]
+        public void Process_ShouldRemoveTag_WhenNoOperationUsesIt()
+        {
+            var processor = new ControllerXmlCommentTagProcessor(CreateXmlCommentProvider());
+            var document = CreateDocumentWithOperationTag("Sample");
+            document.Tags.Add(new OpenApiTag { Name = "Sample" });
+            document.Tags.Add(new OpenApiTag { Name = "V3VersionedValues", Description = "空分组说明" });
+
+            processor.Process(CreateDocumentProcessorContext(document, typeof(SampleController)));
+
+            Assert.DoesNotContain(document.Tags, item => item.Name == "V3VersionedValues");
+            Assert.Contains(document.Tags, item => item.Name == "Sample");
+        }
+
+        /// <summary>
+        /// 控制器没有实际接口引用时不应主动新增空 Tag。
+        /// </summary>
+        [Fact]
+        public void Process_ShouldNotCreateTag_WhenNoOperationUsesControllerTag()
+        {
+            var processor = new ControllerXmlCommentTagProcessor(CreateXmlCommentProvider());
+            var document = new OpenApiDocument();
+
+            processor.Process(CreateDocumentProcessorContext(document, typeof(SampleController)));
+
+            Assert.Empty(document.Tags);
+        }
+
+        /// <summary>
+        /// 接口存在错误 Tag 时应按真实控制器名称重建分组。
+        /// </summary>
+        [Fact]
+        public void Process_ShouldReplaceOperationTag_WithControllerName()
+        {
+            var processor = new ControllerOperationTagProcessor();
+            var context = CreateOperationProcessorContext(typeof(SampleController), "V3VersionedValues");
+
+            var result = processor.Process(context);
+
+            Assert.True(result);
+            Assert.Equal(new[] { "Sample" }, context.OperationDescription.Operation.Tags);
         }
 
         private static XmlCommentProvider CreateXmlCommentProvider()
@@ -79,6 +137,7 @@ namespace QYQ.Base.Common.Test.Swagger
             {
                 [$"F:{GetXmlTypeName(typeof(XmlOnlyEnum))}.{nameof(XmlOnlyEnum.Enabled)}"] = "启用状态",
                 [$"F:{GetXmlTypeName(typeof(AttributeFirstEnum))}.{nameof(AttributeFirstEnum.Active)}"] = "XML 状态说明",
+                [$"F:{GetXmlTypeName(typeof(SameDescriptionEnum))}.{nameof(SameDescriptionEnum.Enabled)}"] = "相同说明",
                 [$"T:{GetXmlTypeName(typeof(SampleController))}"] = "示例控制器说明"
             });
         }
@@ -101,6 +160,17 @@ namespace QYQ.Base.Common.Test.Swagger
             return schema;
         }
 
+        private static OpenApiDocument CreateDocumentWithOperationTag(string tagName)
+        {
+            var document = new OpenApiDocument();
+            var operation = new OpenApiOperation();
+            operation.Tags.Add(tagName);
+            var pathItem = new OpenApiPathItem();
+            pathItem[OpenApiOperationMethod.Get] = operation;
+            document.Paths["/sample"] = pathItem;
+            return document;
+        }
+
         private static DocumentProcessorContext CreateDocumentProcessorContext(OpenApiDocument document, Type controllerType)
         {
             var settings = new OpenApiDocumentGeneratorSettings();
@@ -116,6 +186,31 @@ namespace QYQ.Base.Common.Test.Swagger
                 settings);
         }
 
+        private static OperationProcessorContext CreateOperationProcessorContext(Type controllerType, string tagName)
+        {
+            var document = new OpenApiDocument();
+            var operationDescription = new OpenApiOperationDescription
+            {
+                Path = "/sample",
+                Method = OpenApiOperationMethod.Get,
+                Operation = new OpenApiOperation()
+            };
+            operationDescription.Operation.Tags.Add(tagName);
+            var settings = new OpenApiDocumentGeneratorSettings();
+            var schemaSettings = new SystemTextJsonSchemaGeneratorSettings();
+            var resolver = new JsonSchemaResolver(document, schemaSettings);
+
+            return new OperationProcessorContext(
+                document,
+                operationDescription,
+                controllerType,
+                controllerType.GetMethod(nameof(SampleController.Get))!,
+                null!,
+                resolver,
+                settings,
+                new[] { operationDescription });
+        }
+
         private enum XmlOnlyEnum
         {
             Enabled = 1
@@ -127,8 +222,17 @@ namespace QYQ.Base.Common.Test.Swagger
             Active = 1
         }
 
+        private enum SameDescriptionEnum
+        {
+            [Description("相同说明")]
+            Enabled = 1
+        }
+
         private class SampleController
         {
+            public void Get()
+            {
+            }
         }
     }
 }

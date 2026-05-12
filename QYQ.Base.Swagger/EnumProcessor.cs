@@ -12,8 +12,8 @@ namespace QYQ.Base.Swagger
     public class EnumProcessor : ISchemaProcessor
     {
         private static readonly Lazy<XmlCommentProvider> DefaultXmlCommentProvider = new(XmlCommentProvider.FromAppContextBaseDirectory);
-        private static readonly ConcurrentDictionary<Type, List<Tuple<object, string, string>>> Dict = new();
         private readonly IXmlCommentProvider _xmlCommentProvider;
+        private readonly ConcurrentDictionary<Type, List<Tuple<object, string, string>>> _dict = new();
 
         /// <summary>
         /// 创建枚举 Schema 处理器。
@@ -86,7 +86,7 @@ namespace QYQ.Base.Swagger
         /// <returns>枚举值、名称和说明集合。</returns>
         private List<Tuple<object, string, string>> GetTextValueItems(Type enumType)
         {
-            if (Dict.TryGetValue(enumType, out List<Tuple<object, string, string>>? tuples) && tuples != null)
+            if (_dict.TryGetValue(enumType, out List<Tuple<object, string, string>>? tuples) && tuples != null)
             {
                 return tuples;
             }
@@ -98,8 +98,7 @@ namespace QYQ.Base.Swagger
                 if (field.FieldType.IsEnum)
                 {
                     var attribute = field.GetCustomAttribute<DescriptionAttribute>();
-                    string key = attribute?.Description ?? _xmlCommentProvider.GetSummary(field);
-                    key = string.IsNullOrWhiteSpace(key) ? field.Name : key;
+                    string key = BuildEnumDescription(attribute?.Description, _xmlCommentProvider.GetSummary(field), field.Name);
                     int value = 0;
                     var enumValue = enumType.InvokeMember(field.Name, BindingFlags.GetField, null, null, null);
                     if (enumValue != null)
@@ -110,8 +109,26 @@ namespace QYQ.Base.Swagger
                     tuples.Add(new Tuple<object, string, string>(value, field.Name, key));
                 }
             }
-            Dict.TryAdd(enumType, tuples);
+            _dict.TryAdd(enumType, tuples);
             return tuples;
+        }
+
+        private static string BuildEnumDescription(string? attributeDescription, string xmlSummary, string fieldName)
+        {
+            var description = string.IsNullOrWhiteSpace(attributeDescription) ? string.Empty : attributeDescription.Trim();
+            var summary = string.IsNullOrWhiteSpace(xmlSummary) ? string.Empty : xmlSummary.Trim();
+
+            if (!string.IsNullOrEmpty(description) && !string.IsNullOrEmpty(summary) && !string.Equals(description, summary, StringComparison.Ordinal))
+            {
+                return $"{description}（{summary}）";
+            }
+
+            if (!string.IsNullOrEmpty(description))
+            {
+                return description;
+            }
+
+            return string.IsNullOrEmpty(summary) ? fieldName : summary;
         }
     }
 }
