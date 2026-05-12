@@ -27,32 +27,52 @@ namespace QYQ.Base.Common.Test.Swagger
             var processor = new EnumProcessor(CreateXmlCommentProvider());
             var schema = CreateSchema(typeof(XmlOnlyEnum), processor);
 
-            Assert.Contains("1:Enabled,启用状态;", schema.Description);
+            Assert.Contains("Enabled = 1（启用状态）;", schema.Description);
         }
 
         /// <summary>
-        /// 枚举成员同时存在 DescriptionAttribute 和 XML Summary 时应同时显示两类说明。
+        /// 枚举成员同时存在 DescriptionAttribute 和 XML Summary 时应只显示 XML Summary 注释。
         /// </summary>
         [Fact]
-        public void Process_ShouldAppendXmlSummary_WhenEnumFieldHasDescriptionAttribute()
+        public void Process_ShouldUseXmlSummaryOnly_WhenEnumFieldHasDescriptionAttribute()
         {
             var processor = new EnumProcessor(CreateXmlCommentProvider());
             var schema = CreateSchema(typeof(AttributeFirstEnum), processor);
 
-            Assert.Contains("1:Active,特性优先状态（XML 状态说明）;", schema.Description);
+            Assert.Contains("Active = 1（XML 状态说明）;", schema.Description);
+            Assert.DoesNotContain("特性优先状态", schema.Description);
         }
 
         /// <summary>
-        /// 枚举成员的 DescriptionAttribute 和 XML Summary 相同时不应重复显示。
+        /// 枚举成员没有 XML Summary 注释时应只显示枚举名和值。
         /// </summary>
         [Fact]
-        public void Process_ShouldDeduplicateDescription_WhenEnumFieldCommentsAreSame()
+        public void Process_ShouldUseEnumNameAndValue_WhenEnumFieldHasNoXmlSummary()
         {
             var processor = new EnumProcessor(CreateXmlCommentProvider());
-            var schema = CreateSchema(typeof(SameDescriptionEnum), processor);
+            var schema = CreateSchema(typeof(NoXmlSummaryEnum), processor);
 
-            Assert.Contains("1:Enabled,相同说明;", schema.Description);
-            Assert.DoesNotContain("相同说明（相同说明）", schema.Description);
+            Assert.Contains("Pending = 2;", schema.Description);
+        }
+
+        /// <summary>
+        /// 引用枚举的模型属性不应重复追加枚举说明。
+        /// </summary>
+        [Fact]
+        public void Process_ShouldNotAppendEnumDescriptionToReferenceProperty()
+        {
+            var processor = new EnumProcessor(CreateXmlCommentProvider());
+            var enumSchema = CreateSchema(typeof(XmlOnlyEnum), processor);
+            var classSchema = new JsonSchema();
+            classSchema.Properties[nameof(ModelWithEnum.Code)] = new JsonSchemaProperty
+            {
+                Description = "接口返回码",
+                Reference = enumSchema
+            };
+
+            ProcessSchema(typeof(ModelWithEnum), classSchema, processor);
+
+            Assert.Equal("接口返回码", classSchema.Properties[nameof(ModelWithEnum.Code)].Description);
         }
 
         /// <summary>
@@ -137,7 +157,6 @@ namespace QYQ.Base.Common.Test.Swagger
             {
                 [$"F:{GetXmlTypeName(typeof(XmlOnlyEnum))}.{nameof(XmlOnlyEnum.Enabled)}"] = "启用状态",
                 [$"F:{GetXmlTypeName(typeof(AttributeFirstEnum))}.{nameof(AttributeFirstEnum.Active)}"] = "XML 状态说明",
-                [$"F:{GetXmlTypeName(typeof(SameDescriptionEnum))}.{nameof(SameDescriptionEnum.Enabled)}"] = "相同说明",
                 [$"T:{GetXmlTypeName(typeof(SampleController))}"] = "示例控制器说明"
             });
         }
@@ -150,14 +169,18 @@ namespace QYQ.Base.Common.Test.Swagger
         private static JsonSchema CreateSchema(Type type, EnumProcessor processor)
         {
             var schema = new JsonSchema();
+            ProcessSchema(type, schema, processor);
+            return schema;
+        }
+
+        private static void ProcessSchema(Type type, JsonSchema schema, EnumProcessor processor)
+        {
             var settings = new SystemTextJsonSchemaGeneratorSettings();
             var resolver = new JsonSchemaResolver(schema, settings);
             var generator = new JsonSchemaGenerator(settings);
             var context = new SchemaProcessorContext(type.ToContextualType(), schema, resolver, generator, settings);
 
             processor.Process(context);
-
-            return schema;
         }
 
         private static OpenApiDocument CreateDocumentWithOperationTag(string tagName)
@@ -222,10 +245,15 @@ namespace QYQ.Base.Common.Test.Swagger
             Active = 1
         }
 
-        private enum SameDescriptionEnum
+        private enum NoXmlSummaryEnum
         {
-            [Description("相同说明")]
-            Enabled = 1
+            [Description("等待处理")]
+            Pending = 2
+        }
+
+        private class ModelWithEnum
+        {
+            public XmlOnlyEnum Code { get; set; }
         }
 
         private class SampleController

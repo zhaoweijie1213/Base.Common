@@ -1,7 +1,6 @@
 using NJsonSchema;
 using NJsonSchema.Generation;
 using System.Collections.Concurrent;
-using System.ComponentModel;
 using System.Reflection;
 
 namespace QYQ.Base.Swagger
@@ -44,38 +43,9 @@ namespace QYQ.Base.Swagger
                 if (items.Count > 0)
                 {
                     // 枚举描述
-                    string description = string.Join("<br/>", items.Select(f => $"{f.Item1}:{f.Item2},{f.Item3};{Environment.NewLine}"));
+                    string description = string.Join("<br/>", items.Select(f => $"{f.Item3};{Environment.NewLine}"));
                     schema.Description = string.IsNullOrEmpty(schema.Description) ? description : $"{schema.Description}:<br/><br/>{description}";
                 }
-            }
-            else if (context.ContextualType.OriginalType.IsClass && context.ContextualType.OriginalType != typeof(string))
-            {
-                UpdateSchemaDescription(schema);
-            }
-        }
-
-        private void UpdateSchemaDescription(JsonSchema schema)
-        {
-            if (schema.HasReference)
-            {
-                var s = schema.ActualSchema;
-                if (s != null && s.Enumeration != null && s.Enumeration.Count > 0)
-                {
-                    if (!string.IsNullOrEmpty(s.Description))
-                    {
-                        string description = $"【{s.Description}】";
-                        if (string.IsNullOrEmpty(schema.Description) || !schema.Description.EndsWith(description))
-                        {
-                            schema.Description += description;
-                        }
-                    }
-                }
-            }
-
-            foreach (var key in schema.Properties.Keys)
-            {
-                var s = schema.Properties[key];
-                UpdateSchemaDescription(s);
             }
         }
 
@@ -97,8 +67,6 @@ namespace QYQ.Base.Swagger
             {
                 if (field.FieldType.IsEnum)
                 {
-                    var attribute = field.GetCustomAttribute<DescriptionAttribute>();
-                    string key = BuildEnumDescription(attribute?.Description, _xmlCommentProvider.GetSummary(field), field.Name);
                     int value = 0;
                     var enumValue = enumType.InvokeMember(field.Name, BindingFlags.GetField, null, null, null);
                     if (enumValue != null)
@@ -106,29 +74,18 @@ namespace QYQ.Base.Swagger
                         value = (int)enumValue;
                     }
 
-                    tuples.Add(new Tuple<object, string, string>(value, field.Name, key));
+                    var summary = _xmlCommentProvider.GetSummary(field);
+                    tuples.Add(new Tuple<object, string, string>(value, field.Name, BuildEnumDescription(field.Name, value, summary)));
                 }
             }
             _dict.TryAdd(enumType, tuples);
             return tuples;
         }
 
-        private static string BuildEnumDescription(string? attributeDescription, string xmlSummary, string fieldName)
+        private static string BuildEnumDescription(string fieldName, int value, string xmlSummary)
         {
-            var description = string.IsNullOrWhiteSpace(attributeDescription) ? string.Empty : attributeDescription.Trim();
             var summary = string.IsNullOrWhiteSpace(xmlSummary) ? string.Empty : xmlSummary.Trim();
-
-            if (!string.IsNullOrEmpty(description) && !string.IsNullOrEmpty(summary) && !string.Equals(description, summary, StringComparison.Ordinal))
-            {
-                return $"{description}（{summary}）";
-            }
-
-            if (!string.IsNullOrEmpty(description))
-            {
-                return description;
-            }
-
-            return string.IsNullOrEmpty(summary) ? fieldName : summary;
+            return string.IsNullOrEmpty(summary) ? $"{fieldName} = {value}" : $"{fieldName} = {value}（{summary}）";
         }
     }
 }
