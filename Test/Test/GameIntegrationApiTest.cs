@@ -4,6 +4,7 @@ using LobbyWebManagement;
 using QYQ.Base.Common.IOCExtensions;
 using QYQ.Base.Consul.Grpc;
 using System.Net.Http;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Test.Test
@@ -44,8 +45,8 @@ namespace Test.Test
         /// <summary>
         /// 健康检查
         /// </summary>
-        [Fact]
-        public async void HealthCheck()
+        [Fact(Skip = "依赖外部 Consul 服务 game-integration，避免本地单元测试受外部环境影响。")]
+        public async Task HealthCheck()
         {
 
             var client = _consulGrpcClientFactory.CreateClient<GamePlay.Grpc.GamePlay.GamePlayClient>("Gameplay");

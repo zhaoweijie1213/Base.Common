@@ -43,8 +43,8 @@ namespace Test
                        RetryPolicy = new RetryPolicy
                        {
                            MaxAttempts = 3,
-                           InitialBackoff = TimeSpan.FromSeconds(0.5),
-                           MaxBackoff = TimeSpan.FromSeconds(2),
+                           InitialBackoff = System.TimeSpan.FromSeconds(0.5),
+                           MaxBackoff = System.TimeSpan.FromSeconds(2),
                            BackoffMultiplier = 1.2,
                            RetryableStatusCodes = { StatusCode.Unavailable }
                        }

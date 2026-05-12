@@ -6,6 +6,7 @@
   </PropertyGroup>
   <ItemGroup>
     <None Remove="Proto\GamePlay.proto" />
+    <None Remove="Proto\TeamService.proto" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Microsoft.Extensions.Logging.Log4Net.AspNetCore" Version="8.0.0" />
@@ -32,6 +33,10 @@
   <ItemGroup>
     <Protobuf Include="Proto\GamePlay.proto" GrpcServices="Client" />
     <Protobuf Include="Proto\TeamService.proto" GrpcServices="Client" />
+    <Compile Include="$(IntermediateOutputPath)Proto\GamePlay.cs" Visible="false" />
+    <Compile Include="$(IntermediateOutputPath)Proto\GamePlayGrpc.cs" Visible="false" />
+    <Compile Include="$(IntermediateOutputPath)Proto\TeamService.cs" Visible="false" />
+    <Compile Include="$(IntermediateOutputPath)Proto\TeamServiceGrpc.cs" Visible="false" />
   </ItemGroup>
   <ItemGroup>
     <Content Update="appsettings.json">

@@ -9,9 +9,6 @@ using Microsoft.Extensions.Options;
 using NJsonSchema.Generation;
 using NSwag;
 using NSwag.AspNetCore;
-using NSwag.Generation.Processors.Security;
-using System.Reflection.Metadata;
-using System.Xml.Linq;
 //using Microsoft.OpenApi.Models;
 //using Swashbuckle.AspNetCore.SwaggerGen;
 
@@ -163,6 +160,7 @@ namespace QYQ.Base.Swagger.Extension
 
             var provider = services.BuildServiceProvider()
                                          .GetRequiredService<IApiVersionDescriptionProvider>();
+            var xmlCommentProvider = XmlCommentProvider.FromAppContextBaseDirectory();
 
             foreach (var description in provider.ApiVersionDescriptions)
             {
@@ -185,7 +183,8 @@ namespace QYQ.Base.Swagger.Extension
                       document.ApiGroupNames = new[] { description.GroupName };
 
                       //枚举处理
-                      document.SchemaSettings.SchemaProcessors.Add(new EnumProcessor());
+                      document.SchemaSettings.SchemaProcessors.Add(new EnumProcessor(xmlCommentProvider));
+                      document.DocumentProcessors.Add(new ControllerXmlCommentTagProcessor(xmlCommentProvider));
                       if (IsProduction && apiGateway)
                       {
                           document.PostProcess = procss =>
