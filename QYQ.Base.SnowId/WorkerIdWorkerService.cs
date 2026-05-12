@@ -58,7 +58,7 @@ namespace QYQ.Base.SnowId
                 {
                     await Task.Delay(15000, stoppingToken);
 
-                    _logger.LogDebug("刷新 WorkerId 的有效期...");
+                    //_logger.LogDebug("刷新 WorkerId 的有效期...");
                     var refreshed = await _workerIdManager.RefreshAsync();
                     if (refreshed)
                     {

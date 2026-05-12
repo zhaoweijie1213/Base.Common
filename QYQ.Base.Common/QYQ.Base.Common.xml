@@ -484,6 +484,11 @@
             大厅
             </summary>
         </member>
+        <member name="F:QYQ.Base.Common.CustomClaimTypes.Pf">
+            <summary>
+            大厅标识
+            </summary>
+        </member>
         <member name="F:QYQ.Base.Common.CustomClaimTypes.Config">
             <summary>
             配置
@@ -983,6 +988,11 @@
         <member name="P:QYQ.Base.Common.Models.UserInfo.Lobby">
             <summary>
             大厅
+            </summary>
+        </member>
+        <member name="P:QYQ.Base.Common.Models.UserInfo.Pf">
+            <summary>
+            大厅标识
             </summary>
         </member>
         <member name="P:QYQ.Base.Common.Models.UserInfo.Config">
