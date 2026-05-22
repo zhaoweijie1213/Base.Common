@@ -158,13 +158,21 @@ namespace QYQ.Base.SnowId
 
         /// <summary>
         /// 获取雪花Id
-        /// 时间戳向左偏移22位
+        /// 时间戳向左偏移workerIdBitLength + seqBitLength + dataCenterIdBitLength位
         /// </summary>
         /// <param name="time"></param>
         /// <returns></returns>
         public virtual long GetSnowId(DateTime time)
         {
-            return (long)(time - BaseTime).TotalMilliseconds << (workerIdBitLength + seqBitLength + dataCenterIdBitLength);
+            DateTime utcTime = time.Kind switch
+            {
+                DateTimeKind.Utc => time,
+                DateTimeKind.Local => time.ToUniversalTime(),
+                // 数据库/接口传来的本地时间，但 Kind 丢失了
+                DateTimeKind.Unspecified => DateTime.SpecifyKind(time, DateTimeKind.Local).ToUniversalTime(),
+                _ => time
+            };
+            return (long)(utcTime - BaseTime).TotalMilliseconds << (workerIdBitLength + seqBitLength + dataCenterIdBitLength);
         }
 
         /// <summary>
