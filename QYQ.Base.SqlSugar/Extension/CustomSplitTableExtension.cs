@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -46,6 +47,27 @@ namespace QYQ.Base.SnowId.Extension
                 .ToList();
 
             return result;
+        }
+
+        /// <summary>
+        /// 按时间范围过滤分表信息列表，自动从实体类型 <typeparamref name="T"/> 上的
+        /// <see cref="SplitTableAttribute"/> 特性中读取分表类型。
+        /// 若实体类未标注该特性，则默认使用 <see cref="SplitType.Season"/>。
+        /// </summary>
+        /// <typeparam name="T">实体类型，应标注 [SplitTable(SplitType.xxx)] 特性</typeparam>
+        /// <param name="tables">分表信息列表</param>
+        /// <param name="start">开始时间</param>
+        /// <param name="end">结束时间</param>
+        /// <returns>符合条件的分表信息列表</returns>
+        public static List<SplitTableInfo> FilterSplitTablesByRange<T>(
+            this List<SplitTableInfo> tables,
+            DateTime start,
+            DateTime end)
+            where T : class, new()
+        {
+            var attr = typeof(T).GetCustomAttribute<SplitTableAttribute>();
+            var splitType = attr?.SplitType ?? SplitType.Season;
+            return tables.FilterSplitTablesByRange(start, end, splitType);
         }
 
         private static DateTime NormalizeSplitDate(DateTime date, SplitType splitType)
