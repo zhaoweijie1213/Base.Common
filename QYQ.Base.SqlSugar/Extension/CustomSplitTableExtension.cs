@@ -7,7 +7,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace QYQ.Base.SnowId.Extension
+namespace QYQ.Base.SqlSugar.Extension
 {
     /// <summary>
     /// 分表信息列表的扩展方法类
