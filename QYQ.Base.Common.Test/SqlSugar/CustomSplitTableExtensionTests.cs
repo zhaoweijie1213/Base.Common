@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using QYQ.Base.SnowId.Extension;
+using QYQ.Base.SqlSugar.Extension;
 using SqlSugar;
 using Xunit;
 
