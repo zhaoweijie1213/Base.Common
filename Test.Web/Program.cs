@@ -8,6 +8,7 @@ using QYQ.Base.Common.Middleware;
 using QYQ.Base.Consul;
 using QYQ.Base.SnowId;
 using QYQ.Base.Swagger.Extension;
+using static Grpc.ShortLink.ShortLink;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,7 +20,7 @@ builder.Services.AddGrpc();
 
 builder.Services.AddConsulDispatcher(ConsulDispatcherType.Weight);
 builder.AddQYQConsul().AddQYQConsulHttp().AddQYQConsulgRPC();
-
+builder.AddConsulGrpcClient<ShortLinkClient>("short-link", "short-link-grpc");
 builder.Services.AddConsulHttpClient("game-play");
 //builder.AddConsulGrpcClient<GamePlay.Grpc.GamePlay.GamePlayClient>("Gameplay", "game-play-grpc");
 builder.AddQYQSwaggerAndApiVersioning(new OpenApiInfo { Title = "CommonTest" }, new Asp.Versioning.ApiVersion(1));

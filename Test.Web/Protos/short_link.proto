@@ -1,0 +1,162 @@
+syntax = "proto3";
+import "google/protobuf/timestamp.proto";
+package Grpc.ShortLink;
+
+// 短链 gRPC 服务，提供短链生成、解析、域名配置管理和统计配置缓存刷新能力。
+service ShortLink{
+    // 根据原始长链接生成可访问的短链接。
+    rpc Create(CreateRequest) returns (CreateResponse);
+    // 根据短链 Key 解析原始长链接。
+    rpc Resolve(ResolveRequest) returns (ResolveResponse);
+    // 按主键查询短链域名配置。
+    rpc GetDomainConfigById(GetDomainConfigByIdRequest) returns (GetDomainConfigResponse);
+    // 按域名地址查询短链域名配置。
+    rpc GetDomainConfigByUrl(GetDomainConfigByUrlRequest) returns (GetDomainConfigResponse);
+    // 分页查询短链域名配置列表。
+    rpc ListDomainConfigs(ListDomainConfigsRequest) returns (ListDomainConfigsResponse);
+    // 新增短链域名配置。
+    rpc CreateDomainConfig(CreateDomainConfigRequest) returns (BaseResponse);
+    // 更新短链域名配置。
+    rpc UpdateDomainConfig(UpdateDomainConfigRequest) returns (BaseResponse);
+    // 删除短链域名配置。
+    rpc DeleteDomainConfig(DeleteDomainConfigRequest) returns (BaseResponse);
+    // 刷新重点统计地址缓存。
+    rpc UpdateAnalysisCache(UpdateAnalysisCacheRequest) returns (BaseResponse);
+}
+
+// 通用响应结果，承载业务状态码和提示信息。
+message BaseResponse{
+    // 业务状态码，沿用 ApiResult 的 Code 语义。
+	int32 Code = 1;
+    // 业务处理提示信息。
+	string Message = 2;
+}
+
+// 空消息占位，用于无入参或无返回数据的兼容场景。
+message EmptyMessage{
+	
+}
+
+// 短链生成请求。
+message CreateRequest{
+    // 原始长链接地址。
+    string UrlLong = 1;
+    // 短链有效期类型，1 表示永久短链，0 表示临时短链。
+    int32 Always = 2; 
+    // 兼容旧接口版本标识，用于保持旧调用方返回格式。
+    string Version = 3;
+}
+
+// 短链生成响应。
+message CreateResponse{
+    // 通用业务处理结果。
+	BaseResponse Base = 1;
+    // 生成后的短链信息。
+    ShortLinkEntry  Data = 2;
+}
+
+// 短链解析请求。
+message ResolveRequest{
+    // 短链 Key，不包含域名部分。
+    string Code = 1;
+}
+
+// 短链解析响应。
+message ResolveResponse{
+    // 通用业务处理结果。
+	BaseResponse Base = 1;
+    // 解析得到的短链信息。
+	ShortLinkEntry  Data = 2;
+}
+
+// 短链业务信息。
+message ShortLinkEntry{
+    // 完整短链访问地址。
+    string ShortUrl = 1;
+    // 原始长链接地址。
+    string LongUrl = 2;
+    // 兼容旧接口的业务提示信息。
+    string Message = 3;
+    // 兼容旧接口的业务成功状态。
+    bool State = 4;
+}
+
+// 短链域名配置记录。
+message DomainConfigEntry{
+    // 域名配置主键。
+    int32 Id = 1;
+    // 短链域名地址。
+    string Url = 2;
+    // 域名启用状态，1 表示启用。
+    int32 State = 3;
+}
+
+// 新增域名配置请求。
+message CreateDomainConfigRequest{
+    // 短链域名地址。
+    string Url = 1;
+    // 域名启用状态，1 表示启用。
+    int32 State = 2;
+}
+
+// 更新域名配置请求。
+message UpdateDomainConfigRequest{
+    // 域名配置主键。
+    int32 Id = 1;
+    // 更新后的短链域名地址。
+    string Url = 2;
+    // 更新后的域名启用状态。
+    int32 State = 3;
+}
+
+// 单条域名配置响应。
+message GetDomainConfigResponse{
+    // 通用业务处理结果。
+    BaseResponse Base = 1;
+    // 域名配置记录。
+    DomainConfigEntry Data = 2;
+}
+
+// 删除域名配置请求。
+message DeleteDomainConfigRequest{
+    // 域名配置主键。
+    int32 Id = 1;
+}
+
+// 按主键查询域名配置请求。
+message GetDomainConfigByIdRequest{
+    // 域名配置主键。
+    int32 Id = 1;
+}
+
+// 按地址查询域名配置请求。
+message GetDomainConfigByUrlRequest{
+    // 短链域名地址。
+    string Url = 1;
+}
+
+// 分页查询域名配置请求。
+message ListDomainConfigsRequest{
+    // 页码，从 1 开始。
+    int32 PageIndex = 1;
+    // 每页记录数。
+    int32 PageSize = 2;
+}
+
+// 分页查询域名配置响应。
+message ListDomainConfigsResponse{
+    // 通用业务处理结果。
+    BaseResponse Base = 1;
+    // 当前页域名配置列表。
+    repeated DomainConfigEntry Data = 2;
+    // 符合条件的记录总数。
+    int32 Total = 3;
+}
+
+// 刷新重点统计地址缓存请求。
+message UpdateAnalysisCacheRequest{
+    // 需要刷新缓存的统计地址，空值表示按服务默认规则处理。
+    string AnalysisUrl = 1;
+    // 统计地址名称，空值表示按服务默认规则处理。
+    string Name = 2;
+}

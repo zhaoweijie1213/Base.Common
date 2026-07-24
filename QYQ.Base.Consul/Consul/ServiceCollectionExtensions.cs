@@ -17,6 +17,8 @@ using QYQ.Base.Consul.Grpc.Serivce;
 using QYQ.Base.Consul.Http;
 using System;
 using System.Linq;
+using System.Net.Http;   // SocketsHttpHandler、HttpKeepAlivePingPolicy
+using System.Threading;  // Timeout.InfiniteTimeSpan
 
 namespace QYQ.Base.Consul
 {
@@ -326,15 +328,21 @@ namespace QYQ.Base.Consul
                 client.Address = new Uri($"consul://{addresss.Host}:{addresss.Port}");
                 client.ChannelOptionsActions.Add(channel =>
                 {
-                    //channel.HttpHandler = new SocketsHttpHandler
-                    //{
-                    //    //当达到并发流限制时，通道会创建额外的 HTTP/2 连接
-                    //    EnableMultipleHttp2Connections = true,
-                    //    //PooledConnectionIdleTimeout = TimeSpan.FromHours(30),
-                    //    KeepAlivePingDelay = TimeSpan.FromSeconds(10),
-                    //    KeepAlivePingTimeout = TimeSpan.FromSeconds(30),
-                    //    // ...configure other handler settings
-                    //};
+                    // 连接保温：空闲期发送 HTTP/2 KeepAlive PING，避免连接被回收后每次现连，
+                    // 后端瞬时抖动/重连时减少 gRPC 抛 Unavailable；连接失效时也能更快探测切换。
+                    channel.HttpHandler = new SocketsHttpHandler
+                    {
+                        // 关闭空闲连接回收（默认 1 分钟，正是 Idle→Disconnected 的元凶），由 KeepAlive 维持长连接
+                        PooledConnectionIdleTimeout = Timeout.InfiniteTimeSpan,
+                        // 空闲 60s 后开始发送 PING
+                        KeepAlivePingDelay = TimeSpan.FromSeconds(60),
+                        // PING 发出后 30s 内无响应即判定连接失效
+                        KeepAlivePingTimeout = TimeSpan.FromSeconds(30),
+                        // 关键：即使当前没有活跃调用也保持 PING，防止空闲断连
+                        KeepAlivePingPolicy = HttpKeepAlivePingPolicy.Always,
+                        // 并发流达到上限时创建额外 HTTP/2 连接
+                        EnableMultipleHttp2Connections = true,
+                    };
                     channel.Credentials = ChannelCredentials.Insecure;
                     //channel.MaxRetryAttempts = 1000;
                     //channel.MaxSendMessageSize= int.MaxValue;

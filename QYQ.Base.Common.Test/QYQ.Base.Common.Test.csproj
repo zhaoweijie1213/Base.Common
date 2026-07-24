@@ -21,6 +21,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\QYQ.Base.Common\QYQ.Base.Common.csproj" />
+    <ProjectReference Include="..\QYQ.Base.Consul\QYQ.Base.Consul.csproj" />
     <ProjectReference Include="..\QYQ.Base.Swagger\QYQ.Base.Swagger.csproj" />
     <ProjectReference Include="..\QYQ.Base.SqlSugar\QYQ.Base.SqlSugar.csproj" />
   </ItemGroup>

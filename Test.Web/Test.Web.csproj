@@ -6,10 +6,15 @@
     <GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
   <ItemGroup>
+    <None Remove="Protos\short_link.proto" />
     <None Remove="Proto\GamePlay.proto" />
     <None Remove="Proto\TeamService.proto" />
   </ItemGroup>
   <ItemGroup>
+    <PackageReference Include="Grpc.Tools" Version="2.83.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.Extensions.Logging.Log4Net.AspNetCore" Version="10.0.0" />
   </ItemGroup>
   <ItemGroup>
@@ -21,6 +26,7 @@
     <ProjectReference Include="..\Test.Models\Test.Models.csproj" />
   </ItemGroup>
   <ItemGroup>
+    <Protobuf Include="Protos\short_link.proto" GrpcServices="Client" />
     <Protobuf Include="Proto\GamePlay.proto">
       <GrpcServices>Client</GrpcServices>
     </Protobuf>

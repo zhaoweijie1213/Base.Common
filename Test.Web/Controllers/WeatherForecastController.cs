@@ -9,6 +9,7 @@ using QYQ.Base.Consul.Grpc;
 using QYQ.Base.SnowId.Interface;
 using Test.Models.Input;
 using Test.Web.Models;
+using static Grpc.ShortLink.ShortLink;
 
 namespace Test.Web.Controllers
 {
@@ -35,14 +36,17 @@ namespace Test.Web.Controllers
 
         private readonly IHttpClientFactory _httpClientFactory;
 
+        private readonly GrpcClientFactory _grpcClientFactory;
+
         /// <summary>
         /// 
         /// </summary>
-        public WeatherForecastController(ILogger<WeatherForecastController> logger,ISnowIdGenerator snowIdGenerator, IHttpClientFactory httpClientFactory)
+        public WeatherForecastController(ILogger<WeatherForecastController> logger,ISnowIdGenerator snowIdGenerator, IHttpClientFactory httpClientFactory, GrpcClientFactory grpcClientFactory)
         {
             _logger = logger;
             _snowIdGenerator = snowIdGenerator;
             _httpClientFactory = httpClientFactory;
+            _grpcClientFactory = grpcClientFactory;
         }
 
         /// <summary>
@@ -143,6 +147,28 @@ namespace Test.Web.Controllers
             result.SetResult(ApiResultCode.Success, qr);
             return result;
 
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="code"></param>
+        /// <returns></returns>
+        [HttpGet("GetUrlAsync")]
+        public async Task<ApiResult<string>> GetUrlAsync(string code)
+        {
+            ApiResult<string> result = new();
+            try
+            {
+                var client = _grpcClientFactory.CreateClient<ShortLinkClient>("short-link");
+                //client.BaseAddress = new Uri(options.CurrentValue.BaseUrl.TrimEnd('/') + "/");
+                var output = await client.ResolveAsync(new Grpc.ShortLink.ResolveRequest() { Code = code });
+                return result.SetResult(ApiResultCode.Success, output.Data.LongUrl);
+            }
+            catch (Exception ex)
+            {
+                return result.SetResult(ApiResultCode.InternalServerError, null, ex.Message);
+            }
         }
 
 
