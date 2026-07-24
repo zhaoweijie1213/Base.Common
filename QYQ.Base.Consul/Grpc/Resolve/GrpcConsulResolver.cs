@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using GrpcStatus = Grpc.Core.Status;
+using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace QYQ.Base.Consul.Grpc.Resolve
 {
@@ -65,6 +66,11 @@ namespace QYQ.Base.Consul.Grpc.Resolve
 
             _cts = new CancellationTokenSource();
             _watchTask = Task.Run(() => WatchLoopAsync(_cts.Token));
+
+            if (_logger.IsEnabled(LogLevel.Information))
+            {
+                _logger.LogInformation("OnStarted:{ServiceName} 后台 watch 循环已启动", ServiceName);
+            }
         }
 
         /// <summary>
@@ -75,8 +81,16 @@ namespace QYQ.Base.Consul.Grpc.Resolve
         protected override async Task ResolveAsync(CancellationToken cancellationToken)
         {
             var client = EnsureClient();
+            if (_logger.IsEnabled(LogLevel.Debug))
+            {
+                _logger.LogDebug("ResolveAsync:开始对 {ServiceName} 进行一次性（非阻塞）解析", ServiceName);
+            }
             // 非阻塞查询：WaitIndex 为 0，立即返回当前健康实例快照。
             var result = await client.Health.Service(ServiceName, tag: "", passingOnly: true, cancellationToken);
+            if (_logger.IsEnabled(LogLevel.Debug))
+            {
+                _logger.LogDebug("ResolveAsync:{ServiceName} 一次性解析返回 {Count} 个健康实例", ServiceName, result.Response?.Length ?? 0);
+            }
             Publish(result.Response);
         }
 
@@ -97,13 +111,25 @@ namespace QYQ.Base.Consul.Grpc.Resolve
                         WaitIndex = _lastIndex,
                         WaitTime = _watchWaitTime,
                     };
+                    if (_logger.IsEnabled(LogLevel.Debug))
+                    {
+                        _logger.LogDebug("WatchLoopAsync:发起阻塞查询 {ServiceName}，WaitIndex={WaitIndex}，WaitTime={WaitTime}", ServiceName, _lastIndex, _watchWaitTime);
+                    }
                     var result = await client.Health.Service(ServiceName, tag: "", passingOnly: true, options, cancellationToken);
 
                     // 仅在索引推进时才认为发生变化，避免 WaitTime 到期的无变化返回引起重复发布。
                     if (result.LastIndex > _lastIndex)
                     {
+                        if (_logger.IsEnabled(LogLevel.Information))
+                        {
+                            _logger.LogInformation("WatchLoopAsync:检测到 {ServiceName} 服务集变化，索引 {OldIndex} -> {NewIndex}，健康实例 {Count} 个", ServiceName, _lastIndex, result.LastIndex, result.Response?.Length ?? 0);
+                        }
                         _lastIndex = result.LastIndex;
                         Publish(result.Response);
+                    }
+                    else if (_logger.IsEnabled(LogLevel.Debug))
+                    {
+                        _logger.LogDebug("WatchLoopAsync:{ServiceName} 本轮无变化，当前索引 {LastIndex}", ServiceName, _lastIndex);
                     }
                 }
                 catch (OperationCanceledException) when (cancellationToken.IsCancellationRequested)
@@ -139,11 +165,19 @@ namespace QYQ.Base.Consul.Grpc.Resolve
                 _logger.LogError(message);
                 throw new InvalidOperationException(message);
             }
-            return _consulClient ??= new ConsulClient(c =>
+            if (_consulClient == null)
             {
-                c.Address = new Uri(ConsulClientOption.ConsulAddress);
-                c.Token = ConsulClientOption.Token;
-            });
+                _consulClient = new ConsulClient(c =>
+                {
+                    c.Address = new Uri(ConsulClientOption.ConsulAddress);
+                    c.Token = ConsulClientOption.Token;
+                });
+                if (_logger.IsEnabled(LogLevel.Debug))
+                {
+                    _logger.LogDebug("EnsureClient:已创建 Consul 客户端，地址 {ConsulAddress}", ConsulClientOption.ConsulAddress);
+                }
+            }
+            return _consulClient;
         }
 
         /// <summary>
@@ -158,9 +192,19 @@ namespace QYQ.Base.Consul.Grpc.Resolve
             {
                 if (addresses.Length == 0)
                 {
-                    _logger.LogWarning("Publish:解析器没有返回{ServiceName}服务地址", ServiceName);
+                    // entries 为空/0 说明 Consul 本身没有返回健康实例（服务未注册、健康检查未通过或 tag/passingOnly 过滤掉）；
+                    // entries 有值但地址为 0 则说明实例存在却映射不出地址（Service.Address 与 Node.Address 均为空），据此区分排查方向。
+                    _logger.LogWarning("Publish:{ServiceName} 无可用服务地址，Consul 返回健康实例 {EntryCount} 个", ServiceName, entries?.Length ?? 0);
                     Listener(ResolverResult.ForFailure(new GrpcStatus(StatusCode.Unavailable, $"无可用的 {ServiceName} 服务实例")));
                     return;
+                }
+                if (_logger.IsEnabled(LogLevel.Information))
+                {
+                    _logger.LogInformation("Publish:向负载均衡器发布 {ServiceName} 的 {Count} 个服务地址", ServiceName, addresses.Length);
+                }
+                if (_logger.IsEnabled(LogLevel.Debug))
+                {
+                    _logger.LogDebug("Publish:{ServiceName} 地址列表 {Addresses}", ServiceName, string.Join(", ", addresses.Select(a => $"{a.EndPoint.Host}:{a.EndPoint.Port}")));
                 }
                 // 解析结果通知负载均衡器
                 Listener(ResolverResult.ForResult(addresses));
