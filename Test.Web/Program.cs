@@ -4,16 +4,23 @@ using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json;
 using NSwag;
 using QYQ.Base.Common;
+using QYQ.Base.Common.IOCExtensions;
 using QYQ.Base.Common.Middleware;
 using QYQ.Base.Consul;
 using QYQ.Base.SnowId;
 using QYQ.Base.Swagger.Extension;
+using Test.Web.Models;
 using static Grpc.ShortLink.ShortLink;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Configuration.AddQYQApollo().AddQYQRawNamespace("base-game-list", "BaseGameList");
 builder.Logging.AddLog4Net();
 // Add services to the container.
+
+// 注册游戏列表配置，内部已接好配置变更令牌，Apollo 推送后自动重算
+builder.Services.AddQYQXmlOptions<GameListEntry>("BaseGameList");
+
 
 builder.Services.AddControllers();
 builder.Services.AddGrpc();
@@ -61,5 +68,8 @@ app.MapControllers();
 app.UseGrpcHealthcheck();
 app.UseHttpHealthcheck();
 app.UseQYQSwaggerUI("CommonTest", true);
+
+// 把 Apollo 客户端日志接进日志系统，长轮询与推送情况才看得见
+app.UseQYQApolloLogger();
 
 app.Run();

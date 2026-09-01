@@ -437,23 +437,21 @@
         </member>
         <member name="T:QYQ.Base.Consul.Grpc.Resolve.GrpcConsulResolver">
             <summary>
-            Grpc自定义解析程序
+            Grpc 自定义解析程序。
+            通过 Consul 的<b>阻塞查询（blocking query / watch）</b>感知服务实例变化：
+            无变化时请求在 Consul 端挂起、不产生无谓轮询；实例上/下线时秒级返回并刷新地址表。
             </summary>
-            <remarks>
-            _consulClientOption
-            </remarks>
         </member>
         <member name="M:QYQ.Base.Consul.Grpc.Resolve.GrpcConsulResolver.#ctor(Microsoft.Extensions.Logging.ILoggerFactory)">
             <summary>
-            Grpc自定义解析程序
+            Grpc 自定义解析程序。
+            通过 Consul 的<b>阻塞查询（blocking query / watch）</b>感知服务实例变化：
+            无变化时请求在 Consul 端挂起、不产生无谓轮询；实例上/下线时秒级返回并刷新地址表。
             </summary>
-            <remarks>
-            _consulClientOption
-            </remarks>
         </member>
         <member name="P:QYQ.Base.Consul.Grpc.Resolve.GrpcConsulResolver.ConsulClientOption">
             <summary>
-            
+            Consul 客户端配置
             </summary>
         </member>
         <member name="P:QYQ.Base.Consul.Grpc.Resolve.GrpcConsulResolver.ServiceName">
@@ -461,17 +459,69 @@
             服务名称
             </summary>
         </member>
+        <member name="F:QYQ.Base.Consul.Grpc.Resolve.GrpcConsulResolver._watchWaitTime">
+            <summary>
+            阻塞查询单次最长挂起时间。到期后即使无变化也会返回，随即发起下一次 watch，形成长轮询。
+            </summary>
+        </member>
+        <member name="F:QYQ.Base.Consul.Grpc.Resolve.GrpcConsulResolver._errorBackoff">
+            <summary>
+            watch 循环异常后的退避时间，避免 Consul 抖动时打爆日志与请求。
+            </summary>
+        </member>
+        <member name="F:QYQ.Base.Consul.Grpc.Resolve.GrpcConsulResolver._lastIndex">
+            <summary>
+            Consul 一致性索引，用于阻塞查询；仅当返回的 <see cref="P:Consul.QueryResult.LastIndex"/> 增大时才视为发生变化。
+            </summary>
+        </member>
+        <member name="F:QYQ.Base.Consul.Grpc.Resolve.GrpcConsulResolver._publishLock">
+            <summary>
+            串行化对 <see cref="P:Grpc.Net.Client.Balancer.PollingResolver.Listener"/> 的发布，避免 watch 循环与 <see cref="M:QYQ.Base.Consul.Grpc.Resolve.GrpcConsulResolver.ResolveAsync(System.Threading.CancellationToken)"/> 并发发布产生竞争。
+            </summary>
+        </member>
         <member name="M:QYQ.Base.Consul.Grpc.Resolve.GrpcConsulResolver.OnStarted">
             <summary>
-            
+            解析器启动：保留基类首次解析，并额外启动后台 watch 循环持续感知变化。
             </summary>
         </member>
         <member name="M:QYQ.Base.Consul.Grpc.Resolve.GrpcConsulResolver.ResolveAsync(System.Threading.CancellationToken)">
             <summary>
-            获取Consul地址列表
+            一次性解析路径：基类在首次启动与子通道连接失败时调用，做一次<b>非阻塞</b>查询并发布当前快照，
+            让连接失败时能立即重解析，与后台 watch 循环互补。
             </summary>
-            <param name="cancellationToken"></param>
-            <returns></returns>
+            <param name="cancellationToken">取消令牌</param>
+        </member>
+        <member name="M:QYQ.Base.Consul.Grpc.Resolve.GrpcConsulResolver.WatchLoopAsync(System.Threading.CancellationToken)">
+            <summary>
+            后台 watch 循环：以阻塞查询持续等待服务集变化，变化时刷新地址表。
+            </summary>
+            <param name="cancellationToken">取消令牌，随解析器释放而触发</param>
+        </member>
+        <member name="M:QYQ.Base.Consul.Grpc.Resolve.GrpcConsulResolver.EnsureClient">
+            <summary>
+            惰性创建 <see cref="T:Consul.ConsulClient"/>，配置校验失败时抛出。
+            </summary>
+        </member>
+        <member name="M:QYQ.Base.Consul.Grpc.Resolve.GrpcConsulResolver.Publish(Consul.ServiceEntry[])">
+            <summary>
+            将 Consul 健康实例发布给负载均衡器。无可用实例时下发失败状态（保留现有子通道并按退避重试），
+            而非下发空地址表清空后端引发抖动。
+            </summary>
+            <param name="entries">Consul 返回的健康服务实例</param>
+        </member>
+        <member name="M:QYQ.Base.Consul.Grpc.Resolve.GrpcConsulResolver.BuildAddresses(System.Collections.Generic.IReadOnlyCollection{Consul.ServiceEntry})">
+            <summary>
+            将 Consul 健康实例映射为 gRPC 负载均衡地址。
+            当服务未显式登记地址（<see cref="P:Consul.AgentService.Address"/> 为空）时回退到节点地址（<see cref="P:Consul.Node.Address"/>）。
+            </summary>
+            <param name="entries">Consul 返回的健康服务实例，可能为 null</param>
+            <returns>负载均衡地址数组，无实例时为空数组</returns>
+        </member>
+        <member name="M:QYQ.Base.Consul.Grpc.Resolve.GrpcConsulResolver.Dispose(System.Boolean)">
+            <summary>
+            释放 watch 循环与 Consul 客户端，修复定时器/连接句柄泄漏。
+            </summary>
+            <param name="disposing">是否释放托管资源</param>
         </member>
         <member name="T:QYQ.Base.Consul.Grpc.Resolve.GrpcConsulResolverFactory">
             <summary>

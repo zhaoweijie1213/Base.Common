@@ -20,6 +20,7 @@ dotnet test
 
 - 编译失败代码
 - 测试失败代码
+- NuGet README 未同步的新增功能（见「NuGet 文档同步」）
 
 ------
 
@@ -100,6 +101,23 @@ dotnet test
 
 - ❗ 先调用 `logger.IsEnabled(LogLevel.Debug/Information)` 判断日志级别是否开启
 - ❗ 避免在日志未开启时执行字符串拼接、对象序列化等高开销操作
+
+------
+
+## NuGet 文档同步（必须执行）
+
+本仓库的项目是供其他项目使用的 NuGet 组件，**包内 README 就是使用方唯一能看到的文档**。
+
+打包进 NuGet 的是**项目目录下的** `<项目>/README.md`（由 csproj 里的 `<None Include="README.md" Pack="True">` 指定），不是仓库根目录的 `README.md`。根目录那份只给 GitHub 看，两份都要维护，不要只改一份。
+
+新增功能、新增封装、修改扩展方法签名或修改公开类型名时，必须同步：
+
+1. `<项目>/README.md` —— 功能概览补一条，正文补用法示例
+2. 仓库根 `README.md` —— 对应章节与更新日志
+3. `<项目>/README.md` 里安装示例的版本号，跟随 csproj 的 `<Version>`
+4. 有隐性契约（全局副作用、必须搭配的其他调用、失败语义、必须用哪种注入方式）时，在包内 README 明确写出来
+
+❗ 改了公开 API 却没动 `<项目>/README.md`，视为任务未完成。
 
 ------
 

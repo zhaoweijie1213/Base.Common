@@ -2,6 +2,7 @@ using Asp.Versioning;
 //using GamePlay.Grpc;
 using Grpc.Net.ClientFactory;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Options;
 using NSwag.Annotations;
 using QYQ.Base.Common.ApiResult;
 using QYQ.Base.Common.Tool;
@@ -9,6 +10,7 @@ using QYQ.Base.Consul.Grpc;
 using QYQ.Base.SnowId.Interface;
 using Test.Models.Input;
 using Test.Web.Models;
+using QYQ.Base.Common.Xml;
 using static Grpc.ShortLink.ShortLink;
 
 namespace Test.Web.Controllers
@@ -38,15 +40,18 @@ namespace Test.Web.Controllers
 
         private readonly GrpcClientFactory _grpcClientFactory;
 
+        private readonly IOptionsMonitor<XmlConfigOptions<GameListEntry>> _baseGameListOptions;
+
         /// <summary>
         /// 
         /// </summary>
-        public WeatherForecastController(ILogger<WeatherForecastController> logger,ISnowIdGenerator snowIdGenerator, IHttpClientFactory httpClientFactory, GrpcClientFactory grpcClientFactory)
+        public WeatherForecastController(ILogger<WeatherForecastController> logger,ISnowIdGenerator snowIdGenerator, IHttpClientFactory httpClientFactory, GrpcClientFactory grpcClientFactory, IOptionsMonitor<XmlConfigOptions<GameListEntry>> baseGameListOptions)
         {
             _logger = logger;
             _snowIdGenerator = snowIdGenerator;
             _httpClientFactory = httpClientFactory;
             _grpcClientFactory = grpcClientFactory;
+            _baseGameListOptions = baseGameListOptions;
         }
 
         /// <summary>
@@ -115,6 +120,21 @@ namespace Test.Web.Controllers
         {
             ApiResult<string> result = new();
             result.SetResult(ApiResultCode.Success, input.Email);
+            return result;
+
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="input"></param>
+        /// <returns></returns>
+        [HttpGet("Games")]
+        public ApiResult<List<GameListEntry>> Email()
+        {
+            ApiResult<List<GameListEntry>> result = new();
+
+            result.SetResult(ApiResultCode.Success, [.. _baseGameListOptions.CurrentValue.Items]);
             return result;
 
         }

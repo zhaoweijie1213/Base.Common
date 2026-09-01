@@ -767,6 +767,41 @@
             获取 Token 类型（0=Domestic,1=Overseas），解析失败返回 null
             </summary>
         </member>
+        <member name="T:QYQ.Base.Common.Extension.XmlContentExtension">
+             <summary>
+             【用途】XML 原文映射扩展方法。
+            
+             配合 AddQYQRawNamespace 使用：后者把无法被内置解析器摊平的 Namespace 原样取回，
+             本类负责把那段原文按 <see cref="T:QYQ.Base.Common.Xml.XmlAttributeNameAttribute"/> 的声明转成业务对象。
+             </summary>
+        </member>
+        <member name="M:QYQ.Base.Common.Extension.XmlContentExtension.ParseXmlItems``1(System.String,System.String)">
+             <summary>
+             【业务意图】把一段 XML 原文解析为 <typeparamref name="T"/> 的集合。
+            
+             只映射 XML 节点上的属性（attribute），不读取子元素文本；
+             目标类型上未标注 <see cref="T:QYQ.Base.Common.Xml.XmlAttributeNameAttribute"/> 的属性不参与映射。
+             </summary>
+             <typeparam name="T">目标类型，需要有公开无参构造。</typeparam>
+             <param name="content">XML 原文；为空视为配置尚未下发，返回空集合。</param>
+             <param name="elementName">只取该名字的子节点；为 null 时取根节点下全部子节点。</param>
+             <returns>解析出的对象集合，顺序与原文中的节点顺序一致。</returns>
+             <exception cref="T:QYQ.Base.Common.Xml.XmlContentParseException">原文畸形、必填属性缺失、值无法转换或目标类型不受支持。</exception>
+        </member>
+        <member name="M:QYQ.Base.Common.Extension.XmlContentExtension.GetXmlItems``1(Microsoft.Extensions.Configuration.IConfiguration,System.String,System.String)">
+             <summary>
+             【业务意图】从配置的 {sectionKey}:content 取出 XML 原文并解析为 <typeparamref name="T"/> 的集合。
+            
+             sectionKey 与 AddQYQRawNamespace 注册时传入的保持一致即可。
+             </summary>
+             <typeparam name="T">目标类型，需要有公开无参构造。</typeparam>
+             <param name="configuration">配置对象。</param>
+             <param name="sectionKey">注册原文 Namespace 时使用的配置键前缀。</param>
+             <param name="elementName">只取该名字的子节点；为 null 时取根节点下全部子节点。</param>
+             <returns>解析出的对象集合；配置里没有该键时返回空集合。</returns>
+             <exception cref="T:System.ArgumentException">sectionKey 为空时抛出。</exception>
+             <exception cref="T:QYQ.Base.Common.Xml.XmlContentParseException">原文畸形、必填属性缺失、值无法转换或目标类型不受支持。</exception>
+        </member>
         <member name="T:QYQ.Base.Common.IOCExtensions.ApolloConfigExtension">
             <summary>
             apollo 扩展
@@ -778,6 +813,21 @@
             </summary>
             <param name="builder"></param>
             <returns></returns>
+        </member>
+        <member name="M:QYQ.Base.Common.IOCExtensions.ApolloConfigExtension.AddQYQRawNamespace(Com.Ctrip.Framework.Apollo.IApolloConfigurationBuilder,System.String,System.String,Com.Ctrip.Framework.Apollo.Enums.ConfigFileFormat)">
+             <summary>
+             【业务意图】注册一个「只取原文、不摊平」的 Apollo Namespace，供内容无法被
+             内置解析器处理的场景（如策划表格导出的 XML）使用。
+            
+             注意：适配器按格式注册在全局静态表上，调用后该格式的**所有** Namespace 都不再
+             摊平。同一进程内若还有需要自动摊平的同格式 Namespace，不要使用本方法。
+             </summary>
+             <param name="builder">Apollo 配置构建器，由 <see cref="M:QYQ.Base.Common.IOCExtensions.ApolloConfigExtension.AddQYQApollo(Microsoft.Extensions.Configuration.IConfigurationBuilder)"/> 返回。</param>
+             <param name="namespace">Namespace 名称，不含格式后缀（后缀由 format 拼接）。</param>
+             <param name="sectionKey">配置键前缀，最终以 {sectionKey}:content 读取原文。</param>
+             <param name="format">Namespace 格式，默认 Xml。</param>
+             <returns>Apollo 配置构建器，便于链式调用。</returns>
+             <exception cref="T:System.ArgumentException">sectionKey 为空时抛出。</exception>
         </member>
         <member name="M:QYQ.Base.Common.IOCExtensions.ApolloConfigExtension.UseQYQApolloLogger(Microsoft.AspNetCore.Builder.WebApplication)">
             <summary>
@@ -856,6 +906,33 @@
             实现该接口将自动注册到Ioc容器，生命周期为每次创建一个新实例
             </summary>
         </member>
+        <member name="T:QYQ.Base.Common.IOCExtensions.RawContentConfigAdapter">
+             <summary>
+             【用途】让指定格式的 Apollo Namespace 原样保留文件内容，不做键值摊平。
+            
+             客户端内置的 XmlConfigAdapter 按微软 AddXmlFile 的规则摊平 XML：同名兄弟节点
+             只要没有 Name 属性就会撞键并抛 FormatException。由策划表格导出的配置天然是
+             同名节点重复、且可能带中文属性名，这类内容无法交给内置解析器。
+             本适配器把原文原样放在 content 键上，由业务侧自行解析。
+             </summary>
+        </member>
+        <member name="P:QYQ.Base.Common.IOCExtensions.RawContentConfigAdapter.Instance">
+            <summary>
+            【含义】无状态适配器，全局复用同一实例。
+            </summary>
+        </member>
+        <member name="M:QYQ.Base.Common.IOCExtensions.RawContentConfigAdapter.#ctor">
+            <summary>
+            私有构造，强制通过 <see cref="P:QYQ.Base.Common.IOCExtensions.RawContentConfigAdapter.Instance"/> 获取实例。
+            </summary>
+        </member>
+        <member name="M:QYQ.Base.Common.IOCExtensions.RawContentConfigAdapter.GetProperties(System.String)">
+            <summary>
+            【业务意图】把 Namespace 的整段原文放回 content 键，不做任何解析。
+            </summary>
+            <param name="content">Namespace 的原始文本内容，可能为 null（服务端未下发内容）。</param>
+            <returns>仅含 content 一项的配置集合；原文缺失时该项为空字符串。</returns>
+        </member>
         <member name="T:QYQ.Base.Common.IOCExtensions.SerilogExtension">
             <summary>
             日志注册扩展
@@ -888,6 +965,38 @@
             <param name="preserveStaticLogger">是否保留静态日志记录器</param>
             <param name="writeToProviders">是否写入日志提供者</param>
             <returns></returns>
+        </member>
+        <member name="T:QYQ.Base.Common.IOCExtensions.XmlConfigOptionsExtension">
+            <summary>
+            【用途】把 Apollo 原文 Namespace 里的 XML 接成可热更新的配置选项。
+            </summary>
+        </member>
+        <member name="M:QYQ.Base.Common.IOCExtensions.XmlConfigOptionsExtension.AddQYQXmlOptions``1(Microsoft.Extensions.DependencyInjection.IServiceCollection,System.String,System.String)">
+             <summary>
+             【业务意图】注册 <see cref="T:QYQ.Base.Common.Xml.XmlConfigOptions`1"/>，让 {sectionKey}:content 上的 XML 原文
+             被解析成 <typeparamref name="T"/> 集合，并在 Apollo 推送新内容时自动重算。
+            
+             之所以把这两步收进库里：<c>AddOptions().Configure(委托)</c> 不像 <c>Bind()</c> 那样自带
+             配置变更令牌，少注册一个 <see cref="T:Microsoft.Extensions.Options.IOptionsChangeTokenSource`1"/>，
+             <see cref="T:Microsoft.Extensions.Options.IOptionsMonitor`1"/> 的缓存就永不失效——编译通过、运行不报错，
+             只是热更新静默失效，各自手写极易漏。
+            
+             注意：读取端必须用 <see cref="T:Microsoft.Extensions.Options.IOptionsMonitor`1"/> 或 <see cref="T:Microsoft.Extensions.Options.IOptionsSnapshot`1"/>；
+             <see cref="T:Microsoft.Extensions.Options.IOptions`1"/> 是单例快照，拿不到新值。
+            
+             同一个 <typeparamref name="T"/> 只应注册一次；重复注册不同 sectionKey 时后者会覆盖前者。
+            
+             本方法不做容错：原文畸形时 <c>CurrentValue</c> 会抛 <see cref="T:QYQ.Base.Common.Xml.XmlContentParseException"/>，
+             且每次访问都抛。需要「解析失败沿用旧快照」或「条数为 0 视为故障」的场景，
+             请在业务侧自建单例目录服务并订阅 <c>IConfiguration.GetReloadToken</c>，
+             那类判断属于业务决策，不进通用库。
+             </summary>
+             <typeparam name="T">条目类型，需要有公开无参构造。</typeparam>
+             <param name="services">服务集合。</param>
+             <param name="sectionKey">注册原文 Namespace 时使用的配置键前缀，与 AddQYQRawNamespace 传入的一致。</param>
+             <param name="elementName">只取该名字的子节点；为 null 时取根节点下全部子节点。</param>
+             <returns>服务集合，便于链式调用。</returns>
+             <exception cref="T:System.ArgumentException">sectionKey 为空时抛出。</exception>
         </member>
         <member name="T:QYQ.Base.Common.Middleware.ErrorHandlingMiddleware">
             <summary>
@@ -1143,6 +1252,250 @@
             <param name="services"></param>
             <param name="action"></param>
             <returns></returns>
+        </member>
+        <member name="T:QYQ.Base.Common.Xml.XmlAttributeNameAttribute">
+             <summary>
+             【用途】标记 DTO 属性对应 XML 节点上的哪一个属性（attribute）名。
+            
+             策划表格导出的配置常带中文属性名（如 游戏ID），且属性名与 C# 命名规范无法对齐，
+             因此由本特性显式声明映射关系；未标注本特性的属性不参与映射，也不做任何校验。
+            
+             命名上刻意避开 BCL 的 System.Xml.Serialization.XmlAttributeAttribute，
+             防止两者同时被 using 时静默混淆。
+             </summary>
+             <param name="name">对应 XML 节点上的属性名。</param>
+        </member>
+        <member name="M:QYQ.Base.Common.Xml.XmlAttributeNameAttribute.#ctor(System.String)">
+             <summary>
+             【用途】标记 DTO 属性对应 XML 节点上的哪一个属性（attribute）名。
+            
+             策划表格导出的配置常带中文属性名（如 游戏ID），且属性名与 C# 命名规范无法对齐，
+             因此由本特性显式声明映射关系；未标注本特性的属性不参与映射，也不做任何校验。
+            
+             命名上刻意避开 BCL 的 System.Xml.Serialization.XmlAttributeAttribute，
+             防止两者同时被 using 时静默混淆。
+             </summary>
+             <param name="name">对应 XML 节点上的属性名。</param>
+        </member>
+        <member name="P:QYQ.Base.Common.Xml.XmlAttributeNameAttribute.Name">
+            <summary>
+            【含义】对应 XML 节点上的属性名，允许中文。
+            </summary>
+        </member>
+        <member name="P:QYQ.Base.Common.Xml.XmlAttributeNameAttribute.Required">
+             <summary>
+             【含义】该属性是否必须出现在 XML 节点上。
+            
+             true（默认）：节点上缺少该属性即视为配置写错，直接抛出异常；
+             false：缺少时保留 CLR 默认值（可空类型为 null）。
+            
+             注意本项只管「缺不缺」。属性存在但值转换失败属于写错了值，无论本项如何都会抛。
+             </summary>
+        </member>
+        <member name="T:QYQ.Base.Common.Xml.XmlConfigOptions`1">
+             <summary>
+             【用途】承载从 XML 原文解析出的条目集合的配置选项。
+            
+             由 AddQYQXmlOptions 注册，通过 IOptionsMonitor&lt;XmlConfigOptions&lt;T&gt;&gt; 读取；
+             使用方无需再为每个配置单独定义一个 Options 类。
+             </summary>
+             <typeparam name="T">条目类型，属性上用 <see cref="T:QYQ.Base.Common.Xml.XmlAttributeNameAttribute"/> 声明映射关系。</typeparam>
+        </member>
+        <member name="P:QYQ.Base.Common.Xml.XmlConfigOptions`1.Items">
+            <summary>
+            【含义】解析出的条目集合，顺序与 XML 原文中的节点顺序一致。
+            </summary>
+        </member>
+        <member name="T:QYQ.Base.Common.Xml.XmlContentMapper">
+             <summary>
+             【用途】把 XML 原文按 <see cref="T:QYQ.Base.Common.Xml.XmlAttributeNameAttribute"/> 声明的映射关系转成对象集合。
+            
+             只对外暴露扩展方法（QYQ.Base.Common.Extension.XmlContentExtension），
+             本类保持 internal，避免同一能力出现两套等价的公开入口。
+             </summary>
+        </member>
+        <member name="F:QYQ.Base.Common.Xml.XmlContentMapper._mappingCache">
+            <summary>
+            【含义】类型 → 映射关系的缓存，避免每次解析都重新走一遍反射。
+            </summary>
+        </member>
+        <member name="M:QYQ.Base.Common.Xml.XmlContentMapper.Parse``1(System.String,System.String)">
+            <summary>
+            【业务意图】把 XML 原文解析为 <typeparamref name="T"/> 的集合。
+            </summary>
+            <typeparam name="T">目标类型，需要有公开无参构造。</typeparam>
+            <param name="content">XML 原文；为空视为「配置尚未下发」，返回空集合。</param>
+            <param name="elementName">只取该名字的子节点；为 null 时取根节点下全部子节点。</param>
+            <returns>解析出的对象集合，顺序与原文中的节点顺序一致。</returns>
+            <exception cref="T:QYQ.Base.Common.Xml.XmlContentParseException">原文畸形、必填属性缺失、值无法转换或目标类型不受支持。</exception>
+        </member>
+        <member name="M:QYQ.Base.Common.Xml.XmlContentMapper.MapElement``1(System.Xml.Linq.XElement,QYQ.Base.Common.Xml.XmlContentMapper.XmlPropertyMapping[],System.Int32)">
+            <summary>
+            把单个 XML 节点映射为一个对象实例。
+            </summary>
+            <typeparam name="T">目标类型。</typeparam>
+            <param name="element">当前节点。</param>
+            <param name="mappings">该类型的映射关系。</param>
+            <param name="itemIndex">当前节点在集合中的序号，用于报错定位。</param>
+            <returns>填充完毕的对象实例。</returns>
+        </member>
+        <member name="M:QYQ.Base.Common.Xml.XmlContentMapper.ConvertValue(System.String,System.Type)">
+            <summary>
+            把 XML 上的文本值转换成目标类型。
+            </summary>
+            <param name="raw">属性的原始文本值。</param>
+            <param name="targetType">目标类型（已剥掉 Nullable 包装）。</param>
+            <returns>转换后的值。</returns>
+        </member>
+        <member name="M:QYQ.Base.Common.Xml.XmlContentMapper.ConvertOtherValue(System.String,System.Type,System.Globalization.CultureInfo)">
+            <summary>
+            转换没有对应 TypeCode 的受支持类型。
+            </summary>
+            <param name="raw">属性的原始文本值。</param>
+            <param name="targetType">目标类型。</param>
+            <param name="culture">用于解析的区域信息。</param>
+            <returns>转换后的值。</returns>
+        </member>
+        <member name="M:QYQ.Base.Common.Xml.XmlContentMapper.ParseBoolean(System.String)">
+            <summary>
+            【业务意图】布尔值除 true/false 外，还接受配置里常见的 1/0 写法。
+            </summary>
+            <param name="raw">属性的原始文本值。</param>
+            <returns>转换后的布尔值。</returns>
+        </member>
+        <member name="M:QYQ.Base.Common.Xml.XmlContentMapper.GetMappings(System.Type)">
+            <summary>
+            取类型的映射关系，命中缓存则直接返回。
+            </summary>
+            <param name="type">目标类型。</param>
+            <returns>该类型上标注了映射特性的属性集合。</returns>
+        </member>
+        <member name="M:QYQ.Base.Common.Xml.XmlContentMapper.BuildMappings(System.Type)">
+            <summary>
+            反射扫描类型上标注了 <see cref="T:QYQ.Base.Common.Xml.XmlAttributeNameAttribute"/> 的属性，并校验其可用性。
+            </summary>
+            <param name="type">目标类型。</param>
+            <returns>映射关系数组。</returns>
+        </member>
+        <member name="M:QYQ.Base.Common.Xml.XmlContentMapper.IsSupported(System.Type)">
+            <summary>
+            判断目标类型是否在支持范围内。
+            </summary>
+            <param name="type">已剥掉 Nullable 包装的目标类型。</param>
+            <returns>受支持返回 true。</returns>
+        </member>
+        <member name="M:QYQ.Base.Common.Xml.XmlContentMapper.GetLineInfo(System.Xml.Linq.XElement)">
+            <summary>
+            取节点在原文中的行列位置。
+            </summary>
+            <param name="element">当前节点。</param>
+            <returns>行号与列号；取不到时均为 0。</returns>
+        </member>
+        <member name="M:QYQ.Base.Common.Xml.XmlContentMapper.BuildLocation(System.Int32,System.Int32,System.Int32)">
+            <summary>
+            拼出错误信息里的定位描述，行信息缺失时退化为节点序号。
+            </summary>
+            <param name="line">行号。</param>
+            <param name="position">列号。</param>
+            <param name="itemIndex">节点序号（从 0 开始）。</param>
+            <returns>可直接嵌进错误信息的定位描述。</returns>
+        </member>
+        <member name="T:QYQ.Base.Common.Xml.XmlContentMapper.XmlPropertyMapping">
+            <summary>
+            单个属性的映射关系。
+            </summary>
+            <param name="property">目标类型上的属性。</param>
+            <param name="attributeName">对应的 XML 属性名。</param>
+            <param name="required">该 XML 属性是否必填。</param>
+            <param name="underlyingType">已剥掉 Nullable 包装的目标类型。</param>
+            <param name="isNullable">属性本身是否可为 null。</param>
+        </member>
+        <member name="M:QYQ.Base.Common.Xml.XmlContentMapper.XmlPropertyMapping.#ctor(System.Reflection.PropertyInfo,System.String,System.Boolean,System.Type,System.Boolean)">
+            <summary>
+            单个属性的映射关系。
+            </summary>
+            <param name="property">目标类型上的属性。</param>
+            <param name="attributeName">对应的 XML 属性名。</param>
+            <param name="required">该 XML 属性是否必填。</param>
+            <param name="underlyingType">已剥掉 Nullable 包装的目标类型。</param>
+            <param name="isNullable">属性本身是否可为 null。</param>
+        </member>
+        <member name="P:QYQ.Base.Common.Xml.XmlContentMapper.XmlPropertyMapping.Property">
+            <summary>【含义】目标类型上的属性。</summary>
+        </member>
+        <member name="P:QYQ.Base.Common.Xml.XmlContentMapper.XmlPropertyMapping.AttributeName">
+            <summary>【含义】对应的 XML 属性名。</summary>
+        </member>
+        <member name="P:QYQ.Base.Common.Xml.XmlContentMapper.XmlPropertyMapping.Required">
+            <summary>【含义】该 XML 属性是否必填。</summary>
+        </member>
+        <member name="P:QYQ.Base.Common.Xml.XmlContentMapper.XmlPropertyMapping.UnderlyingType">
+            <summary>【含义】已剥掉 Nullable 包装的目标类型。</summary>
+        </member>
+        <member name="P:QYQ.Base.Common.Xml.XmlContentMapper.XmlPropertyMapping.IsNullable">
+            <summary>【含义】属性本身是否可为 null，空值可直接跳过赋值。</summary>
+        </member>
+        <member name="T:QYQ.Base.Common.Xml.XmlContentParseException">
+             <summary>
+             【用途】XML 原文映射为对象时的统一失败异常。
+            
+             XML 本身畸形、必填属性缺失、属性值类型转换失败、目标类型不受支持，
+             全部收敛到本异常类型，调用方只需 catch 一种即可沿用上一份可用快照。
+             </summary>
+             <param name="message">中文错误说明，已包含定位信息。</param>
+             <param name="itemIndex">出错节点在集合中的序号（从 0 开始）；无法定位到具体节点时为 -1。</param>
+             <param name="lineNumber">出错位置在原文中的行号；取不到行信息时为 0。</param>
+             <param name="linePosition">出错位置在原文中的列号；取不到行信息时为 0。</param>
+             <param name="attributeName">出错的 XML 属性名；与具体属性无关时为 null。</param>
+             <param name="rawValue">出错属性的原始文本值；与具体值无关时为 null。</param>
+             <param name="targetType">期望转换成的目标类型；与类型转换无关时为 null。</param>
+             <param name="innerException">底层异常，便于排查。</param>
+        </member>
+        <member name="M:QYQ.Base.Common.Xml.XmlContentParseException.#ctor(System.String,System.Int32,System.Int32,System.Int32,System.String,System.String,System.Type,System.Exception)">
+             <summary>
+             【用途】XML 原文映射为对象时的统一失败异常。
+            
+             XML 本身畸形、必填属性缺失、属性值类型转换失败、目标类型不受支持，
+             全部收敛到本异常类型，调用方只需 catch 一种即可沿用上一份可用快照。
+             </summary>
+             <param name="message">中文错误说明，已包含定位信息。</param>
+             <param name="itemIndex">出错节点在集合中的序号（从 0 开始）；无法定位到具体节点时为 -1。</param>
+             <param name="lineNumber">出错位置在原文中的行号；取不到行信息时为 0。</param>
+             <param name="linePosition">出错位置在原文中的列号；取不到行信息时为 0。</param>
+             <param name="attributeName">出错的 XML 属性名；与具体属性无关时为 null。</param>
+             <param name="rawValue">出错属性的原始文本值；与具体值无关时为 null。</param>
+             <param name="targetType">期望转换成的目标类型；与类型转换无关时为 null。</param>
+             <param name="innerException">底层异常，便于排查。</param>
+        </member>
+        <member name="P:QYQ.Base.Common.Xml.XmlContentParseException.ItemIndex">
+            <summary>
+            【含义】出错节点在集合中的序号（从 0 开始）；无法定位到具体节点时为 -1。
+            </summary>
+        </member>
+        <member name="P:QYQ.Base.Common.Xml.XmlContentParseException.LineNumber">
+            <summary>
+            【含义】出错位置在原文中的行号；取不到行信息时为 0。
+            </summary>
+        </member>
+        <member name="P:QYQ.Base.Common.Xml.XmlContentParseException.LinePosition">
+            <summary>
+            【含义】出错位置在原文中的列号；取不到行信息时为 0。
+            </summary>
+        </member>
+        <member name="P:QYQ.Base.Common.Xml.XmlContentParseException.AttributeName">
+            <summary>
+            【含义】出错的 XML 属性名；与具体属性无关时为 null。
+            </summary>
+        </member>
+        <member name="P:QYQ.Base.Common.Xml.XmlContentParseException.RawValue">
+            <summary>
+            【含义】出错属性的原始文本值；与具体值无关时为 null。
+            </summary>
+        </member>
+        <member name="P:QYQ.Base.Common.Xml.XmlContentParseException.TargetType">
+            <summary>
+            【含义】期望转换成的目标类型；与类型转换无关时为 null。
+            </summary>
         </member>
         <member name="F:DefaultOptionsHelpers.DefaultIgnorePath">
             <summary>
